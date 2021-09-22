@@ -1,0 +1,67 @@
+{
+  "name": "@fransvilhelm/wp-bundler",
+  "version": "0.0.1",
+  "description": "A fast bundler tailored for WordPress based on esbuild",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/adambrgmn/wp-bundler.git"
+  },
+  "author": {
+    "name": "Adam Bergman",
+    "email": "adam@fransvilhelm.com"
+  },
+  "homepage": "https://github.com/adambrgmn/wp-bundler#readme",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint . --ext .ts",
+    "test": "jest",
+    "type-check": "tsc --noEmit",
+    "release": "yarn build && yarn changeset publish",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.15.5",
+    "@babel/preset-env": "^7.15.6",
+    "@babel/preset-typescript": "^7.15.0",
+    "@changesets/cli": "^2.17.0",
+    "@fransvilhelm/changeset-changelog": "^1.0.0",
+    "@types/jest": "^27.0.2",
+    "@types/node": "^16.9.6",
+    "@typescript-eslint/eslint-plugin": "^4.31.2",
+    "@typescript-eslint/parser": "^4.31.2",
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.32.0",
+    "eslint-config-react-app": "^6.0.0",
+    "eslint-plugin-flowtype": "^5.10.0",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-jest": "^24.4.2",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react": "^7.26.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "eslint-plugin-testing-library": "^3.10.2",
+    "husky": ">=6",
+    "jest": "^27.2.1",
+    "lint-staged": ">=10",
+    "prettier": "^2.4.1",
+    "typescript": "^4.4.3"
+  },
+  "bugs": {
+    "url": "https://github.com/adambrgmn/wp-bundler/issues"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "prettier": {
+    "singleQuote": true,
+    "trailingComma": "all",
+    "proseWrap": "always"
+  },
+  "lint-staged": {
+    "*.{ts,js}": "eslint --cache --fix",
+    "*.{ts,js,md}": "prettier --write"
+  }
+}
