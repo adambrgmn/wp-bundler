@@ -1,0 +1,23 @@
+{
+  "name": "@fransvilhelm/wp-bundler-example",
+  "private": true,
+  "scripts": {
+    "build": "../cli.js build",
+    "dev": "../cli.js build --watch"
+  },
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "wp-bundler": {
+    "entrypoints": {
+      "admin": [
+        "./src/admin.ts",
+        "./src/admin.css"
+      ],
+      "app": [
+        "./src/app.tsx"
+      ]
+    }
+  }
+}
