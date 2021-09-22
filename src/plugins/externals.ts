@@ -1,6 +1,6 @@
-import { Plugin } from 'esbuild';
+import { BundlerPlugin } from '../types';
 
-export const externals = (): Plugin => ({
+export const externals: BundlerPlugin = () => ({
   name: 'wp-bundler-externals',
   setup(build) {
     let externals: Record<string, string> = {

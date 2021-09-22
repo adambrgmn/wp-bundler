@@ -1,3 +1,5 @@
+@import url('./variables.css');
+
 .header {
-  color: rgb(255, 0, 0);
+  color: var(--color);
 }

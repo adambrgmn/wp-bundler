@@ -1,0 +1,6 @@
+@import url('./variables.css');
+
+.container {
+  width: 512px;
+  border: 2px solid var(--color);
+}

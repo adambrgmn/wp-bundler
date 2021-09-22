@@ -1,7 +1,7 @@
 import { Plugin } from 'esbuild';
-import { Mode } from '../types';
+import { BundlerPlugin, Mode } from '../types';
 
-export const define = (mode: Mode): Plugin => ({
+export const define: BundlerPlugin = (mode: Mode): Plugin => ({
   name: 'wp-bundler-define',
   setup(build) {
     const options = build.initialOptions;

@@ -8,7 +8,7 @@ import { define } from './plugins/define';
 import { CliOptions, Mode } from './types';
 
 export async function main({
-  mode = 'dev',
+  mode = 'prod',
   cwd = process.cwd(),
 }: CliOptions = {}) {
   const project = await readPackageUpAsync({ cwd });
@@ -23,8 +23,7 @@ export async function main({
     project.packageJson['wp-bundler'],
   );
 
-  const result = await esbuild.build(getSharedConfig(mode, config, paths));
-  console.log(result);
+  await esbuild.build(getSharedConfig(mode, config, paths));
 
   const server = await esbuild.serve(
     { port: config.port },
@@ -37,18 +36,23 @@ export async function main({
 function getSharedConfig(
   mode: Mode,
   config: BundlerConfig,
-  { absolute, root }: ProjectPaths,
+  paths: ProjectPaths,
 ): esbuild.BuildOptions {
   return {
     entryPoints: config.entryPoints,
-    outdir: absolute(config.outdir),
+    outdir: paths.absolute(config.outdir),
+    entryNames: mode === 'prod' ? '[dir]/[name].[hash]' : '[dir]/[name]',
     bundle: true,
-    format: 'iife',
+    format: 'esm',
     platform: 'browser',
     target: 'esnext',
-    sourcemap: config.sourcemap,
-    plugins: [externals(), manifest(), define(mode)],
-    absWorkingDir: root,
+    sourcemap: config.sourcemap || mode === 'dev',
+    plugins: [
+      externals(mode, config, paths),
+      manifest(mode, config, paths),
+      define(mode, config, paths),
+    ],
+    absWorkingDir: paths.root,
     minify: mode === 'prod',
   };
 }
