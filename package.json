@@ -17,7 +17,7 @@
   "bin": "./cli.js",
   "scripts": {
     "build": "node bundle.mjs",
-    "dev": "node build.mjs --watch",
+    "dev": "node bundle.mjs --watch",
     "lint": "eslint . --ext .ts",
     "test": "jest",
     "type-check": "tsc --noEmit",
@@ -25,7 +25,9 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "esbuild": "^0.13.0"
+    "esbuild": "^0.13.0",
+    "read-pkg-up": "^8.0.0",
+    "zod": "^3.8.2"
   },
   "devDependencies": {
     "@babel/core": "^7.15.5",

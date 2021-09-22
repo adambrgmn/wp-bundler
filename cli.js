@@ -3,4 +3,7 @@ import { main } from './dist/index.js';
 
 main()
   .then(() => process.exit(0))
-  .catch(() => process.exit(1));
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
