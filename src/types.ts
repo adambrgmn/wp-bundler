@@ -10,6 +10,7 @@ export interface CliOptions {
 
 export interface ProjectPaths {
   root: string;
+  temp: string;
   absolute: (...to: string[]) => string;
 }
 

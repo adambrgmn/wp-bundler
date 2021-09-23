@@ -15,5 +15,9 @@ export async function readPkg(
 
 function createPaths(pkgPath: string): ProjectPaths {
   let root = path.dirname(pkgPath);
-  return { root, absolute: (...to: string[]) => path.join(root, ...to) };
+  return {
+    root,
+    temp: path.join(root, '.wp-bundler'),
+    absolute: (...to: string[]) => path.join(root, ...to),
+  };
 }

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { main } from './dist/index.js';
 
-main()
+const mode = process.argv.includes('--prod') ? 'prod' : 'dev';
+main({ mode, cwd: process.cwd() })
   .then(() => process.exit(0))
   .catch((error) => {
     console.error(error);

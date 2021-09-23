@@ -1,3 +1,9 @@
 import { add } from './utils/math';
 
-console.log(add(1, 2, 3));
+main()
+  .then(() => {})
+  .catch((error) => console.error(error));
+
+async function main() {
+  console.log(await add(1, 2, 3));
+}

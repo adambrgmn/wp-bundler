@@ -26,3 +26,7 @@ export function ensure<T>(value: T | null | undefined, message?: string): T {
 
   return value;
 }
+
+export function isNotNullable<T>(value: T | null | undefined): value is T {
+  return value != null;
+}
