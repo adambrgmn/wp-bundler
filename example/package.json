@@ -2,8 +2,8 @@
   "name": "@fransvilhelm/wp-bundler-example",
   "private": true,
   "scripts": {
-    "build": "../cli.js build",
-    "dev": "../cli.js build --watch"
+    "build": "../cli.js",
+    "dev": "../cli.js --watch"
   },
   "dependencies": {
     "react": "^17.0.2",

@@ -2,7 +2,9 @@
   "name": "@fransvilhelm/wp-bundler",
   "version": "0.0.1",
   "description": "A fast bundler tailored for WordPress based on esbuild",
-  "main": "index.js",
+  "type": "module",
+  "module": "./dist/index.js",
+  "bin": "./cli.js",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/adambrgmn/wp-bundler.git"
@@ -13,8 +15,6 @@
   },
   "homepage": "https://github.com/adambrgmn/wp-bundler#readme",
   "license": "MIT",
-  "type": "module",
-  "bin": "./cli.js",
   "scripts": {
     "build": "node bundle.mjs",
     "dev": "node bundle.mjs --watch",
@@ -30,6 +30,7 @@
     "@babel/runtime": "^7.15.4",
     "core-js": "^3.18.0",
     "esbuild": "^0.13.0",
+    "meow": "^10.1.1",
     "postcss": "^8.3.7",
     "postcss-preset-env": "^6.7.0",
     "read-pkg-up": "^8.0.0",
