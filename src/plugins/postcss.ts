@@ -7,12 +7,7 @@ const postcssPlugin: BundlerPlugin = ({ project }) => ({
   name: 'wp-bundler-postcss',
   async setup(build) {
     build.initialOptions.metafile = true;
-    build.onEnd(async (result) => {
-      let { metafile } = result;
-      if (metafile == null) {
-        throw new Error('Metafile must be outputted.');
-      }
-
+    build.onEnd(async ({ metafile = { outputs: {} } }) => {
       let { outputs } = metafile;
       for (let outputFile of Object.keys(outputs)) {
         if (!outputFile.match(/\.css$/)) continue;

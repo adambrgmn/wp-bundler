@@ -8,12 +8,7 @@ export const nomodule: BundlerPlugin = ({ mode, project }) => ({
   name: 'wp-bundler-nomodule',
   setup(build) {
     build.initialOptions.metafile = true;
-    build.onEnd(async (result) => {
-      let { metafile } = result;
-      if (metafile == null) {
-        throw new Error('Metafile must be outputted.');
-      }
-
+    build.onEnd(async ({ metafile = { outputs: {} } }) => {
       let { outputs } = metafile;
       for (let outputFile of Object.keys(outputs)) {
         if (!outputFile.match(/\.js$/)) continue;

@@ -38,7 +38,7 @@ let bundler = new Bundler({ mode, cwd });
 bundler.on('init', () => console.log('init'));
 bundler.on('rebuild', () => console.log('rebuild'));
 bundler.on('end', () => console.log('end'));
-bundler.on('error', () => console.log('error'));
+bundler.on('error', (err) => console.log(err.errors));
 
 if (watch) {
   bundler.watch();

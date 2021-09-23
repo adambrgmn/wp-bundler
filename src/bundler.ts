@@ -56,8 +56,9 @@ export class Bundler extends EventEmitter {
 
     buildOptions.watch = {
       onRebuild: (error, result) => {
-        if (error != null) this.emit('error', error);
-        if (result != null) {
+        if (error != null) {
+          this.emit('error', error);
+        } else if (result != null) {
           ensureMetafile(result);
           this.emit('rebuild', result);
         }
@@ -94,6 +95,7 @@ export class Bundler extends EventEmitter {
 
       absWorkingDir: this.project.paths.root,
       metafile: true,
+      // logLevel: 'silent',
 
       plugins: [
         plugin.externals(pluginOptions),
