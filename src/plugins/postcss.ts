@@ -27,42 +27,6 @@ const postcssPlugin: BundlerPlugin = ({ project }) => ({
         await fs.writeFile(outputPath, result.css);
       }
     });
-
-    // const tempDir = path.join(project.paths.temp, 'css');
-
-    // build.onResolve(
-    //   { filter: /.\.(css)$/, namespace: 'file' },
-    //   async (args) => {
-    //     const srcFullPath = path.resolve(args.resolveDir, args.path);
-    //     const srcExt = path.extname(srcFullPath);
-    //     const srcBasename = path.basename(srcFullPath, srcExt);
-    //     const srcDir = path.dirname(srcFullPath);
-    //     const srcRelDir = path.relative(path.dirname(project.paths.root), srcDir);
-
-    //     const tmpDir = path.resolve(tempDir, srcRelDir);
-    //     const tmpFilePath = path.resolve(tmpDir, `${srcBasename}.css`);
-    //     await ensureDir(tmpDir);
-
-    //     const css = await fs.readFile(srcFullPath);
-
-    //     const result = await postcss([
-    //       postcssImport(),
-    //       postcssPresetEnv(),
-    //     ]).process(css, {
-    //       from: srcFullPath,
-    //       to: tmpFilePath,
-    //     });
-
-    //     // Write result file
-    //     await fs.writeFile(tmpFilePath, result.css);
-
-    //     return { path: tmpFilePath };
-    //   },
-    // );
-
-    // build.onEnd(async () => {
-    //   await rimraf(tempDir);
-    // });
   },
 });
 
