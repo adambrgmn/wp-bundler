@@ -2,7 +2,7 @@ import { PluginBuild } from 'esbuild';
 import { toCamelCase } from 'strman';
 import { BundlerPlugin } from '../types';
 
-export const externals: BundlerPlugin = (_, config) => ({
+export const externals: BundlerPlugin = ({ config }) => ({
   name: 'wp-bundler-externals',
   setup(build) {
     setupProjectExternals(build, config.externals);

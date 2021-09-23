@@ -1,4 +1,5 @@
 import { Plugin } from 'esbuild';
+import { NormalizedReadResult } from 'read-pkg-up';
 import { BundlerConfig } from './schema';
 
 export type Mode = 'dev' | 'prod';
@@ -14,8 +15,13 @@ export interface ProjectPaths {
   absolute: (...to: string[]) => string;
 }
 
-export type BundlerPlugin = (
-  mode: Mode,
-  config: BundlerConfig,
-  paths: ProjectPaths,
-) => Plugin;
+export type ProjectInfo = NormalizedReadResult & { paths: ProjectPaths };
+
+export interface BundlerPluginOptions {
+  mode: Mode;
+  config: BundlerConfig;
+  project: ProjectInfo;
+  bundler: ProjectInfo;
+}
+
+export type BundlerPlugin = (options: BundlerPluginOptions) => Plugin;

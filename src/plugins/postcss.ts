@@ -3,7 +3,7 @@ import postcss from 'postcss';
 import postcssPresetEnv from 'postcss-preset-env';
 import { BundlerPlugin } from '../types';
 
-const postcssPlugin: BundlerPlugin = (mode, config, paths) => ({
+const postcssPlugin: BundlerPlugin = ({ project }) => ({
   name: 'wp-bundler-postcss',
   async setup(build) {
     build.initialOptions.metafile = true;
@@ -16,7 +16,7 @@ const postcssPlugin: BundlerPlugin = (mode, config, paths) => ({
       let { outputs } = metafile;
       for (let outputFile of Object.keys(outputs)) {
         if (!outputFile.match(/\.css$/)) continue;
-        let outputPath = paths.absolute(outputFile);
+        let outputPath = project.paths.absolute(outputFile);
         let content = await fs.readFile(outputPath, 'utf-8');
 
         let result = await postcss([postcssPresetEnv()]).process(content, {
@@ -28,7 +28,7 @@ const postcssPlugin: BundlerPlugin = (mode, config, paths) => ({
       }
     });
 
-    // const tempDir = path.join(paths.temp, 'css');
+    // const tempDir = path.join(project.paths.temp, 'css');
 
     // build.onResolve(
     //   { filter: /.\.(css)$/, namespace: 'file' },
@@ -37,7 +37,7 @@ const postcssPlugin: BundlerPlugin = (mode, config, paths) => ({
     //     const srcExt = path.extname(srcFullPath);
     //     const srcBasename = path.basename(srcFullPath, srcExt);
     //     const srcDir = path.dirname(srcFullPath);
-    //     const srcRelDir = path.relative(path.dirname(paths.root), srcDir);
+    //     const srcRelDir = path.relative(path.dirname(project.paths.root), srcDir);
 
     //     const tmpDir = path.resolve(tempDir, srcRelDir);
     //     const tmpFilePath = path.resolve(tmpDir, `${srcBasename}.css`);

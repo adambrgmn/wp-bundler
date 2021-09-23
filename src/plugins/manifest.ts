@@ -5,7 +5,7 @@ import { Manifest } from '../schema';
 import { BundlerPlugin } from '../types';
 import { assert } from '../utils/assert';
 
-export const manifest: BundlerPlugin = (_, { entryPoints }): Plugin => ({
+export const manifest: BundlerPlugin = ({ config }): Plugin => ({
   name: 'wp-bundler-manifest',
   setup(build) {
     build.initialOptions.metafile = true;
@@ -15,7 +15,7 @@ export const manifest: BundlerPlugin = (_, { entryPoints }): Plugin => ({
       let outdir = build.initialOptions.outdir;
 
       let manifest: Manifest = {};
-      let names = Object.keys(entryPoints);
+      let names = Object.keys(config.entryPoints);
 
       for (let name of names) {
         let js = Object.keys(metafile.outputs).find(

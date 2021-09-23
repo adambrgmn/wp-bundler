@@ -11,7 +11,7 @@ const rimraf = promisify(_rimraf);
 const { __dirname } = dirname(import.meta.url);
 
 export async function build({
-  mode = 'prod',
+  mode = 'dev',
   cwd = process.cwd(),
 }: CliOptions = {}) {
   const bundler = await readPkg(__dirname);
@@ -23,6 +23,6 @@ export async function build({
 
   await rimraf(project.paths.absolute(config.outdir));
 
-  const buildOptions = createBundlerOptions(mode, config, project.paths);
+  const buildOptions = createBundlerOptions({ mode, config, project, bundler });
   await esbuild.build(buildOptions);
 }

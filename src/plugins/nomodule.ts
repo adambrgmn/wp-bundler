@@ -4,7 +4,7 @@ import babel from '@babel/core';
 import esbuild from 'esbuild';
 import { BundlerPlugin } from '../types';
 
-export const nomodule: BundlerPlugin = (mode, config, paths) => ({
+export const nomodule: BundlerPlugin = ({ mode, project }) => ({
   name: 'wp-bundler-nomodule',
   setup(build) {
     build.initialOptions.metafile = true;
@@ -17,7 +17,7 @@ export const nomodule: BundlerPlugin = (mode, config, paths) => ({
       let { outputs } = metafile;
       for (let outputFile of Object.keys(outputs)) {
         if (!outputFile.match(/\.js$/)) continue;
-        let outputPath = paths.absolute(outputFile);
+        let outputPath = project.paths.absolute(outputFile);
         let content = await fs.readFile(outputPath, 'utf-8');
 
         let nomodulePath = outputPath.replace(/\.js$/, '.nomodule.js');
@@ -32,7 +32,7 @@ export const nomodule: BundlerPlugin = (mode, config, paths) => ({
 
           babelrc: false,
           envName: mode === 'prod' ? 'production' : 'development',
-          cwd: paths.root,
+          cwd: project.paths.root,
           filename: path.basename(nomodulePath),
           filenameRelative: nomodulePath,
           sourceFileName: path.basename(outputFile),
