@@ -8,7 +8,7 @@ export interface CliOptions {
   cwd?: string;
 }
 
-interface ProjectPaths {
+export interface ProjectPaths {
   root: string;
   absolute: (...to: string[]) => string;
 }

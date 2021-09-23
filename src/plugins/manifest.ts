@@ -3,6 +3,7 @@ import * as path from 'path';
 import { Plugin } from 'esbuild';
 import { Manifest } from '../schema';
 import { BundlerPlugin } from '../types';
+import { assert } from '../utils/assert';
 
 export const manifest: BundlerPlugin = (_, { entryPoints }): Plugin => ({
   name: 'wp-bundler-manifest',
@@ -10,8 +11,8 @@ export const manifest: BundlerPlugin = (_, { entryPoints }): Plugin => ({
     build.initialOptions.metafile = true;
 
     build.onEnd(async ({ metafile = { outputs: {} } }) => {
+      assert(build.initialOptions.outdir, 'An outdir must be configured.');
       let outdir = build.initialOptions.outdir;
-      if (outdir == null) throw new Error('An outdir is required.');
 
       let manifest: Manifest = {};
       let names = Object.keys(entryPoints);
@@ -23,7 +24,7 @@ export const manifest: BundlerPlugin = (_, { entryPoints }): Plugin => ({
         let css = Object.keys(metafile.outputs).find(
           (key) => key.includes(name) && key.endsWith('.css'),
         );
-        if (js == null && css == null) continue;
+
         manifest[name] = { name, js, css };
       }
 

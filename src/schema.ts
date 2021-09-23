@@ -5,6 +5,7 @@ export const BundlerConfigSchema = z.object({
   outdir: z.string().default('./dist'),
   port: z.number().min(2000).default(3000),
   sourcemap: z.boolean().optional(),
+  externals: z.record(z.string()).optional(),
 });
 
 export type BundlerConfig = z.infer<typeof BundlerConfigSchema>;

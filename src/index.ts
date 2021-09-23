@@ -1,36 +1,30 @@
-import * as path from 'path';
-import { readPackageUpAsync } from 'read-pkg-up';
 import * as esbuild from 'esbuild';
+import _rimraf from 'rimraf';
+import { promisify } from 'util';
 import { BundlerConfig, BundlerConfigSchema } from './schema';
-import { externals } from './plugins';
-import { manifest } from './plugins/manifest';
-import { define } from './plugins/define';
-import { CliOptions, Mode } from './types';
+import { externals, manifest, define } from './plugins';
+import { CliOptions, Mode, ProjectPaths } from './types';
+import { dirname } from './utils/dirname';
+import { readPkg } from './utils/read-pkg';
+
+const rimraf = promisify(_rimraf);
+const { __dirname } = dirname(import.meta.url);
 
 export async function main({
-  mode = 'prod',
+  mode = 'dev',
   cwd = process.cwd(),
 }: CliOptions = {}) {
-  const project = await readPackageUpAsync({ cwd });
-  if (project == null) {
-    throw new Error(`Could not find a package.json relative to ${cwd}.`);
-  }
-
-  const root = path.dirname(project.path);
-  const paths = { root, absolute: (...to: string[]) => path.join(root, ...to) };
+  const bundler = await readPkg(__dirname);
+  const project = await readPkg(cwd);
 
   const config = await BundlerConfigSchema.parseAsync(
     project.packageJson['wp-bundler'],
   );
 
-  await esbuild.build(getSharedConfig(mode, config, paths));
+  await rimraf(project.paths.absolute(config.outdir));
 
-  const server = await esbuild.serve(
-    { port: config.port },
-    getSharedConfig(mode, config, paths),
-  );
-
-  await server.wait;
+  const buildOptions = getSharedConfig(mode, config, project.paths);
+  await esbuild.build(buildOptions);
 }
 
 function getSharedConfig(
@@ -45,7 +39,7 @@ function getSharedConfig(
     bundle: true,
     format: 'esm',
     platform: 'browser',
-    target: 'esnext',
+    target: 'es6',
     sourcemap: config.sourcemap || mode === 'dev',
     plugins: [
       externals(mode, config, paths),
@@ -55,9 +49,4 @@ function getSharedConfig(
     absWorkingDir: paths.root,
     minify: mode === 'prod',
   };
-}
-
-interface ProjectPaths {
-  root: string;
-  absolute: (...to: string[]) => string;
 }
