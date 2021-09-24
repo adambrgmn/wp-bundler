@@ -20,6 +20,9 @@ const { __dirname } = dirname(import.meta.url);
 interface BundlerEvents {
   init: Bundler;
   end: BuildResult & { metafile: Metafile };
+  'rebuild-start': void;
+  'rebuild-end': BuildResult & { metafile: Metafile };
+  'rebuild-error': BuildFailure | BuildResult;
   rebuild: BuildResult & { metafile: Metafile };
   error: BuildFailure;
 }
@@ -46,7 +49,6 @@ export class Bundler extends EventEmitter {
     let result = await esbuild.build(buildOptions);
 
     ensureMetafile(result);
-    this.emit('end', result);
     return result;
   }
 
@@ -95,15 +97,36 @@ export class Bundler extends EventEmitter {
 
       absWorkingDir: this.project.paths.root,
       metafile: true,
-      // logLevel: 'silent',
+      logLevel: 'silent',
 
       plugins: [
+        this.timingPlugin(),
         plugin.externals(pluginOptions),
         plugin.manifest(pluginOptions),
         plugin.define(pluginOptions),
         plugin.postcss(pluginOptions),
         this.mode === 'prod' ? plugin.nomodule(pluginOptions) : null,
       ].filter(isNotNullable),
+    };
+  }
+
+  private timingPlugin(): esbuild.Plugin {
+    return {
+      name: 'wp-bundler-timing',
+      setup: (build) => {
+        build.onStart(() => {
+          this.emit('rebuild-start', undefined);
+        });
+
+        build.onEnd((result) => {
+          if (result.errors.length > 0) {
+            this.emit('rebuild-error', result);
+          } else {
+            ensureMetafile(result);
+            this.emit('rebuild-end', result);
+          }
+        });
+      },
     };
   }
 

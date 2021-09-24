@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import meow from 'meow';
 import * as path from 'path';
-import { Bundler } from './dist/index.js';
+import { Bundler, Runner } from './dist/index.js';
 
 const cli = meow(
   `
@@ -21,6 +21,7 @@ const cli = meow(
       mode: { type: 'string' },
       cwd: { type: 'string' },
     },
+    hardRejection: false,
   },
 );
 
@@ -35,13 +36,10 @@ process.env.NODE_ENV =
   process.env.NODE_ENV || mode === 'prod' ? 'production' : 'development';
 
 let bundler = new Bundler({ mode, cwd });
-bundler.on('init', () => console.log('init'));
-bundler.on('rebuild', () => console.log('rebuild'));
-bundler.on('end', () => console.log('end'));
-bundler.on('error', (err) => console.log(err.errors));
+let runner = new Runner(bundler, cwd);
 
 if (watch) {
-  bundler.watch();
+  runner.watch();
 } else {
-  bundler.build();
+  runner.build();
 }
