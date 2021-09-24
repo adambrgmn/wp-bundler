@@ -5,6 +5,9 @@ import exitHook from 'exit-hook';
 import ora from 'ora';
 import { codeFrameColumns } from '@babel/code-frame';
 import { Bundler } from './bundler';
+import { render } from 'ink';
+import { createElement } from 'react';
+import { Watch } from './components/Watch';
 
 export class Runner {
   private bundler: Bundler;
@@ -37,49 +40,13 @@ export class Runner {
   }
 
   async watch() {
-    let spinner = ora('Preparing.').start();
-    this.bundler.on('rebuild-start', () => {
-      spinner.text = 'Build started.';
-    });
-
-    this.bundler.on('rebuild-end', () => {
-      spinner.succeed('Build suceeded.');
-      spinner.start('Watching for changes.');
-    });
-
-    this.bundler.on('rebuild-error', (error) => {
-      spinner.fail('Build errored. Resolve the issue.');
-      this.printErrors(error.errors);
-      spinner.start('Watching for changes.');
-    });
-
-    this.bundler.on('end', () => {
-      spinner.succeed('Watch mode cancelled.');
-    });
-
     try {
-      process.on('unhandledRejection', (rejection) => {
-        if (!isBuildFailure(rejection)) {
-          spinner.fail('An unknown error occured. Exiting watch mode.');
-          console.error(rejection);
-          process.exit(1);
-        }
-      });
-
-      let cancel = await this.bundler.watch();
-      exitHook(() => cancel());
-    } catch (error) {
-      spinner.fail(
-        'Could not start watch mode due to initial source code errors.',
+      let { waitUntilExit } = render(
+        createElement(Watch, { bundler: this.bundler, cwd: this.cwd }),
       );
-
-      if (isBuildFailure(error)) {
-        this.printErrors(error.errors);
-      } else {
-        console.error(error);
-      }
-
-      process.exit(1);
+      await waitUntilExit();
+    } catch (error) {
+      console.error(error);
     }
   }
 

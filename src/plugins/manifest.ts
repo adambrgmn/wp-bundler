@@ -11,6 +11,7 @@ export const manifest: BundlerPlugin = ({ config }): Plugin => ({
     build.initialOptions.metafile = true;
 
     build.onEnd(async ({ metafile = { outputs: {} } }) => {
+      if (Object.keys(metafile.outputs).length < 1) return;
       assert(build.initialOptions.outdir, 'An outdir must be configured.');
       let outdir = build.initialOptions.outdir;
 
