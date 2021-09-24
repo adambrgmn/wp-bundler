@@ -1,26 +1,21 @@
+import { useCallback, useEffect } from 'react';
 import { createModel } from 'xstate/lib/model.js';
 import { useMachine } from '@xstate/react';
 import { BuildFailure, BuildResult, Metafile } from 'esbuild';
 import { Bundler } from '../bundler';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useInput } from 'ink';
 import { ContextFrom, EventFrom, StateFrom } from 'xstate';
 
 export function useWatchMode(bundler: Bundler) {
   const [state, send] = useMachine(createWatchMachine);
-  const stopRef = useRef(() => {});
 
   const start = useCallback(async () => {
     try {
-      stopRef.current = await bundler.watch();
+      await bundler.watch();
     } catch (error) {
       send(watchModel.events.unhandledRejection(error));
     }
   }, [bundler, send]);
-
-  const stop = useCallback(() => {
-    stopRef.current();
-  }, []);
 
   useInput(
     (key) => {
@@ -69,24 +64,11 @@ export function useWatchMode(bundler: Bundler) {
     };
   }, [send]);
 
-  const events: typeof watchModel.events = useMemo(() => {
-    let event: any = {};
-    let keys = Object.keys(
-      watchModel.events,
-    ) as (keyof typeof watchModel.events)[];
-    for (let key of keys) {
-      event[key] = (...args: any[]) => send(watchModel.events[key](...args));
-    }
-
-    return event;
-  }, [send]);
-
-  return [state, events, start, stop] as const;
+  return [state] as const;
 }
 
 const watchModel = createModel(
   {
-    cancel: null as null | (() => void),
     error: null as null | BuildFailure | Error,
     result: null as null | (BuildResult & { metafile: Metafile }),
     rejection: null as any,

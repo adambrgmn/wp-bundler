@@ -8,6 +8,7 @@ import { Bundler } from './bundler';
 import { render } from 'ink';
 import { createElement } from 'react';
 import { Watch } from './components/Watch';
+import { Build } from './components/Build';
 
 export class Runner {
   private bundler: Bundler;
@@ -19,22 +20,14 @@ export class Runner {
   }
 
   async build() {
-    let spinner = ora('Preparing.').start();
-    this.bundler.on('init', () => {
-      spinner.text = 'Bundler initialized. Running build.';
-    });
-
     try {
-      await this.bundler.build();
-      spinner.succeed('Build succeded.');
+      let { waitUntilExit } = render(
+        createElement(Build, { bundler: this.bundler, cwd: this.cwd }),
+      );
+      await waitUntilExit();
+      process.exit(0);
     } catch (error) {
-      spinner.fail('Build failed.');
-      if (isBuildFailure(error)) {
-        this.printErrors(error.errors);
-      } else {
-        console.error(error);
-      }
-
+      console.error(error);
       process.exit(1);
     }
   }
@@ -47,6 +40,7 @@ export class Runner {
       await waitUntilExit();
     } catch (error) {
       console.error(error);
+      process.exit(1);
     }
   }
 

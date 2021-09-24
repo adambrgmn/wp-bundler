@@ -2,40 +2,32 @@ import React from 'react';
 import { Box, Text } from 'ink';
 import figures from 'figures';
 import { Bundler } from '../bundler';
-import { useWatchMode, WatchContext } from '../hooks/useWatchMode';
+import { BuildContext, useBuildMode } from '../hooks/useBuildMode';
 import { CwdProvider } from '../hooks/useCwd';
 import { SpinnerWithMessage } from './SpinnerWithMessage';
 import { BundleOutput } from './BundleOutput';
 import { FailureOutput } from './FailureOutput';
 
-export interface WatchProps {
-  bundler: Bundler;
-  cwd: string;
-}
-
-export const Watch: React.FC<WatchProps> = ({ bundler, cwd }) => {
-  const [state] = useWatchMode(bundler);
-
+export const Build: React.FC<{ bundler: Bundler; cwd: string }> = ({
+  bundler,
+  cwd,
+}) => {
+  const [state] = useBuildMode(bundler);
   return (
     <CwdProvider cwd={cwd}>
       <Box>
         {state.matches('preparing') && (
           <SpinnerWithMessage message="Preparing bundler." />
         )}
-        {state.matches('idle') && <Idle {...state.context} />}
-        {state.matches('rebuilding') && (
-          <SpinnerWithMessage message="Rebuilding project." />
+        {state.matches('building') && (
+          <SpinnerWithMessage message="Building project." />
         )}
+        {state.matches('success') && <Success {...state.context} />}
+
         {state.matches('error') && (
           <FailureOutput
             error={state.context.error}
-            message="Build failed. Fix errors shown below."
-          />
-        )}
-        {state.matches('unhandled') && (
-          <FailureOutput
-            error={state.context.error}
-            message={'Starting bundler failed. Press "r" to restart bundler.'}
+            message="Failed to build project."
           />
         )}
       </Box>
@@ -43,14 +35,14 @@ export const Watch: React.FC<WatchProps> = ({ bundler, cwd }) => {
   );
 };
 
-const Idle: React.FC<WatchContext> = ({ result }) => {
+const Success: React.FC<BuildContext> = ({ result }) => {
   return (
     <Box flexDirection="column">
       <Box marginBottom={1}>
         <Text color="green">{figures.tick} Succesfully built project.</Text>
       </Box>
       <Box paddingLeft={2}>
-        {result != null && <BundleOutput metafile={result.metafile} />}
+        {result != null && <BundleOutput metafile={result.metafile} withSize />}
       </Box>
     </Box>
   );
