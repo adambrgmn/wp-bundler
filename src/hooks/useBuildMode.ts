@@ -1,25 +1,25 @@
 import { createModel } from 'xstate/lib/model.js';
 import { useMachine } from '@xstate/react';
-import { BuildFailure, BuildResult, Metafile } from 'esbuild';
+import { BuildResult, Metafile } from 'esbuild';
 import { Bundler } from '../bundler';
 import { useEffect } from 'react';
 import { assign, ContextFrom } from 'xstate';
+import { useApp } from 'ink';
 
 export function useBuildMode(bundler: Bundler) {
+  const app = useApp();
   const [state, send] = useMachine(() => createBuildMachine({ bundler }));
 
   useEffect(() => {
-    let onInit = () => send(buildModel.events.ready());
-    bundler.on('init', onInit);
+    if (state.done) app.exit((state.context.error as any) ?? undefined);
+  }, [state, app]);
 
-    const handleRejection: NodeJS.UnhandledRejectionListener = (error) => {
-      send(buildModel.events.unhandled(error));
-    };
-    process.on('unhandledRejection', handleRejection);
+  useEffect(() => {
+    let onError = (error: unknown) => send(buildModel.events.error(error));
+    process.on('unhandledRejection', onError);
 
     return () => {
-      bundler.off('init', onInit);
-      process.off('unhandledRejection', handleRejection);
+      process.off('unhandledRejection', onError);
     };
   }, [bundler, send]);
 
@@ -30,12 +30,11 @@ const buildModel = createModel(
   {
     bundler: null as unknown as Bundler,
     result: null as null | (BuildResult & { metafile: Metafile }),
-    error: null as null | BuildFailure | Error,
+    error: null as null | unknown,
   },
   {
     events: {
-      ready: () => ({}),
-      unhandled: (error: any) => ({ error }),
+      error: (error: unknown) => ({ error }),
     },
   },
 );
@@ -45,15 +44,20 @@ function createBuildMachine(ctx: Pick<BuildContext, 'bundler'>) {
     context: { ...buildModel.initialContext, ...ctx },
     initial: 'preparing',
     on: {
-      unhandled: {
+      error: {
         target: 'error',
-        actions: buildModel.assign({ error: (_, event) => event.error }),
+        actions: buildModel.assign({
+          error: (_: any, event: any) => event.error,
+        }),
       },
     },
     states: {
       preparing: {
-        on: {
-          ready: 'building',
+        invoke: {
+          id: 'prepare',
+          src: (ctx) => ctx.bundler.prepare(),
+          onDone: 'building',
+          onError: 'error',
         },
       },
       building: {
@@ -70,12 +74,8 @@ function createBuildMachine(ctx: Pick<BuildContext, 'bundler'>) {
           },
         },
       },
-      success: {
-        type: 'final',
-      },
-      error: {
-        type: 'final',
-      },
+      success: { type: 'final' },
+      error: { type: 'final' },
     },
   });
 }

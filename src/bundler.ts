@@ -1,10 +1,5 @@
 import EventEmitter from 'events';
-import esbuild, {
-  BuildFailure,
-  BuildOptions,
-  BuildResult,
-  Metafile,
-} from 'esbuild';
+import esbuild, { BuildOptions, BuildResult, Metafile, Message } from 'esbuild';
 import _rimraf from 'rimraf';
 import { promisify } from 'util';
 import { BundlerPluginOptions, CliOptions, Mode, ProjectInfo } from './types';
@@ -18,33 +13,27 @@ const rimraf = promisify(_rimraf);
 const { __dirname } = dirname(import.meta.url);
 
 interface BundlerEvents {
-  init: Bundler;
-  end: BuildResult & { metafile: Metafile };
-  'rebuild-start': void;
-  'rebuild-end': BuildResult & { metafile: Metafile };
-  'rebuild-error': BuildFailure | BuildResult;
-  rebuild: BuildResult & { metafile: Metafile };
-  error: BuildFailure;
+  'rebuild.init': void;
+  'rebuild.end': BuildResult & { metafile: Metafile };
+  'rebuild.error': { errors: Message[] };
 }
 
 export class Bundler extends EventEmitter {
   private mode: Mode;
   private cwd: string;
-  private awaitPrepare: Promise<void>;
   private project: ProjectInfo = {} as unknown as any;
   private bundler: ProjectInfo = {} as unknown as any;
   private config: BundlerConfig = {} as unknown as any;
+  private prepared = false;
 
   constructor({ mode, cwd }: CliOptions) {
     super();
 
     this.mode = mode;
     this.cwd = cwd;
-    this.awaitPrepare = this.prepare();
   }
 
   async build() {
-    await this.awaitPrepare;
     let buildOptions = this.createBundlerOptions();
     let result = await esbuild.build(buildOptions);
 
@@ -53,30 +42,28 @@ export class Bundler extends EventEmitter {
   }
 
   async watch() {
-    await this.awaitPrepare;
     let buildOptions = this.createBundlerOptions();
-
-    buildOptions.watch = {
-      onRebuild: (error, result) => {
-        if (error != null) {
-          this.emit('error', error);
-        } else if (result != null) {
-          ensureMetafile(result);
-          this.emit('rebuild', result);
-        }
-      },
-    };
-
+    buildOptions.watch = true;
     let result = await esbuild.build(buildOptions);
-    return () => {
-      ensureMetafile(result);
-      this.emit('end', result);
-      if (typeof result.stop === 'function') result.stop();
-    };
+    ensureMetafile(result);
+    return result;
+  }
+
+  async prepare() {
+    if (this.prepared) return;
+    this.bundler = await readPkg(__dirname);
+    this.project = await readPkg(this.cwd);
+
+    this.config = await BundlerConfigSchema.parseAsync(
+      this.project.packageJson['wp-bundler'],
+    );
+
+    await rimraf(this.project.paths.absolute(this.config.outdir));
+    this.prepared = true;
   }
 
   private createBundlerOptions(): BuildOptions {
-    let pluginOptions = {
+    let pluginOptions: BundlerPluginOptions = {
       mode: this.mode,
       config: this.config,
       project: this.project,
@@ -115,31 +102,19 @@ export class Bundler extends EventEmitter {
       name: 'wp-bundler-timing',
       setup: (build) => {
         build.onStart(() => {
-          this.emit('rebuild-start', undefined);
+          this.emit('rebuild.init', undefined);
         });
 
         build.onEnd((result) => {
           if (result.errors.length > 0) {
-            this.emit('rebuild-error', result);
+            this.emit('rebuild.error', result);
           } else {
             ensureMetafile(result);
-            this.emit('rebuild-end', result);
+            this.emit('rebuild.end', result);
           }
         });
       },
     };
-  }
-
-  private async prepare() {
-    this.bundler = await readPkg(__dirname);
-    this.project = await readPkg(this.cwd);
-
-    this.config = await BundlerConfigSchema.parseAsync(
-      this.project.packageJson['wp-bundler'],
-    );
-
-    await rimraf(this.project.paths.absolute(this.config.outdir));
-    this.emit('init', this);
   }
 
   emit<E extends keyof BundlerEvents>(eventName: E, payload: BundlerEvents[E]) {
@@ -180,32 +155,6 @@ export class Bundler extends EventEmitter {
   ) {
     return super.removeListener(eventName, listener);
   }
-}
-
-export function createBundlerOptions(
-  options: BundlerPluginOptions,
-): BuildOptions {
-  return {
-    entryPoints: options.config.entryPoints,
-    outdir: options.project.paths.absolute(options.config.outdir),
-    entryNames:
-      options.mode === 'prod' ? '[dir]/[name].[hash]' : '[dir]/[name]',
-    bundle: true,
-    format: 'esm',
-    platform: 'browser',
-    target: 'es2020',
-    sourcemap: options.config.sourcemap || options.mode === 'dev',
-    plugins: [
-      plugin.externals(options),
-      plugin.manifest(options),
-      plugin.define(options),
-      plugin.postcss(options),
-      options.mode === 'prod' ? plugin.nomodule(options) : null,
-    ].filter(isNotNullable),
-    absWorkingDir: options.project.paths.root,
-    minify: options.mode === 'prod',
-    metafile: true,
-  };
 }
 
 function ensureMetafile(

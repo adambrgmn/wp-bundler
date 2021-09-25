@@ -1,61 +1,48 @@
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { createModel } from 'xstate/lib/model.js';
 import { useMachine } from '@xstate/react';
-import { BuildFailure, BuildResult, Metafile } from 'esbuild';
+import { BuildResult, Metafile } from 'esbuild';
 import { Bundler } from '../bundler';
 import { useInput } from 'ink';
-import { ContextFrom, EventFrom, StateFrom } from 'xstate';
+import { assign, ContextFrom, EventFrom, StateFrom } from 'xstate';
 
 export function useWatchMode(bundler: Bundler) {
-  const [state, send] = useMachine(createWatchMachine);
-
-  const start = useCallback(async () => {
-    try {
-      await bundler.watch();
-    } catch (error) {
-      send(watchModel.events.unhandledRejection(error));
-    }
-  }, [bundler, send]);
+  const [state, send] = useMachine(() => createWatchMachine({ bundler }));
 
   useInput(
     (key) => {
-      if (key.toLowerCase() === 'r') start();
+      if (key.toLowerCase() === 'r') send(watchModel.events.restart());
     },
     { isActive: state.matches('unhandled') },
   );
 
   useEffect(() => {
-    let onInit = () => {
-      send(watchModel.events.prepared());
-      start();
+    let onRebuildStart = () => {
+      send(watchModel.events.rebuild());
     };
-    bundler.on('init', onInit);
-
-    let onRebuildStart = () => send(watchModel.events.rebuild());
-    bundler.on('rebuild-start', onRebuildStart);
+    bundler.on('rebuild.init', onRebuildStart);
 
     let onRebuildEnd = (result: BuildResult & { metafile: Metafile }) => {
-      return send(watchModel.events.rebuildSuccess(result));
+      send(watchModel.events.rebuildSuccess(result));
     };
-    bundler.on('rebuild-end', onRebuildEnd);
+    bundler.on('rebuild.end', onRebuildEnd);
 
-    let onRebuildError = (error: BuildFailure | BuildResult) => {
-      send(watchModel.events.rebuildError(error as BuildFailure));
+    let onRebuildError = (error: unknown) => {
+      send(watchModel.events.rebuildError(error));
     };
-    bundler.on('rebuild-error', onRebuildError);
+    bundler.on('rebuild.error', onRebuildError);
 
     return () => {
-      bundler.off('init', onInit);
-      bundler.off('rebuild-start', onRebuildStart);
-      bundler.off('rebuild-end', onRebuildEnd);
-      bundler.off('rebuild-error', onRebuildError);
+      bundler.off('rebuild.init', onRebuildStart);
+      bundler.off('rebuild.end', onRebuildEnd);
+      bundler.off('rebuild.error', onRebuildError);
     };
-  }, [bundler, send, start]);
+  }, [bundler, send]);
 
   useEffect(() => {
     const handleRejection: NodeJS.UnhandledRejectionListener = (error) => {
       if (error != null && 'errors' in error) return;
-      send(watchModel.events.unhandledRejection(error));
+      send(watchModel.events.unhandled(error));
     };
 
     process.on('unhandledRejection', handleRejection);
@@ -69,67 +56,88 @@ export function useWatchMode(bundler: Bundler) {
 
 const watchModel = createModel(
   {
-    error: null as null | BuildFailure | Error,
+    bundler: null as unknown as Bundler,
+    error: null as null | unknown,
     result: null as null | (BuildResult & { metafile: Metafile }),
-    rejection: null as any,
+    rejection: null as null | unknown,
   },
   {
     events: {
-      initError: (error: Error) => ({ value: error }),
-      prepared: () => ({ value: undefined }),
-      rebuild: () => ({ value: undefined }),
-      rebuildError: (error: BuildFailure) => ({ value: error }),
+      error: (error: unknown) => ({ value: error }),
+      prepared: () => ({}),
+      rebuild: () => ({}),
+      rebuildError: (error: unknown) => ({ value: error }),
       rebuildSuccess: (value: BuildResult & { metafile: Metafile }) => ({
         value,
       }),
-      unhandledRejection: (error: any) => ({ value: error }),
+      unhandled: (error: unknown) => ({ value: error }),
+      restart: () => ({}),
     },
   },
 );
 
-function createWatchMachine() {
+function createWatchMachine(ctx: Pick<WatchContext, 'bundler'>) {
   return watchModel.createMachine({
-    context: watchModel.initialContext,
+    context: { ...watchModel.initialContext, ...ctx },
     initial: 'preparing',
     on: {
-      initError: {
-        target: 'error',
-        actions: watchModel.assign({ error: (_, event) => event.value }),
+      unhandled: {
+        target: 'unhandled',
+        actions: watchModel.assign({
+          error: (_: any, event: any) => event.value,
+        }),
       },
-      unhandledRejection: 'unhandled',
     },
     states: {
       preparing: {
-        on: {
-          prepared: 'rebuilding',
+        invoke: {
+          id: 'preparing',
+          src: async (ctx) => {
+            await ctx.bundler.prepare();
+            return ctx.bundler.watch();
+          },
+          onDone: {
+            target: 'idle',
+            actions: assign({
+              result: (_, event: any) => event.data,
+              error: () => null,
+            }) as any,
+          },
+          onError: {
+            target: 'unhandled',
+            actions: assign({
+              result: () => null,
+              error: (_, event: any) => event.data,
+            }) as any,
+          },
         },
       },
       idle: {
-        on: {
-          rebuild: 'rebuilding',
-        },
+        on: { rebuild: 'rebuilding' },
       },
       rebuilding: {
         on: {
           rebuildError: {
             target: 'error',
-            actions: watchModel.assign({ error: (_, event) => event.value }),
+            actions: watchModel.assign({
+              result: () => null,
+              error: (_: any, event: any) => event.value,
+            }),
           },
           rebuildSuccess: {
             target: 'idle',
-            actions: watchModel.assign({ result: (_, event) => event.value }),
+            actions: watchModel.assign({
+              result: (_, event) => event.value,
+              error: () => null,
+            }),
           },
         },
       },
       error: {
-        on: {
-          rebuild: 'rebuilding',
-        },
+        on: { rebuild: 'rebuilding' },
       },
       unhandled: {
-        on: {
-          rebuild: 'rebuilding',
-        },
+        on: { restart: 'preparing' },
       },
     },
   });

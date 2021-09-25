@@ -20,7 +20,7 @@ export const Watch: React.FC<WatchProps> = ({ bundler, cwd }) => {
     <CwdProvider cwd={cwd}>
       <Box>
         {state.matches('preparing') && (
-          <SpinnerWithMessage message="Preparing bundler." />
+          <SpinnerWithMessage message="Preparing bundler and performing initial build." />
         )}
         {state.matches('idle') && <Idle {...state.context} />}
         {state.matches('rebuilding') && (
