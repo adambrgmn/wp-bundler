@@ -2,9 +2,9 @@ import EventEmitter from 'events';
 import esbuild, { BuildOptions, BuildResult, Metafile, Message } from 'esbuild';
 import _rimraf from 'rimraf';
 import { promisify } from 'util';
+import merge from 'lodash.merge';
 import { BundlerPluginOptions, CliOptions, Mode, ProjectInfo } from './types';
 import * as plugin from './plugins';
-import { isNotNullable } from './utils/assert';
 import { readPkg } from './utils/read-pkg';
 import { dirname } from './utils/dirname';
 import { BundlerConfigSchema, BundlerConfig } from './schema';
@@ -28,14 +28,20 @@ export class Bundler extends EventEmitter {
 
   constructor({ mode, cwd }: CliOptions) {
     super();
-
     this.mode = mode;
     this.cwd = cwd;
   }
 
   async build() {
-    let buildOptions = this.createBundlerOptions();
-    let result = await esbuild.build(buildOptions);
+    let results = await Promise.all([
+      esbuild.build(this.createBundlerOptions()),
+      esbuild.build(this.createBundlerOptions({ nomodule: true })),
+    ]);
+
+    let result = results.reduce(
+      (acc, next) => merge(acc, next),
+      {} as BuildResult,
+    );
 
     ensureMetafile(result);
     return result;
@@ -62,7 +68,9 @@ export class Bundler extends EventEmitter {
     this.prepared = true;
   }
 
-  private createBundlerOptions(): BuildOptions {
+  private createBundlerOptions({
+    nomodule,
+  }: { nomodule?: boolean } = {}): BuildOptions {
     let pluginOptions: BundlerPluginOptions = {
       mode: this.mode,
       config: this.config,
@@ -70,7 +78,7 @@ export class Bundler extends EventEmitter {
       bundler: this.bundler,
     };
 
-    return {
+    let options: BuildOptions = {
       entryPoints: this.config.entryPoints,
       outdir: this.project.paths.absolute(this.config.outdir),
       entryNames: this.mode === 'prod' ? '[dir]/[name].[hash]' : '[dir]/[name]',
@@ -79,12 +87,20 @@ export class Bundler extends EventEmitter {
       platform: 'browser',
       target: 'es2020',
 
+      loader: {
+        '.ttf': 'file',
+        '.eot': 'file',
+        '.woff': 'file',
+        '.woff2': 'file',
+      },
+
       sourcemap: this.config.sourcemap || this.mode === 'dev',
       minify: this.mode === 'prod',
 
       absWorkingDir: this.project.paths.root,
       metafile: true,
       logLevel: 'silent',
+      // publicPath: 'https://www.example.com/v1',
 
       plugins: [
         this.timingPlugin(),
@@ -92,9 +108,16 @@ export class Bundler extends EventEmitter {
         plugin.manifest(pluginOptions),
         plugin.define(pluginOptions),
         plugin.postcss(pluginOptions),
-        this.mode === 'prod' ? plugin.nomodule(pluginOptions) : null,
-      ].filter(isNotNullable),
+      ],
     };
+
+    if (nomodule) {
+      options.plugins!.push(plugin.babel(pluginOptions));
+      options.entryNames = `${options.entryNames}.nomodule`;
+      options.target = 'es5';
+    }
+
+    return options;
   }
 
   private timingPlugin(): esbuild.Plugin {

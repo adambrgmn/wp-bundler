@@ -61,44 +61,6 @@ export const ErrorCodeFrame: React.FC<{ error: Message }> = ({ error }) => {
           </Box>
         ))}
       </Box>
-
-      {error.detail != null && (
-        <Box flexDirection="column" paddingLeft={2}>
-          <Text underline>Details:</Text>
-          <DetailsTable rows={Object.entries(error.detail)} />
-        </Box>
-      )}
-    </Box>
-  );
-};
-
-const DetailsTable: React.FC<{ rows: Array<string[]> }> = ({ rows }) => {
-  let columnsCount = rows.reduce(
-    (acc, curr) => (curr.length > acc ? curr.length : acc),
-    0,
-  );
-
-  let columns = Array.from({ length: columnsCount }, (_, index) => {
-    return rows.map((row) => row[index]);
-  });
-
-  return (
-    <Box>
-      {columns.map((cells, i) => {
-        let width = cells.reduce(
-          (acc, cell) => (cell.length > acc ? cell.length : acc),
-          0,
-        );
-        return (
-          <Box key={i} flexDirection="column" width={width + 4}>
-            {cells.map((cell, i) => (
-              <Box key={i}>
-                <Text>{cell}</Text>
-              </Box>
-            ))}
-          </Box>
-        );
-      })}
     </Box>
   );
 };
