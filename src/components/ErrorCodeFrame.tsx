@@ -12,7 +12,7 @@ export const ErrorCodeFrame: React.FC<{ error: Message }> = ({ error }) => {
   const cwd = useCwd();
   if (error.location != null) {
     let { location } = error;
-    let sourcePath = path.join(cwd, location.file);
+    let sourcePath = path.join(cwd, location.file.replace(cwd, ''));
     let source = fs.readFileSync(sourcePath, 'utf-8');
     let sourceLocation = {
       start: { line: error.location.line, column: error.location.column },

@@ -1,6 +1,7 @@
 import * as fs from 'fs/promises';
-import postcss from 'postcss';
+import postcss, { AcceptedPlugin } from 'postcss';
 import postcssPresetEnv from 'postcss-preset-env';
+import postcssTailwind from 'tailwindcss';
 import { BundlerPlugin } from '../types';
 
 const postcssPlugin: BundlerPlugin = ({ project }) => ({
@@ -14,7 +15,13 @@ const postcssPlugin: BundlerPlugin = ({ project }) => ({
         let outputPath = project.paths.absolute(outputFile);
         let content = await fs.readFile(outputPath, 'utf-8');
 
-        let result = await postcss([postcssPresetEnv()]).process(content, {
+        let plugins: AcceptedPlugin[] = [postcssPresetEnv()];
+        let tailwindPath = project.paths.absolute('tailwind.config.js');
+        if (await exists(tailwindPath)) {
+          plugins.unshift(postcssTailwind(tailwindPath));
+        }
+
+        let result = await postcss(plugins).process(content, {
           from: outputPath,
           to: outputPath,
         });
@@ -26,3 +33,12 @@ const postcssPlugin: BundlerPlugin = ({ project }) => ({
 });
 
 export { postcssPlugin as postcss };
+
+async function exists(file: string) {
+  try {
+    await fs.access(file);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}

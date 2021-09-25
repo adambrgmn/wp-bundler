@@ -51,6 +51,7 @@
     "read-pkg-up": "^8.0.0",
     "rimraf": "^3.0.2",
     "strman": "^2.0.1",
+    "tailwindcss": "^2.2.15",
     "xstate": "^4.25.0",
     "zod": "^3.8.2"
   },

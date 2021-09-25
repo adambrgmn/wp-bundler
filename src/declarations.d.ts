@@ -3,3 +3,9 @@ declare module 'postcss-preset-env' {
   function postcssPresetEnv(options?: Record<string, any>): AcceptedPlugin;
   export = postcssPresetEnv;
 }
+
+declare module 'tailwindcss' {
+  import { AcceptedPlugin } from 'postcss';
+  function postcssTailwindcss(any): AcceptedPlugin;
+  export = postcssTailwindcss;
+}
