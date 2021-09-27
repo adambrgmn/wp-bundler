@@ -62,6 +62,42 @@ it('extract translations from jsx files', () => {
   ]);
 });
 
+it('extract translations from named imports', () => {
+  let source = `
+    import { __ } from '@wordpress/i18n';
+    __('Translate this', 'wp-bundler');
+  `;
+
+  let result = extractTranslations(source);
+  expect(result).toEqual([
+    { text: 'Translate this', domain: 'wp-bundler', node: expect.anything() },
+  ]);
+});
+
+it('extract translations from default imports', () => {
+  let source = `
+    import i18n from '@wordpress/i18n';
+    i18n.__('Translate this', 'wp-bundler');
+  `;
+
+  let result = extractTranslations(source);
+  expect(result).toEqual([
+    { text: 'Translate this', domain: 'wp-bundler', node: expect.anything() },
+  ]);
+});
+
+it('extract translations from namespace imports', () => {
+  let source = `
+    import * as i18n from '@wordpress/i18n';
+    i18n.__('Translate this', 'wp-bundler');
+  `;
+
+  let result = extractTranslations(source);
+  expect(result).toEqual([
+    { text: 'Translate this', domain: 'wp-bundler', node: expect.anything() },
+  ]);
+});
+
 it('extract translations from calls to window.wp.i18n', () => {
   let source = `
     let translated = window.wp.i18n.__('Translate this', 'wp-bundler');
