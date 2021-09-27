@@ -116,7 +116,6 @@ export class Bundler extends EventEmitter {
       options.plugins!.push(plugin.swc(pluginOptions));
       options.entryNames = `${options.entryNames}.nomodule`;
       options.target = 'es5';
-      options.loader!['.css'] = 'file';
     }
 
     return options;

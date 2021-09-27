@@ -1,9 +1,3 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { BuildFailure } from 'esbuild';
-import exitHook from 'exit-hook';
-import ora from 'ora';
-import { codeFrameColumns } from '@babel/code-frame';
 import { Bundler } from './bundler';
 import { render } from 'ink';
 import { createElement } from 'react';

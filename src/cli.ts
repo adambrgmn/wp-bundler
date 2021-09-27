@@ -1,54 +1,52 @@
-import meow from 'meow';
-import * as path from 'path';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
 import { Bundler } from './bundler';
 import { Runner } from './runner';
-import { Mode } from './types';
+import { CliOptions } from './types';
 
-export function cli() {
-  const program = meow(
-    `
-  Usage
-    $ wp-bundler
-    $ wp-bundler --watch
+export function cli(argv: typeof process.argv) {
+  let program = yargs(hideBin(argv));
 
-  Options
-    --watch, -w        Watch for file changes and rebuild assets on each change.
-    --mode=[prod|dev]  Force dev or prod mode. Defaults to "prod", unless --watch is set, then "dev".
-    --cwd=[string]     Optional working directory to use instead of default process.cwd().
-`,
-    {
-      importMeta: import.meta,
-      flags: {
-        watch: { type: 'boolean', default: false, alias: 'w' },
-        mode: { type: 'string' },
-        cwd: { type: 'string' },
-      },
-      hardRejection: false,
+  program.command<CliOptions>(
+    'build',
+    'Build project',
+    (yargs) => {
+      yargs.option('mode', {
+        alias: 'm',
+        choices: ['dev', 'prod'],
+        default: 'prod',
+        description: 'Mode to build project with',
+      });
+    },
+    ({ mode, cwd = process.cwd() }) => {
+      let bundler = new Bundler({ mode, cwd });
+      let runner = new Runner(bundler, cwd);
+      runner.build();
     },
   );
 
-  let watch = program.flags.watch;
+  program.command<CliOptions>(
+    'dev',
+    'Run project in development mode',
+    (yargs) => {
+      yargs.option('mode', {
+        alias: 'm',
+        choices: ['dev', 'prod'],
+        default: 'prod',
+        description: 'Mode to build project with',
+      });
+    },
+    ({ mode, cwd = process.cwd() }) => {
+      let bundler = new Bundler({ mode, cwd });
+      let runner = new Runner(bundler, cwd);
+      runner.watch();
+    },
+  );
 
-  let mode = program.flags.mode ?? watch ? 'dev' : 'prod';
+  program.option('cwd', {
+    type: 'string',
+    description: 'Optional working directory',
+  });
 
-  let cwd = process.cwd();
-  if (program.flags.cwd != null) {
-    cwd = path.join(cwd, program.flags.cwd);
-  }
-
-  process.env.NODE_ENV =
-    process.env.NODE_ENV || mode === 'prod' ? 'production' : 'development';
-
-  let bundler = new Bundler({ mode: isMode(mode) ? mode : 'dev', cwd });
-  let runner = new Runner(bundler, cwd);
-
-  if (watch) {
-    runner.watch();
-  } else {
-    runner.build();
-  }
-}
-
-function isMode(m: string): m is Mode {
-  return m === 'dev' || m === 'prod';
+  return program.parse();
 }
