@@ -112,9 +112,11 @@ export class Bundler extends EventEmitter {
     };
 
     if (nomodule) {
-      options.plugins!.push(plugin.babel(pluginOptions));
+      options.format = 'iife';
+      options.plugins!.push(plugin.swc(pluginOptions));
       options.entryNames = `${options.entryNames}.nomodule`;
       options.target = 'es5';
+      options.loader!['.css'] = 'file';
     }
 
     return options;

@@ -5,6 +5,9 @@ import { __, _x, _n } from '@wordpress/i18n';
 import * as i18n from '@wordpress/i18n';
 // @ts-ignore
 import i18n2 from '@wordpress/i18n';
+import { add } from './utils/math';
+
+console.log(add(1, 2, 3));
 
 _x('wtf 1', 'any', 'wp-bundler');
 _n('wtf 2', "wtf's 2", 2, 'wp-bundler');
