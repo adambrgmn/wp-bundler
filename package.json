@@ -21,7 +21,7 @@
     "build": "node bundle.mjs",
     "dev": "node bundle.mjs --watch",
     "lint": "eslint . --ext .ts",
-    "test": "jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "type-check": "tsc --noEmit",
     "release": "yarn build && yarn changeset publish",
     "prepare": "husky install"
