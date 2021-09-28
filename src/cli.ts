@@ -2,12 +2,18 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 import { Bundler } from './bundler';
 import { Runner } from './runner';
-import { CliOptions } from './types';
+
+type GlobalArgs = { cwd?: string };
 
 export function cli(argv: typeof process.argv) {
-  let program = yargs(hideBin(argv));
+  let program: yargs.Argv<{ cwd?: string }> = yargs(hideBin(argv));
 
-  program.command<CliOptions>(
+  program.option('cwd', {
+    type: 'string',
+    description: 'Optional working directory',
+  });
+
+  program.command<GlobalArgs & { mode: 'dev' | 'prod' }>(
     'build',
     'Build project',
     (yargs) => {
@@ -25,7 +31,7 @@ export function cli(argv: typeof process.argv) {
     },
   );
 
-  program.command<CliOptions>(
+  program.command<GlobalArgs & { mode: 'dev' | 'prod' }>(
     'dev',
     'Run project in development mode',
     (yargs) => {
@@ -43,10 +49,35 @@ export function cli(argv: typeof process.argv) {
     },
   );
 
-  program.option('cwd', {
-    type: 'string',
-    description: 'Optional working directory',
-  });
+  program.command<GlobalArgs>(
+    'make-pot',
+    'Extract translations from js source code',
+    () => {},
+    async ({ cwd = process.cwd() }) => {
+      try {
+        console.log('make-pot');
+        process.exit(0);
+      } catch (error) {
+        console.error(error);
+        process.exit(1);
+      }
+    },
+  );
+
+  program.command<GlobalArgs>(
+    'make-json',
+    'Extract translations from js source code',
+    () => {},
+    ({ cwd = process.cwd() }) => {
+      try {
+        console.log('make-json');
+        process.exit(0);
+      } catch (error) {
+        console.error(error);
+        process.exit(1);
+      }
+    },
+  );
 
   return program.parse();
 }

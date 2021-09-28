@@ -1,5 +1,9 @@
 import ts from 'typescript';
 
+export function mightHaveTranslations(source: string): boolean {
+  return source.includes('wp.i18n') || source.includes('@wordpress/i18n');
+}
+
 export function extractTranslations(source: string) {
   let sourceFile = ts.createSourceFile(
     'admin.ts',
@@ -26,7 +30,7 @@ type PluralMessageWithContext = MessageBase &
 type SingleMessage = MessageBase & { text: string; domain?: string };
 type SingleMessageWithContext = MessageBase &
   SingleMessage & { context: string };
-type Message =
+export type TranslationMessage =
   | PluralMessage
   | PluralMessageWithContext
   | SingleMessage
@@ -95,7 +99,7 @@ function findTranslatableMessages(
   sourceFile: ts.SourceFile,
   imports: ts.Identifier[],
 ) {
-  let messages: Message[] = [];
+  let messages: TranslationMessage[] = [];
 
   let referencesImport = (expression: { getText(): string }) => {
     return (
@@ -151,7 +155,7 @@ function extractMessage(
   caller: ts.LeftHandSideExpression | ts.MemberName,
   args: ts.NodeArray<ts.Expression>,
   imports?: ts.Identifier[],
-): Message | null {
+): TranslationMessage | null {
   let id = caller.getText();
 
   /**

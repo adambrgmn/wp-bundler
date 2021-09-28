@@ -8,6 +8,8 @@ import { assert } from '../utils/assert';
 export const manifest: BundlerPlugin = ({ config }): Plugin => ({
   name: 'wp-bundler-manifest',
   setup(build) {
+    if (!build.initialOptions.write) return;
+
     build.initialOptions.metafile = true;
 
     build.onEnd(async ({ metafile = { outputs: {} } }) => {
@@ -29,10 +31,16 @@ export const manifest: BundlerPlugin = ({ config }): Plugin => ({
         manifest[name] = { name, js, css };
       }
 
-      await fs.writeFile(
-        path.join(outdir, './manifest.json'),
-        JSON.stringify(manifest, null, 2),
-      );
+      await Promise.all([
+        fs.writeFile(
+          path.join(outdir, './manifest.json'),
+          JSON.stringify(manifest, null, 2),
+        ),
+        fs.writeFile(
+          path.join(outdir, './metafile.json'),
+          JSON.stringify(metafile, null, 2),
+        ),
+      ]);
     });
   },
 });
