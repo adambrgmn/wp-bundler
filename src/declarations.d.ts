@@ -45,6 +45,6 @@ declare module 'po2json' {
 
   export function parse<Domain extends string = 'messages'>(
     buffer: Buffer | string,
-    options?: ParseOptions,
+    options?: ParseOptions<Domain>,
   ): ParseResult<Domain>;
 }

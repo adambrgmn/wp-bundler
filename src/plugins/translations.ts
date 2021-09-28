@@ -1,15 +1,14 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { Loader, Location, PartialMessage, Plugin } from 'esbuild';
-import ts from 'typescript';
-import md5 from 'md5';
+import { Loader, PartialMessage, Plugin } from 'esbuild';
 import { BundlerPlugin } from '../types';
 import {
   extractTranslations,
   mightHaveTranslations,
   TranslationMessage,
 } from '../utils/extract-translations';
-import { ExtendedPO } from '../utils/pofile';
+import { ExtendedPO, generateTranslationFilename } from '../utils/pofile';
+import { nodeToLocation } from '../utils/ts-ast';
 
 let name = 'wp-bundler-translations';
 
@@ -95,21 +94,20 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
             continue;
           }
 
-          let jed = po.toJED(({ references }) =>
+          let jed = po.toJED(translationsConfig.domain, ({ references }) =>
             references.some((ref) =>
               srcFiles.includes(ref.replace(/:\d+$/, '')),
             ),
           );
           if (jed == null) continue;
 
-          let domain = translationsConfig.domain;
-          let language = po.headers.Language;
-          let md5Path = md5(distFile);
-          let filename = `${domain}-${language}-${md5Path}`;
-          await fs.writeFile(
-            path.join(langDir, filename),
-            JSON.stringify(jed, null, 2),
+          let filename = generateTranslationFilename(
+            translationsConfig.domain,
+            po.headers.Language,
+            distFile,
           );
+
+          await fs.writeFile(path.join(langDir, filename), JSON.stringify(jed));
         }
       }
 
@@ -156,21 +154,4 @@ function validateTranslations(
   }
 
   return warnings;
-}
-
-function nodeToLocation(node: ts.Node, source: string, file: string): Location {
-  let substring = source.substr(0, node.pos);
-  let lines = substring.split('\n');
-  let line = lines.length;
-  let column = lines[line - 1].length;
-
-  return {
-    file,
-    namespace: '',
-    line,
-    column,
-    length: 1,
-    lineText: '',
-    suggestion: '',
-  };
 }

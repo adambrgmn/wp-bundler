@@ -2,6 +2,7 @@ import * as fs from 'fs/promises';
 import PO from 'pofile';
 import merge from 'lodash.merge';
 import { parse } from 'po2json';
+import md5 from 'md5';
 import { TranslationMessage } from './extract-translations';
 import { nodeToLocation } from './ts-ast';
 
@@ -71,18 +72,30 @@ export class ExtendedPO extends PO {
     merge(existing, next);
   }
 
-  toJED(filterItems?: (item: typeof this['items'][number]) => boolean) {
+  toJED(
+    domain: string,
+    filterItems?: (item: typeof this['items'][number]) => boolean,
+  ) {
     let po: ExtendedPO = this;
     if (filterItems != null) po = this.clone(filterItems);
     if (po.items.length < 1) return null;
-    let result = parse(po.toString(), { format: 'jed' });
+    let result = parse(po.toString(), { format: 'jed', domain });
 
-    for (let key of Object.keys(result.locale_data.messages)) {
+    for (let key of Object.keys(result.locale_data[domain])) {
       if (key === '') continue;
-      result.locale_data.messages[key] =
-        result.locale_data.messages[key].slice(1);
+      result.locale_data[domain][key] =
+        result.locale_data[domain][key].slice(1);
     }
 
     return result;
   }
+}
+
+export function generateTranslationFilename(
+  domain: string,
+  language: string,
+  file: string,
+): string {
+  let md5Path = md5(file);
+  return `${domain}-${language}-${md5Path}.json`;
 }

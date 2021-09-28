@@ -38,7 +38,7 @@ export function cli(argv: typeof process.argv) {
       yargs.option('mode', {
         alias: 'm',
         choices: ['dev', 'prod'],
-        default: 'prod',
+        default: 'dev',
         description: 'Mode to build project with',
       });
     },
