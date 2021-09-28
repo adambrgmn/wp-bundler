@@ -7,6 +7,7 @@ export const BundlerConfigSchema = z.object({
   externals: z.record(z.string()).optional(),
   translations: z
     .object({
+      domain: z.string(),
       pot: z.string(),
       pos: z.array(z.string()),
     })

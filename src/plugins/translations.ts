@@ -27,11 +27,11 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
   async setup(build) {
     if (config.translations == null) return;
 
-    let { translations } = config;
+    let translationsConfig = config.translations;
 
     let [pot, ...pos] = await Promise.all([
-      ExtendedPO.create(project.paths.absolute(translations.pot)),
-      ...translations.pos.map((po) =>
+      ExtendedPO.create(project.paths.absolute(translationsConfig.pot)),
+      ...translationsConfig.pos.map((po) =>
         ExtendedPO.create(project.paths.absolute(po)),
       ),
     ]);
@@ -52,6 +52,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
           let fileTranslations = extractTranslations(source);
 
           for (let translation of fileTranslations) {
+            if (translation.domain !== translationsConfig.domain) continue;
             pot.append(translation, { path: relativePath, source: source });
             pos.forEach((po) => {
               return po.append(translation, {
@@ -75,7 +76,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
     /**
      * Write all po- and pot-files to disk.
      */
-    build.onEnd(async ({ metafile }) => {
+    build.onEnd(async ({ metafile, warnings }) => {
       await Promise.all([pot.write(), ...pos.map((po) => po.write())]);
 
       if (metafile == null) return;
@@ -83,12 +84,16 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
       let langDir = project.paths.absolute(config.outdir, 'languages');
       await fs.mkdir(langDir, { recursive: true });
 
+      let missingLangWarnings: ExtendedPO[] = [];
+
       for (let distFile of Object.keys(metafile.outputs)) {
         let meta = metafile.outputs[distFile];
         let srcFiles = Object.keys(meta.inputs);
         for (let po of pos) {
-          if (po.headers['X-Domain'] == null) continue;
-          if (po.headers.Language == null) continue;
+          if (po.headers.Language == null || po.headers.Language === '') {
+            missingLangWarnings.push(po);
+            continue;
+          }
 
           let jed = po.toJED(({ references }) =>
             references.some((ref) =>
@@ -97,7 +102,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
           );
           if (jed == null) continue;
 
-          let domain = po.headers['X-Domain'];
+          let domain = translationsConfig.domain;
           let language = po.headers.Language;
           let md5Path = md5(distFile);
           let filename = `${domain}-${language}-${md5Path}`;
@@ -107,6 +112,28 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
           );
         }
       }
+
+      warnings.push(
+        ...missingLangWarnings
+          .filter((po, i, arr) => arr.indexOf(po) === i)
+          .map((po) => {
+            return {
+              pluginName: name,
+              text: 'The po file is missing a language header',
+              location: {
+                file: project.paths.relative(po.filename),
+                line: 1,
+                column: 1,
+                namespace: '',
+                lineText: '',
+                length: 0,
+                suggestion: '',
+              },
+              detail: {},
+              notes: [],
+            };
+          }),
+      );
     });
   },
 });
