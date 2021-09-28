@@ -12,6 +12,7 @@ export interface CliOptions {
 export interface ProjectPaths {
   root: string;
   absolute: (...to: string[]) => string;
+  relative: (to: string) => string;
 }
 
 export type ProjectInfo = NormalizedReadResult & { paths: ProjectPaths };

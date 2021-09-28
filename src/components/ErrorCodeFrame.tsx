@@ -78,6 +78,15 @@ function getFrame(
       message: error.text,
     });
 
+    /**
+     * Unfortunately @babel/code-frame fails to inject the error text in some
+     * cases. From what I can tell it happens on css files at least. In that
+     * case we will just prepend the error text at the top of the code frame.
+     */
+    if (!frame.includes(error.text)) {
+      frame = `${error.text}\n${frame}`;
+    }
+
     return { text: frame, location, sourcePath };
   } catch (error) {
     return null;

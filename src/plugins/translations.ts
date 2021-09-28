@@ -1,49 +1,116 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { Loader, Plugin } from 'esbuild';
+import { Loader, Location, PartialMessage, Plugin } from 'esbuild';
+import ts from 'typescript';
 import { BundlerPlugin } from '../types';
 import {
   extractTranslations,
   mightHaveTranslations,
   TranslationMessage,
 } from '../utils/extract-translations';
+import { ExtendedPO } from '../utils/pofile';
 
-export const translations: BundlerPlugin = ({ config }): Plugin => ({
-  name: 'wp-bundler-translations',
+let name = 'wp-bundler-translations';
+
+let loaders: Record<string, Loader | undefined> = {
+  '.js': 'js',
+  '.mjs': 'js',
+  '.cjs': 'js',
+  '.jsx': 'jsx',
+  '.ts': 'ts',
+  '.tsx': 'tsx',
+};
+
+export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
+  name,
   setup(build) {
-    let translations: TranslationMessage[] = [];
+    if (config.translations == null) return;
+
+    let { translations } = config;
+
+    let pot: ExtendedPO | null = null;
+    let pos: ExtendedPO[] = [];
+
+    build.onStart(async () => {
+      [pot, ...pos] = await Promise.all([
+        ExtendedPO.create(project.paths.absolute(translations.pot)),
+        ...translations.pos.map((po) =>
+          ExtendedPO.create(project.paths.absolute(po)),
+        ),
+      ]);
+    });
+
     build.onLoad(
       { filter: /.(js|ts|tsx|jsx)$/, namespace: '' },
       async (args) => {
-        let contents = await fs.readFile(args.path, 'utf-8');
-        let loader = path.extname(args.path).replace('.', '') as Loader;
+        let relativePath = project.paths.relative(args.path);
+        let source = await fs.readFile(args.path, 'utf-8');
+        let loader = loaders[path.extname(args.path)];
 
-        if (mightHaveTranslations(contents)) {
-          translations.push(...extractTranslations(contents));
+        let warnings: PartialMessage[] | undefined = undefined;
+        if (mightHaveTranslations(source)) {
+          let fileTranslations = extractTranslations(source);
+
+          for (let translation of fileTranslations) {
+            pot!.append(translation, { path: relativePath, source: source });
+            pos.forEach((po) => {
+              return po.append(translation, {
+                path: relativePath,
+                source: source,
+              });
+            });
+          }
+
+          warnings = validateTranslations(
+            fileTranslations,
+            source,
+            relativePath,
+          );
         }
 
-        return {
-          contents,
-          loader,
-          warnings: [
-            {
-              pluginName: 'wp-bundler-translations',
-              text: 'Missing domain',
-            },
-          ],
-        };
+        return { contents: source, loader, warnings };
       },
     );
 
-    build.onEnd(() => {
-      console.log(translations);
+    build.onEnd(async () => {
+      await Promise.all([pot!.write(), ...pos.map((po) => po.write())]);
     });
   },
 });
-// export interface PartialMessage {
-//   pluginName?: string;
-//   text?: string;
-//   location?: Partial<Location> | null;
-//   notes?: PartialNote[];
-//   detail?: any;
-// }
+
+function validateTranslations(
+  translations: TranslationMessage[],
+  source: string,
+  file: string,
+): PartialMessage[] {
+  let warnings: PartialMessage[] = [];
+
+  for (let translation of translations) {
+    if (translation.domain == null) {
+      warnings.push({
+        pluginName: name,
+        text: 'Missing domain.',
+        location: nodeToLocation(translation.node, source, file),
+      });
+    }
+  }
+
+  return warnings;
+}
+
+function nodeToLocation(node: ts.Node, source: string, file: string): Location {
+  let substring = source.substr(0, node.pos);
+  let lines = substring.split('\n');
+  let line = lines.length;
+  let column = lines[line - 1].length;
+
+  return {
+    file,
+    namespace: '',
+    line,
+    column,
+    length: 1,
+    lineText: '',
+    suggestion: '',
+  };
+}

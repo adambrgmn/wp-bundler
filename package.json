@@ -38,6 +38,7 @@
     "ink": "^3.0.9",
     "ink-link": "^2.0.0",
     "lodash.merge": "^4.6.2",
+    "pofile": "^1.1.1",
     "postcss": "^8.3.7",
     "postcss-preset-env": "^6.7.0",
     "react": "^17.0.2",

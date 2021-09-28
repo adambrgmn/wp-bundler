@@ -16,5 +16,6 @@ function createPaths(pkgPath: string): ProjectPaths {
   return {
     root,
     absolute: (...to: string[]) => path.join(root, ...to),
+    relative: (to: string) => path.relative(root, to),
   };
 }

@@ -95,9 +95,9 @@ export const BuildFailureOutput: React.FC<{
             </Text>
           </Box>
           <Box flexDirection="column">
-            {result.warnings.map((error, i) => (
+            {result.warnings.map((warning, i) => (
               <Box key={i} marginBottom={1}>
-                <ErrorCodeFrame error={error} level="warning" />
+                <ErrorCodeFrame error={warning} level="warning" />
               </Box>
             ))}
           </Box>
