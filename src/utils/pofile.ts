@@ -1,11 +1,13 @@
 import * as fs from 'fs/promises';
 import PO from 'pofile';
 import merge from 'lodash.merge';
+import { parse } from 'po2json';
 import { TranslationMessage } from './extract-translations';
 import { nodeToLocation } from './ts-ast';
 
 export class ExtendedPO extends PO {
   public filename: string;
+  private po: PO;
 
   static async create(filename: string) {
     let po: PO;
@@ -23,11 +25,18 @@ export class ExtendedPO extends PO {
   constructor(filename: string, original: PO) {
     super();
     this.filename = filename;
+    this.po = original;
 
     for (let key of Object.keys(original)) {
       // @ts-ignore
       this[key] = original[key];
     }
+  }
+
+  clone(filterItems: (item: typeof this['items'][number]) => boolean) {
+    let next = new ExtendedPO(this.filename, this.po);
+    next.items = this.items.filter(filterItems);
+    return next;
   }
 
   async write() {
@@ -60,5 +69,20 @@ export class ExtendedPO extends PO {
     };
 
     merge(existing, next);
+  }
+
+  toJED(filterItems?: (item: typeof this['items'][number]) => boolean) {
+    let po: ExtendedPO = this;
+    if (filterItems != null) po = this.clone(filterItems);
+    if (po.items.length < 1) return null;
+    let result = parse(po.toString(), { format: 'jed' });
+
+    for (let key of Object.keys(result.locale_data.messages)) {
+      if (key === '') continue;
+      result.locale_data.messages[key] =
+        result.locale_data.messages[key].slice(1);
+    }
+
+    return result;
   }
 }

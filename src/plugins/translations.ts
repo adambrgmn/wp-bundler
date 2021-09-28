@@ -2,6 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { Loader, Location, PartialMessage, Plugin } from 'esbuild';
 import ts from 'typescript';
+import md5 from 'md5';
 import { BundlerPlugin } from '../types';
 import {
   extractTranslations,
@@ -23,23 +24,22 @@ let loaders: Record<string, Loader | undefined> = {
 
 export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
   name,
-  setup(build) {
+  async setup(build) {
     if (config.translations == null) return;
 
     let { translations } = config;
 
-    let pot: ExtendedPO | null = null;
-    let pos: ExtendedPO[] = [];
+    let [pot, ...pos] = await Promise.all([
+      ExtendedPO.create(project.paths.absolute(translations.pot)),
+      ...translations.pos.map((po) =>
+        ExtendedPO.create(project.paths.absolute(po)),
+      ),
+    ]);
 
-    build.onStart(async () => {
-      [pot, ...pos] = await Promise.all([
-        ExtendedPO.create(project.paths.absolute(translations.pot)),
-        ...translations.pos.map((po) =>
-          ExtendedPO.create(project.paths.absolute(po)),
-        ),
-      ]);
-    });
-
+    /**
+     * Parse each source file and extract all translations. Append them to our
+     * po- and pot-files.
+     */
     build.onLoad(
       { filter: /.(js|ts|tsx|jsx)$/, namespace: '' },
       async (args) => {
@@ -52,7 +52,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
           let fileTranslations = extractTranslations(source);
 
           for (let translation of fileTranslations) {
-            pot!.append(translation, { path: relativePath, source: source });
+            pot.append(translation, { path: relativePath, source: source });
             pos.forEach((po) => {
               return po.append(translation, {
                 path: relativePath,
@@ -72,8 +72,41 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
       },
     );
 
-    build.onEnd(async () => {
-      await Promise.all([pot!.write(), ...pos.map((po) => po.write())]);
+    /**
+     * Write all po- and pot-files to disk.
+     */
+    build.onEnd(async ({ metafile }) => {
+      await Promise.all([pot.write(), ...pos.map((po) => po.write())]);
+
+      if (metafile == null) return;
+
+      let langDir = project.paths.absolute(config.outdir, 'languages');
+      await fs.mkdir(langDir, { recursive: true });
+
+      for (let distFile of Object.keys(metafile.outputs)) {
+        let meta = metafile.outputs[distFile];
+        let srcFiles = Object.keys(meta.inputs);
+        for (let po of pos) {
+          if (po.headers['X-Domain'] == null) continue;
+          if (po.headers.Language == null) continue;
+
+          let jed = po.toJED(({ references }) =>
+            references.some((ref) =>
+              srcFiles.includes(ref.replace(/:\d+$/, '')),
+            ),
+          );
+          if (jed == null) continue;
+
+          let domain = po.headers['X-Domain'];
+          let language = po.headers.Language;
+          let md5Path = md5(distFile);
+          let filename = `${domain}-${language}-${md5Path}`;
+          await fs.writeFile(
+            path.join(langDir, filename),
+            JSON.stringify(jed, null, 2),
+          );
+        }
+      }
     });
   },
 });

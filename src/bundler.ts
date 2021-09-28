@@ -118,7 +118,8 @@ export class Bundler extends EventEmitter {
       options.entryNames = `${options.entryNames}.nomodule`;
       options.target = 'es5';
       options.plugins = options.plugins?.filter(
-        (p) => !['wp-bundler-translations'].includes(p.name),
+        (p) =>
+          !['wp-bundler-translations', 'wp-bundler-manifest'].includes(p.name),
       );
     }
 

@@ -8,8 +8,6 @@ import { assert } from '../utils/assert';
 export const manifest: BundlerPlugin = ({ config }): Plugin => ({
   name: 'wp-bundler-manifest',
   setup(build) {
-    if (!build.initialOptions.write) return;
-
     build.initialOptions.metafile = true;
 
     build.onEnd(async ({ metafile = { outputs: {} } }) => {
