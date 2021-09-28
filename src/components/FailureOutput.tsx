@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import { Box, Text } from 'ink';
 import figures from 'figures';
 import { ErrorCodeFrame } from './ErrorCodeFrame';
-import { Message } from 'esbuild';
+import { BuildFailure, BuildResult } from 'esbuild';
 
 export const FailureOutput: React.FC<{
   message: string;
@@ -23,20 +23,7 @@ export const FailureOutput: React.FC<{
 
 const ErrorOutput: React.FC<{ error: unknown }> = ({ error }) => {
   if (isBuildFailure(error)) {
-    return (
-      <Fragment>
-        <Box marginBottom={1}>
-          <Text>{error.errors.length} build error(s) occured:</Text>
-        </Box>
-        <Box flexDirection="column">
-          {error.errors.map((error, i) => (
-            <Box key={i} marginBottom={1}>
-              <ErrorCodeFrame error={error} />
-            </Box>
-          ))}
-        </Box>
-      </Fragment>
-    );
+    return <BuildFailureOutput result={error} />;
   }
 
   if (isError(error)) {
@@ -76,8 +63,52 @@ const ErrorOutput: React.FC<{ error: unknown }> = ({ error }) => {
   );
 };
 
-function isBuildFailure(value: any): value is { errors: Message[] } {
-  return value != null && 'errors' in value;
+export const BuildFailureOutput: React.FC<{
+  result: BuildFailure | BuildResult;
+}> = ({ result }) => {
+  let errorsCount = result.errors.length;
+  let warningsCount = result.warnings.length;
+
+  return (
+    <Fragment>
+      {errorsCount > 0 && (
+        <Fragment>
+          <Box marginBottom={1}>
+            <Text color="red">
+              {result.errors.length} build error(s) occured:
+            </Text>
+          </Box>
+          <Box flexDirection="column">
+            {result.errors.map((error, i) => (
+              <Box key={i} marginBottom={1}>
+                <ErrorCodeFrame error={error} level="error" />
+              </Box>
+            ))}
+          </Box>
+        </Fragment>
+      )}
+      {warningsCount > 0 && (
+        <Fragment>
+          <Box marginBottom={1}>
+            <Text color="yellow">
+              {result.warnings.length} build warning(s) occured:
+            </Text>
+          </Box>
+          <Box flexDirection="column">
+            {result.warnings.map((error, i) => (
+              <Box key={i} marginBottom={1}>
+                <ErrorCodeFrame error={error} level="warning" />
+              </Box>
+            ))}
+          </Box>
+        </Fragment>
+      )}
+    </Fragment>
+  );
+};
+
+function isBuildFailure(value: any): value is BuildFailure {
+  return value != null && ('errors' in value || 'warnings' in value);
 }
 
 function isError(value: any): value is Error {

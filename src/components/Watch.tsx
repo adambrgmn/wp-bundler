@@ -6,7 +6,7 @@ import { useWatchMode, WatchContext } from '../hooks/useWatchMode';
 import { CwdProvider } from '../hooks/useCwd';
 import { SpinnerWithMessage } from './SpinnerWithMessage';
 import { BundleOutput } from './BundleOutput';
-import { FailureOutput } from './FailureOutput';
+import { BuildFailureOutput, FailureOutput } from './FailureOutput';
 
 export interface WatchProps {
   bundler: Bundler;
@@ -49,9 +49,10 @@ const Idle: React.FC<WatchContext> = ({ result }) => {
       <Box marginBottom={1}>
         <Text color="green">{figures.tick} Succesfully built project.</Text>
       </Box>
-      <Box paddingLeft={2}>
+      <Box paddingLeft={2} marginBottom={1}>
         {result != null && <BundleOutput metafile={result.metafile} />}
       </Box>
+      {result != null && <BuildFailureOutput result={result} />}
     </Box>
   );
 };

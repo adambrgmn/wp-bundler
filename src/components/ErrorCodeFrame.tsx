@@ -8,14 +8,19 @@ import Link from 'ink-link';
 import figures from 'figures';
 import { useCwd } from '../hooks/useCwd';
 
-export const ErrorCodeFrame: React.FC<{ error: Message }> = ({ error }) => {
+export const ErrorCodeFrame: React.FC<{
+  error: Message;
+  level: 'error' | 'warning';
+}> = ({ error, level }) => {
   const cwd = useCwd();
   let frame = getFrame(error, cwd);
+  let prefix = level === 'error' ? 'Error in' : 'Warning in';
+
   if (frame != null) {
     return (
       <Box flexDirection="column">
         <Text>
-          {figures.circle} Error in{' '}
+          {figures.circle} {prefix}{' '}
           <Link url={`file://${frame.sourcePath}`} fallback={false}>
             {frame.location.file}
           </Link>
@@ -34,7 +39,7 @@ export const ErrorCodeFrame: React.FC<{ error: Message }> = ({ error }) => {
     <Box flexDirection="column">
       {error.pluginName ? (
         <Text>
-          {figures.circle} Error in <Text color="blue">{error.pluginName}</Text>{' '}
+          {figures.circle} {prefix} <Text color="blue">{error.pluginName}</Text>{' '}
           plugin:
         </Text>
       ) : (

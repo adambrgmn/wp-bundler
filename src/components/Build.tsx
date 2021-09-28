@@ -6,7 +6,7 @@ import { BuildContext, useBuildMode } from '../hooks/useBuildMode';
 import { CwdProvider } from '../hooks/useCwd';
 import { SpinnerWithMessage } from './SpinnerWithMessage';
 import { BundleOutput } from './BundleOutput';
-import { FailureOutput } from './FailureOutput';
+import { BuildFailureOutput, FailureOutput } from './FailureOutput';
 
 export const Build: React.FC<{ bundler: Bundler; cwd: string }> = ({
   bundler,
@@ -41,9 +41,10 @@ const Success: React.FC<BuildContext> = ({ result }) => {
       <Box marginBottom={1}>
         <Text color="green">{figures.tick} Succesfully built project.</Text>
       </Box>
-      <Box paddingLeft={2}>
+      <Box paddingLeft={2} marginBottom={1}>
         {result != null && <BundleOutput metafile={result.metafile} withSize />}
       </Box>
+      {result != null && <BuildFailureOutput result={result} />}
     </Box>
   );
 };
