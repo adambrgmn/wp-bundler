@@ -1,6 +1,7 @@
 import { PluginBuild } from 'esbuild';
 import { toCamelCase } from 'strman';
 import { BundlerPlugin } from '../types';
+import { DEfAULT_EXTERNALS } from '../utils/externals';
 
 export const externals: BundlerPlugin = ({ config, project }) => ({
   name: 'wp-bundler-externals',
@@ -17,9 +18,7 @@ function setupProjectExternals(
 ) {
   let namespace = '_wp-bundler-externals';
   let externals: Record<string, string> = {
-    react: 'React',
-    'react-dom': 'ReactDOM',
-    jquery: '$',
+    ...DEfAULT_EXTERNALS,
     ...providedExternals,
   };
 

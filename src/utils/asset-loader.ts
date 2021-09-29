@@ -4,6 +4,7 @@ import { readFileSync } from 'fs';
 import { Metafile } from 'esbuild';
 import { BundlerConfig } from '../schema';
 import { BundlerPluginOptions, ProjectInfo } from '../types';
+import { findBuiltinDependencies } from './externals';
 
 interface Asset {
   js?: string;
@@ -160,34 +161,3 @@ export function toPhpArray(obj: Record<string, unknown> | Array<unknown>) {
 function trimSlashes(str: string) {
   return str.replace(/^\./, '').replace(/^\//, '').replace(/\/$/, '');
 }
-
-function findBuiltinDependencies(
-  inputs: Metafile['outputs'][string]['inputs'],
-): string[] {
-  let dependencies: string[] = [];
-
-  for (let key of Object.keys(inputs)) {
-    /**
-     * External packages handled by the `externals` plugin prefix all external
-     * dependecies with something similar to `_wp-bundler-externals:{pkg}`. By
-     * trimming that prefix we can find the get the expected built in dependecie
-     */
-    let importedPkg = key.split(':').slice(-1)[0];
-    let dep = DEPENDECIES_MAP[importedPkg];
-    if (dep == null) dep = getWPHandle(importedPkg);
-    if (dep != null) dependencies.push(dep);
-  }
-
-  return dependencies;
-}
-
-function getWPHandle(pkg: string): string | undefined {
-  if (!pkg.startsWith('@wordpress/')) return undefined;
-  return `wp-${pkg.replace('@wordpress/', '')}`;
-}
-
-const DEPENDECIES_MAP: Record<string, string | undefined> = {
-  react: 'react',
-  'react-dom': 'react-dom',
-  jquery: 'jquery',
-};
