@@ -102,7 +102,7 @@ class AssetLoader
      * @param string $action   Action to hook into (defaults to `'wp_enqueue_scripts'`).
      * @return void
      */
-    public static function addAction(
+    public static function enqueueAssets(
         string $name,
         array $deps = [],
         bool $inFooter = true,
@@ -126,7 +126,35 @@ class AssetLoader
     public static function enqueueEditorAssets(string $name, array $deps): void
     {
         self::prepare();
-        self::addAction($name, $deps, true, 'enqueue_block_editor_assets');
+        self::enqueueAssets($name, $deps, true, 'enqueue_block_editor_assets');
+    }
+
+    /**
+     * Enqueue a block type with its related assets.
+     *
+     * @since 0.0.1
+     *
+     * @param string $name        Name of assets to register as part of the block
+     * @param string $blockName   Name of the block to register
+     * @param array  $blockConfig Optional. Array of block type arguments. Accepts any public property of `WP_Block_Type`. See WP_Block_Type::__construct() for information on accepted arguments. Default empty array.
+     * @param array  $deps        Optional. Dependency array (e.g. jquery, wp-i18n etc.).
+     * @return void
+     */
+    public static function enqueueBlockType(
+        string $name,
+        string $blockName,
+        array $blockConfig = [],
+        array $deps = []
+    ): void {
+        self::prepare();
+        \add_action('init', function () use (
+            $name,
+            $blockName,
+            $blockConfig,
+            $deps
+        ) {
+            self::registerBlockType($name, $blockName, $blockConfig, $deps);
+        });
     }
 
     /**
