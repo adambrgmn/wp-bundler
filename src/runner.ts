@@ -15,9 +15,7 @@ export class Runner {
 
   async build() {
     try {
-      let { waitUntilExit } = render(
-        createElement(Build, { bundler: this.bundler, cwd: this.cwd }),
-      );
+      let { waitUntilExit } = render(createElement(Build, { bundler: this.bundler, cwd: this.cwd }));
       await waitUntilExit();
       process.exit(0);
     } catch (error) {
@@ -27,9 +25,7 @@ export class Runner {
 
   async watch() {
     try {
-      let { waitUntilExit } = render(
-        createElement(Watch, { bundler: this.bundler, cwd: this.cwd }),
-      );
+      let { waitUntilExit } = render(createElement(Watch, { bundler: this.bundler, cwd: this.cwd }));
       await waitUntilExit();
       process.exit(0);
     } catch (error) {

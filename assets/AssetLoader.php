@@ -147,12 +147,7 @@ class AssetLoader
         array $deps = []
     ): void {
         self::prepare();
-        \add_action('init', function () use (
-            $name,
-            $blockName,
-            $blockConfig,
-            $deps
-        ) {
+        \add_action('init', function () use ($name, $blockName, $blockConfig, $deps) {
             self::registerBlockType($name, $blockName, $blockConfig, $deps);
         });
     }
@@ -167,11 +162,8 @@ class AssetLoader
      * @param bool   $inFooter Optional. Render script tag in footer (defaults to `true`).
      * @return array Returns array of registered handles by type (js, css, nomodule).
      */
-    public static function register(
-        string $name,
-        array $deps = [],
-        bool $inFooter = true
-    ): array {
+    public static function register(string $name, array $deps = [], bool $inFooter = true): array
+    {
         $handles = [];
 
         if (!key_exists($name, self::$assets)) {
@@ -192,11 +184,7 @@ class AssetLoader
                 $inFooter
             );
 
-            \wp_set_script_translations(
-                $handle,
-                self::$domain,
-                self::outDirPath('languages')
-            );
+            \wp_set_script_translations($handle, self::$domain, self::outDirPath('languages'));
         }
 
         if (key_exists('nomodule', $asset)) {
@@ -216,13 +204,7 @@ class AssetLoader
             $handle = 'wp-bundler.' . $name;
             $handles['css'] = $handle;
 
-            \wp_register_style(
-                $handle,
-                self::outDirUri($asset['css']),
-                [],
-                false,
-                'all'
-            );
+            \wp_register_style($handle, self::outDirUri($asset['css']), [], false, 'all');
         }
 
         return $handles;
@@ -238,11 +220,8 @@ class AssetLoader
      * @param bool   $inFooter Optional. Render script tag in footer (defaults to `true`).
      * @return array Returns array of registered handles by type (js, css, nomodule).
      */
-    public static function enqueue(
-        string $name,
-        array $deps = [],
-        bool $inFooter = true
-    ): array {
+    public static function enqueue(string $name, array $deps = [], bool $inFooter = true): array
+    {
         $handles = self::register($name, $deps, $inFooter);
 
         foreach ($handles as $key => $handle) {
@@ -265,12 +244,8 @@ class AssetLoader
      * @param array  $deps        Optional. Dependency array (e.g. jquery, wp-i18n etc.).
      * @return WP_Block_Type|false The registered block type on success, or false on failure.
      */
-    public static function registerBlockType(
-        string $name,
-        string $blockName,
-        array $blockConfig = [],
-        array $deps = []
-    ) {
+    public static function registerBlockType(string $name, string $blockName, array $blockConfig = [], array $deps = [])
+    {
         $handles = self::register($name, $deps);
 
         if (key_exists('js', $handles)) {

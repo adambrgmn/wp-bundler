@@ -1,9 +1,6 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@1.3.0/schema.json",
-  "changelog": [
-    "@fransvilhelm/changeset-changelog",
-    { "repo": "adambrgmn/wp-bundler" }
-  ],
+  "changelog": ["@fransvilhelm/changeset-changelog", { "repo": "adambrgmn/wp-bundler" }],
   "commit": false,
   "linked": [],
   "access": "public",

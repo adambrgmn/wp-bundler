@@ -8,28 +8,16 @@ import { SpinnerWithMessage } from './SpinnerWithMessage';
 import { BundleOutput } from './BundleOutput';
 import { BuildFailureOutput, FailureOutput } from './FailureOutput';
 
-export const Build: React.FC<{ bundler: Bundler; cwd: string }> = ({
-  bundler,
-  cwd,
-}) => {
+export const Build: React.FC<{ bundler: Bundler; cwd: string }> = ({ bundler, cwd }) => {
   const [state] = useBuildMode(bundler);
   return (
     <CwdProvider cwd={cwd}>
       <Box>
-        {state.matches('preparing') && (
-          <SpinnerWithMessage message="Preparing bundler." />
-        )}
-        {state.matches('building') && (
-          <SpinnerWithMessage message="Building project." />
-        )}
+        {state.matches('preparing') && <SpinnerWithMessage message="Preparing bundler." />}
+        {state.matches('building') && <SpinnerWithMessage message="Building project." />}
         {state.matches('success') && <Success {...state.context} />}
 
-        {state.matches('error') && (
-          <FailureOutput
-            error={state.context.error}
-            message="Failed to build project."
-          />
-        )}
+        {state.matches('error') && <FailureOutput error={state.context.error} message="Failed to build project." />}
       </Box>
     </CwdProvider>
   );

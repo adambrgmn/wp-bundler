@@ -46,9 +46,7 @@ export const BundleOutput: React.FC<{
             {files.map((file, i) => (
               <Box key={i}>
                 <Text>{file.file}</Text>
-                {file.size != null && (
-                  <Text color="grey"> ({filesize(file.size)})</Text>
-                )}
+                {file.size != null && <Text color="grey"> ({filesize(file.size)})</Text>}
               </Box>
             ))}
           </Box>

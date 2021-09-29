@@ -74,9 +74,7 @@ export const BuildFailureOutput: React.FC<{
       {errorsCount > 0 && (
         <Fragment>
           <Box marginBottom={1}>
-            <Text color="red">
-              {result.errors.length} build error(s) occured:
-            </Text>
+            <Text color="red">{result.errors.length} build error(s) occured:</Text>
           </Box>
           <Box flexDirection="column">
             {result.errors.map((error, i) => (
@@ -90,9 +88,7 @@ export const BuildFailureOutput: React.FC<{
       {warningsCount > 0 && (
         <Fragment>
           <Box marginBottom={1}>
-            <Text color="yellow">
-              {result.warnings.length} build warning(s) occured:
-            </Text>
+            <Text color="yellow">{result.warnings.length} build warning(s) occured:</Text>
           </Box>
           <Box flexDirection="column">
             {result.warnings.map((warning, i) => (

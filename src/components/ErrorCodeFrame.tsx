@@ -39,8 +39,7 @@ export const ErrorCodeFrame: React.FC<{
     <Box flexDirection="column">
       {error.pluginName ? (
         <Text>
-          {figures.circle} {prefix} <Text color="blue">{error.pluginName}</Text>{' '}
-          plugin:
+          {figures.circle} {prefix} <Text color="blue">{error.pluginName}</Text> plugin:
         </Text>
       ) : (
         <Text>{figures.circle} Unknown error:</Text>
@@ -60,10 +59,7 @@ export const ErrorCodeFrame: React.FC<{
   );
 };
 
-function getFrame(
-  error: Message,
-  cwd: string,
-): { text: string; location: Location; sourcePath: string } | null {
+function getFrame(error: Message, cwd: string): { text: string; location: Location; sourcePath: string } | null {
   if (error.location == null) return null;
 
   try {

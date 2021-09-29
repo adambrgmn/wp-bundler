@@ -21,11 +21,7 @@ interface TemplateCompileOptions {
   bundler: ProjectInfo;
 }
 
-export function createAssetLoaderTemplate({
-  config,
-  bundler,
-  project,
-}: BundlerPluginOptions) {
+export function createAssetLoaderTemplate({ config, bundler, project }: BundlerPluginOptions) {
   let templatePath = bundler.paths.absolute('./assets/AssetLoader.php');
   let templateOutPath = project.paths.absolute(config.assetLoader.path);
   let compile = createTemplate(readFileSync(templatePath, 'utf-8'));
@@ -36,24 +32,12 @@ export function createAssetLoaderTemplate({
 }
 
 function createTemplate(content: string) {
-  return function compile({
-    metafile,
-    config,
-    bundler,
-  }: TemplateCompileOptions) {
-    let assetsArray = toPhpArray(
-      metafileToAssets(metafile, config.entryPoints),
-    );
+  return function compile({ metafile, config, bundler }: TemplateCompileOptions) {
+    let assetsArray = toPhpArray(metafileToAssets(metafile, config.entryPoints));
 
-    content = content.replace(
-      '* @version v0.0.0',
-      `* @version v${bundler.packageJson.version}`,
-    );
+    content = content.replace('* @version v0.0.0', `* @version v${bundler.packageJson.version}`);
 
-    content = content.replace(
-      'namespace WPBundler;',
-      `namespace ${config.assetLoader.namespace};`,
-    );
+    content = content.replace('namespace WPBundler;', `namespace ${config.assetLoader.namespace};`);
 
     content = content.replace(
       "private static $domain = 'domain';",
@@ -65,34 +49,21 @@ function createTemplate(content: string) {
       `private static $outdir = '/${trimSlashes(config.outdir)}/';`,
     );
 
-    content = content.replace(
-      'private static $assets = [];',
-      `private static $assets = ${assetsArray};`,
-    );
+    content = content.replace('private static $assets = [];', `private static $assets = ${assetsArray};`);
 
     return content;
   };
 }
 
-function metafileToAssets(
-  { outputs }: Pick<Metafile, 'outputs'>,
-  entryPoints: BundlerConfig['entryPoints'],
-) {
+function metafileToAssets({ outputs }: Pick<Metafile, 'outputs'>, entryPoints: BundlerConfig['entryPoints']) {
   let assets: AssetsRecord = {};
   let names = Object.keys(entryPoints);
 
   for (let name of names) {
     let keys = Object.keys(outputs);
-    let js = keys.find(
-      (key) =>
-        key.includes(name) &&
-        key.endsWith('.js') &&
-        !key.endsWith('.nomodule.js'),
-    );
+    let js = keys.find((key) => key.includes(name) && key.endsWith('.js') && !key.endsWith('.nomodule.js'));
 
-    let nomodule = keys.find(
-      (key) => key.includes(name) && key.endsWith('.nomodule.js'),
-    );
+    let nomodule = keys.find((key) => key.includes(name) && key.endsWith('.nomodule.js'));
 
     let css = keys.find((key) => key.includes(name) && key.endsWith('.css'));
 

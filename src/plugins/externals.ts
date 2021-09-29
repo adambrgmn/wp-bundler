@@ -12,10 +12,7 @@ export const externals: BundlerPlugin = ({ config, project }) => ({
   },
 });
 
-function setupProjectExternals(
-  build: PluginBuild,
-  providedExternals: Record<string, string> = {},
-) {
+function setupProjectExternals(build: PluginBuild, providedExternals: Record<string, string> = {}) {
   let namespace = '_wp-bundler-externals';
   let externals: Record<string, string> = {
     ...DEfAULT_EXTERNALS,
@@ -44,18 +41,13 @@ function setupWpExternals(build: PluginBuild) {
 
   build.onLoad({ filter: /.*/, namespace }, (args) => {
     return {
-      contents: `module.exports = window.wp.${toCamelCase(
-        args.path.replace(/^@wordpress\//, ''),
-      )}`,
+      contents: `module.exports = window.wp.${toCamelCase(args.path.replace(/^@wordpress\//, ''))}`,
       loader: 'js',
     };
   });
 }
 
-function setupNodeExternals(
-  dependecies: Record<string, string>,
-  build: PluginBuild,
-) {
+function setupNodeExternals(dependecies: Record<string, string>, build: PluginBuild) {
   if (!Array.isArray(build.initialOptions.external)) {
     build.initialOptions.external = [];
   }
