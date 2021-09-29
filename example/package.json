@@ -2,8 +2,8 @@
   "name": "@fransvilhelm/wp-bundler-example",
   "private": true,
   "scripts": {
-    "build": "../cli.js build",
-    "dev": "../cli.js dev"
+    "build": "../cli.js",
+    "dev": "../cli.js --watch"
   },
   "dependencies": {
     "react": "^17.0.2",
@@ -18,6 +18,13 @@
       "admin-js": "./src/admin.ts",
       "admin-css": "./src/admin.css",
       "app": "./src/app.tsx"
+    },
+    "translations": {
+      "domain": "wp-bundler",
+      "pot": "languages/example.pot",
+      "pos": [
+        "languages/sv_SE.po"
+      ]
     }
   }
 }

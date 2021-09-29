@@ -39,7 +39,6 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
       let loader = loaders[path.extname(args.path)];
 
       let warnings: PartialMessage[] | undefined = undefined;
-      let watchFiles: string[] | undefined = undefined;
 
       if (mightHaveTranslations(source)) {
         let fileTranslations = extractTranslations(source);
@@ -50,20 +49,16 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
         }
 
         warnings = validateTranslations(fileTranslations, source, relativePath);
-
-        if (translationsConfig.pos != null) {
-          watchFiles = translationsConfig.pos.map((po) => project.paths.relative(po));
-        }
       }
 
-      return { contents: source, loader, warnings, watchFiles };
+      return { contents: source, loader, warnings };
     });
 
     /**
      * Write all po- and pot-files to disk.
      */
     build.onEnd(async ({ metafile, warnings }) => {
-      await pot.write();
+      await Promise.all([pot.write(), pos.map((po) => po.write())]);
 
       if (metafile == null) return;
 

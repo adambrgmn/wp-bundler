@@ -17,4 +17,4 @@ i18n2.__('wtf 5', 'wp-bundler');
 // @ts-ignore
 wp.i18n.__('wtf 6', 'wp-bundler');
 // @ts-ignore
-window.wp.i18n.__('wtf 7');
+window.wp.i18n.__('wtf 7', 'wp-bundler');

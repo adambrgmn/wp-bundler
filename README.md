@@ -42,8 +42,8 @@ Then configure the scripts in your `package.json`.
 ```json
 {
   "scripts": {
-    "build": "wp-bundler build",
-    "dev": "wp-bundler dev"
+    "build": "wp-bundler",
+    "dev": "wp-bundler --watch"
   }
 }
 ```
@@ -165,7 +165,8 @@ browsers. See `postcss-preset-env`'s documentation for details around which feat
 #### Tailwindcss
 
 `wp-bundler` also has built-in support for [`tailwindcss`](https://tailwindcss.com/). If the bundler finds a
-`tailwinds.config.js` within your projects root directory the plugin will be enabled.
+`tailwinds.config.js` within your projects root directory the plugin will be enabled. In order to use this functionality
+you also need to install `tailwindcss` as a dependnecy of your project.
 
 ## Asset loader
 
@@ -264,7 +265,7 @@ All translations found will also be emitted to a translations template file (`.p
 every time you add a new translation a new entry will be created in your pot file, even in development mode.
 
 The `.po` files, configured in `translations.pos`, will then be used to emit `jed` formatted json files that the
-WordPress i18n package can handle. Changes to these files will also result in a rebuild.
+WordPress i18n package can handle.
 
 ## Other WordPress focused bundlers
 

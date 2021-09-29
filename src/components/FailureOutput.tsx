@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import { Box, Text } from 'ink';
-import figures from 'figures';
+import { figures } from '../utils/figures';
 import { ErrorCodeFrame } from './ErrorCodeFrame';
 import { BuildFailure, BuildResult } from 'esbuild';
 

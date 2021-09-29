@@ -21,3 +21,13 @@ export const BundlerConfigSchema = z.object({
 });
 
 export type BundlerConfig = z.infer<typeof BundlerConfigSchema>;
+
+export const CliArgsSchema = z.object({
+  help: z.boolean().optional(),
+  version: z.boolean().optional(),
+  watch: z.boolean().optional(),
+  mode: z.union([z.literal('dev'), z.literal('prod')]).optional(),
+  cwd: z.string().optional(),
+});
+
+export type CliArgs = z.infer<typeof CliArgsSchema>;

@@ -6,15 +6,22 @@ const args = process.argv.slice(2);
 (async () => {
   const pkg = JSON.parse(await fs.readFile('./package.json', 'utf-8'));
   const watch = args.includes('--watch') || args.includes('-w');
+  let external = [
+    ...Object.keys(pkg.dependencies),
+    ...Object.keys(pkg.peerDependencies),
+    ...Object.keys(pkg.optionalDependencies),
+  ];
+
   try {
     await build({
       entryPoints: ['./src/index.ts'],
       bundle: true,
-      format: 'esm',
+      format: 'cjs',
       outdir: './dist',
       platform: 'node',
       target: 'node14',
-      external: Object.keys(pkg.dependencies),
+      sourcemap: true,
+      external,
       watch: watch
         ? {
             onRebuild(error) {
