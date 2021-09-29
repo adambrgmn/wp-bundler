@@ -1,6 +1,4 @@
-const config = {
+module.exports = {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
 };
-
-export default config;
