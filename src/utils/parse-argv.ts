@@ -1,4 +1,4 @@
-import { ZodSchema, ZodRawShape } from 'zod';
+import { ZodSchema } from 'zod';
 import parse from 'yargs-parser';
 
 type BaseArg = string | number | boolean | undefined;
