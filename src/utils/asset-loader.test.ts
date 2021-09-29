@@ -12,9 +12,7 @@ describe('toPhpArray', () => {
   });
 
   it('formats an object with primitive values', () => {
-    expect(format(toPhpArray({ a: 'a', b: 1, c: true }))).toEqual(
-      '["a" => "a", "b" => 1, "c" => true]',
-    );
+    expect(format(toPhpArray({ a: 'a', b: 1, c: true }))).toEqual('["a" => "a", "b" => 1, "c" => true]');
   });
 
   it('formats an array of primitive values', () => {
@@ -22,15 +20,11 @@ describe('toPhpArray', () => {
   });
 
   it('formats an object with more complex values within', () => {
-    expect(format(toPhpArray({ a: ['a'], b: { foo: true } }))).toEqual(
-      '["a" => ["a"], "b" => ["foo" => true]]',
-    );
+    expect(format(toPhpArray({ a: ['a'], b: { foo: true } }))).toEqual('["a" => ["a"], "b" => ["foo" => true]]');
   });
 
   it('formats an array with more complex values within', () => {
-    expect(format(toPhpArray([{ a: 'a' }, [1, 2]]))).toEqual(
-      '[["a" => "a"], [1, 2]]',
-    );
+    expect(format(toPhpArray([{ a: 'a' }, [1, 2]]))).toEqual('[["a" => "a"], [1, 2]]');
   });
 
   it('ignores undefined values in objects', () => {

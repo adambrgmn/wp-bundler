@@ -39,10 +39,7 @@ export class Bundler extends EventEmitter {
       esbuild.build(this.createBundlerOptions({ build: true, nomodule: true })),
     ]);
 
-    let result = results.reduce(
-      (acc, next) => merge(acc, next),
-      {} as BuildResult,
-    );
+    let result = results.reduce((acc, next) => merge(acc, next), {} as BuildResult);
 
     ensureMetafile(result);
 
@@ -72,18 +69,13 @@ export class Bundler extends EventEmitter {
     this.bundler = await readPkg(__dirname);
     this.project = await readPkg(this.cwd);
 
-    this.config = await BundlerConfigSchema.parseAsync(
-      this.project.packageJson['wp-bundler'],
-    );
+    this.config = await BundlerConfigSchema.parseAsync(this.project.packageJson['wp-bundler']);
 
     await rimraf(this.project.paths.absolute(this.config.outdir));
     this.prepared = true;
   }
 
-  private createBundlerOptions({
-    build,
-    nomodule,
-  }: { build?: boolean; nomodule?: boolean } = {}): BuildOptions {
+  private createBundlerOptions({ build, nomodule }: { build?: boolean; nomodule?: boolean } = {}): BuildOptions {
     let pluginOptions: BundlerPluginOptions = {
       mode: this.mode,
       config: this.config,
@@ -131,17 +123,13 @@ export class Bundler extends EventEmitter {
       options.entryNames = `${options.entryNames}.nomodule`;
       options.target = 'es5';
       let ignored = ['wp-bundler-translations', 'wp-bundler-manifest'];
-      options.plugins = options.plugins?.filter(
-        (p) => !ignored.includes(p.name),
-      );
+      options.plugins = options.plugins?.filter((p) => !ignored.includes(p.name));
       options.plugins!.push(plugin.swc(pluginOptions));
     }
 
     if (build || nomodule) {
       let ignored = ['wp-bundler-php'];
-      options.plugins = options.plugins?.filter(
-        (p) => !ignored.includes(p.name),
-      );
+      options.plugins = options.plugins?.filter((p) => !ignored.includes(p.name));
     }
 
     return options;
@@ -171,48 +159,29 @@ export class Bundler extends EventEmitter {
     return super.emit(eventName, payload);
   }
 
-  once<E extends keyof BundlerEvents>(
-    eventName: E,
-    listener: (payload: BundlerEvents[E]) => any,
-  ) {
+  once<E extends keyof BundlerEvents>(eventName: E, listener: (payload: BundlerEvents[E]) => any) {
     return super.once(eventName, listener);
   }
 
-  on<E extends keyof BundlerEvents>(
-    eventName: E,
-    listener: (payload: BundlerEvents[E]) => any,
-  ) {
+  on<E extends keyof BundlerEvents>(eventName: E, listener: (payload: BundlerEvents[E]) => any) {
     return super.on(eventName, listener);
   }
 
-  addListener<E extends keyof BundlerEvents>(
-    eventName: E,
-    listener: (payload: BundlerEvents[E]) => any,
-  ) {
+  addListener<E extends keyof BundlerEvents>(eventName: E, listener: (payload: BundlerEvents[E]) => any) {
     return super.addListener(eventName, listener);
   }
 
-  off<E extends keyof BundlerEvents>(
-    eventName: E,
-    listener: (payload: BundlerEvents[E]) => any,
-  ) {
+  off<E extends keyof BundlerEvents>(eventName: E, listener: (payload: BundlerEvents[E]) => any) {
     return super.off(eventName, listener);
   }
 
-  removeListener<E extends keyof BundlerEvents>(
-    eventName: E,
-    listener: (payload: BundlerEvents[E]) => any,
-  ) {
+  removeListener<E extends keyof BundlerEvents>(eventName: E, listener: (payload: BundlerEvents[E]) => any) {
     return super.removeListener(eventName, listener);
   }
 }
 
-function ensureMetafile(
-  result: BuildResult,
-): asserts result is BuildResult & { metafile: Metafile } {
+function ensureMetafile(result: BuildResult): asserts result is BuildResult & { metafile: Metafile } {
   if (result.metafile == null) {
-    throw new Error(
-      'No metafile emitted. Make sure that metafile is set to true in esbuild options.',
-    );
+    throw new Error('No metafile emitted. Make sure that metafile is set to true in esbuild options.');
   }
 }

@@ -11,9 +11,7 @@ describe('assert', () => {
   });
 
   it('can pass along an optional message', () => {
-    expect(() => assert(false, 'the message')).toThrow(
-      'Assertion failed: the message',
-    );
+    expect(() => assert(false, 'the message')).toThrow('Assertion failed: the message');
   });
 });
 

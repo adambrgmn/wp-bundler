@@ -7,10 +7,7 @@ interface SpinnerProps extends React.ComponentProps<typeof Text> {
   spinner?: SpinnerName;
 }
 
-export const Spinner: React.FC<SpinnerProps> = ({
-  spinner = 'dots',
-  ...rest
-}) => {
+export const Spinner: React.FC<SpinnerProps> = ({ spinner = 'dots', ...rest }) => {
   const config = spinners[spinner];
   const [frame, setFrame] = useState(0);
 

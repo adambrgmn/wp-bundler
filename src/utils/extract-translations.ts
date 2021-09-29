@@ -5,13 +5,7 @@ export function mightHaveTranslations(source: string): boolean {
 }
 
 export function extractTranslations(source: string) {
-  let sourceFile = ts.createSourceFile(
-    'admin.ts',
-    source,
-    ts.ScriptTarget.ES2015,
-    true,
-    ts.ScriptKind.TSX,
-  );
+  let sourceFile = ts.createSourceFile('admin.ts', source, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
 
   let relevantImports = findRelevantImports(sourceFile);
   let messages = findTranslatableMessages(sourceFile, relevantImports);
@@ -25,16 +19,10 @@ type PluralMessage = MessageBase & {
   plural: string;
   domain?: string;
 };
-type PluralMessageWithContext = MessageBase &
-  PluralMessage & { context: string };
+type PluralMessageWithContext = MessageBase & PluralMessage & { context: string };
 type SingleMessage = MessageBase & { text: string; domain?: string };
-type SingleMessageWithContext = MessageBase &
-  SingleMessage & { context: string };
-export type TranslationMessage =
-  | PluralMessage
-  | PluralMessageWithContext
-  | SingleMessage
-  | SingleMessageWithContext;
+type SingleMessageWithContext = MessageBase & SingleMessage & { context: string };
+export type TranslationMessage = PluralMessage | PluralMessageWithContext | SingleMessage | SingleMessageWithContext;
 
 const translatableMethods = ['_n', '_nx', '_x', '__'] as const;
 type TranslatableMethod = typeof translatableMethods[number];
@@ -54,11 +42,8 @@ function findRelevantImports(sourceFile: ts.SourceFile): ts.Identifier[] {
 
   visitAll(sourceFile, (node) => {
     if (ts.isImportDeclaration(node)) {
-      if (
-        node.moduleSpecifier.getText(sourceFile).includes('@wordpress/i18n')
-      ) {
-        let clause =
-          node.importClause?.name ?? node.importClause?.namedBindings;
+      if (node.moduleSpecifier.getText(sourceFile).includes('@wordpress/i18n')) {
+        let clause = node.importClause?.name ?? node.importClause?.namedBindings;
         if (clause != null) {
           switch (clause.kind) {
             // Default import
@@ -95,18 +80,11 @@ function findRelevantImports(sourceFile: ts.SourceFile): ts.Identifier[] {
  * @param imports Relevant imported variables to look for
  * @returns An array of translation messages
  */
-function findTranslatableMessages(
-  sourceFile: ts.SourceFile,
-  imports: ts.Identifier[],
-) {
+function findTranslatableMessages(sourceFile: ts.SourceFile, imports: ts.Identifier[]) {
   let messages: TranslationMessage[] = [];
 
   let referencesImport = (expression: { getText(): string }) => {
-    return (
-      imports.findIndex(
-        (imported) => imported.getText() === expression.getText(),
-      ) > -1
-    );
+    return imports.findIndex((imported) => imported.getText() === expression.getText()) > -1;
   };
 
   visitAll(sourceFile, (node) => {
@@ -120,10 +98,7 @@ function findTranslatableMessages(
     }
 
     // i18n.__(...)
-    if (
-      ts.isPropertyAccessExpression(node.expression) &&
-      referencesImport(node.expression.expression)
-    ) {
+    if (ts.isPropertyAccessExpression(node.expression) && referencesImport(node.expression.expression)) {
       let message = extractMessage(node.expression.name, node.arguments);
       if (message != null) messages.push(message);
       return false;
@@ -132,8 +107,7 @@ function findTranslatableMessages(
     // wp.i18n.__(...) || window.wp.i18n.__(...)
     if (
       ts.isPropertyAccessExpression(node.expression) &&
-      (node.expression.expression.getText() === 'window.wp.i18n' ||
-        node.expression.expression.getText() === 'wp.i18n')
+      (node.expression.expression.getText() === 'window.wp.i18n' || node.expression.expression.getText() === 'wp.i18n')
     ) {
       let message = extractMessage(node.expression.name, node.arguments);
       if (message != null) messages.push(message);
@@ -219,11 +193,7 @@ function extractMessage(
 function getRelevantNamedImports(clause: ts.NamedImports): ts.Identifier[] {
   let relevant: ts.Identifier[] = [];
   for (let specifier of clause.elements) {
-    if (
-      isTranslatableMethod(
-        specifier.propertyName?.getText() ?? specifier.name.getText(),
-      )
-    ) {
+    if (isTranslatableMethod(specifier.propertyName?.getText() ?? specifier.name.getText())) {
       relevant.push(specifier.name);
     }
   }
@@ -237,10 +207,7 @@ function getRelevantNamedImports(clause: ts.NamedImports): ts.Identifier[] {
  * @param source The source file to visit node within
  * @param callback A callback fired on each node. Return `false` to prevent going deeper.
  */
-function visitAll(
-  source: ts.SourceFile,
-  callback: (node: ts.Node) => boolean | undefined | null | void,
-) {
+function visitAll(source: ts.SourceFile, callback: (node: ts.Node) => boolean | undefined | null | void) {
   function visit(node: ts.Node) {
     let shouldContinue = callback(node);
     if (shouldContinue !== false) {

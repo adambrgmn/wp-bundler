@@ -10,16 +10,12 @@ export const DEPENDENCIES: Dependencies = {
   jquery: { wpId: 'jquery', global: '$' },
 };
 
-export const DEfAULT_EXTERNALS = Object.entries(DEPENDENCIES).reduce<
-  Record<string, string>
->((acc, [key, dep]) => {
+export const DEfAULT_EXTERNALS = Object.entries(DEPENDENCIES).reduce<Record<string, string>>((acc, [key, dep]) => {
   if (dep) acc[key] = dep.global;
   return acc;
 }, {});
 
-export function findBuiltinDependencies(
-  inputs: Metafile['outputs'][string]['inputs'],
-): string[] {
+export function findBuiltinDependencies(inputs: Metafile['outputs'][string]['inputs']): string[] {
   let dependencies: string[] = [];
 
   for (let key of Object.keys(inputs)) {

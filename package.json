@@ -111,7 +111,8 @@
   "prettier": {
     "singleQuote": true,
     "trailingComma": "all",
-    "proseWrap": "always"
+    "proseWrap": "always",
+    "printWidth": 120
   },
   "lint-staged": {
     "*.{ts,js}": "eslint --cache --fix",

@@ -19,18 +19,11 @@ export const Watch: React.FC<WatchProps> = ({ bundler, cwd }) => {
   return (
     <CwdProvider cwd={cwd}>
       <Box>
-        {state.matches('preparing') && (
-          <SpinnerWithMessage message="Preparing bundler and performing initial build." />
-        )}
+        {state.matches('preparing') && <SpinnerWithMessage message="Preparing bundler and performing initial build." />}
         {state.matches('idle') && <Idle {...state.context} />}
-        {state.matches('rebuilding') && (
-          <SpinnerWithMessage message="Rebuilding project." />
-        )}
+        {state.matches('rebuilding') && <SpinnerWithMessage message="Rebuilding project." />}
         {state.matches('error') && (
-          <FailureOutput
-            error={state.context.error}
-            message="Build failed. Fix errors shown below."
-          />
+          <FailureOutput error={state.context.error} message="Build failed. Fix errors shown below." />
         )}
         {state.matches('unhandled') && (
           <FailureOutput
