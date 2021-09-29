@@ -21,13 +21,3 @@ export const BundlerConfigSchema = z.object({
 });
 
 export type BundlerConfig = z.infer<typeof BundlerConfigSchema>;
-
-export const ManifestSchema = z.record(
-  z.object({
-    name: z.string(),
-    js: z.string().optional(),
-    css: z.string().optional(),
-  }),
-);
-
-export type Manifest = z.infer<typeof ManifestSchema>;

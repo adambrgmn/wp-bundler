@@ -49,35 +49,5 @@ export function cli(argv: typeof process.argv) {
     },
   );
 
-  program.command<GlobalArgs>(
-    'make-pot',
-    'Extract translations from js source code',
-    () => {},
-    async ({ cwd = process.cwd() }) => {
-      try {
-        console.log('make-pot');
-        process.exit(0);
-      } catch (error) {
-        console.error(error);
-        process.exit(1);
-      }
-    },
-  );
-
-  program.command<GlobalArgs>(
-    'make-json',
-    'Extract translations from js source code',
-    () => {},
-    ({ cwd = process.cwd() }) => {
-      try {
-        console.log('make-json');
-        process.exit(0);
-      } catch (error) {
-        console.error(error);
-        process.exit(1);
-      }
-    },
-  );
-
   return program.parse();
 }
