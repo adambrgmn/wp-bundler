@@ -1,7 +1,6 @@
 import * as fs from 'fs/promises';
 import PO from 'pofile';
 import merge from 'lodash.merge';
-import { parse } from 'po2json';
 import md5 from 'md5';
 import { TranslationMessage } from './extract-translations';
 import { nodeToLocation } from './ts-ast';
@@ -69,7 +68,7 @@ export class ExtendedPO extends PO {
     let po: ExtendedPO = this;
     if (filterItems != null) po = this.clone(filterItems);
     if (po.items.length < 1) return null;
-    let result = parse(po.toString(), { format: 'jed', domain });
+    let result = toJED(po, domain);
 
     /**
      * For some reason the po->json parser sets creates an null value at the
@@ -77,10 +76,10 @@ export class ExtendedPO extends PO {
      * doesn't work well with WordPress. Therefore we need to loop thru all
      * keys and remove that initial element in the array.
      */
-    for (let key of Object.keys(result.locale_data[domain])) {
-      if (key === '') continue;
-      result.locale_data[domain][key] = result.locale_data[domain][key].slice(1);
-    }
+    // for (let key of Object.keys(result.locale_data[domain])) {
+    //   if (key === '') continue;
+    //   result.locale_data[domain][key] = result.locale_data[domain][key].slice(1);
+    // }
 
     return result;
   }
@@ -89,4 +88,39 @@ export class ExtendedPO extends PO {
 export function generateTranslationFilename(domain: string, language: string, file: string): string {
   let md5Path = md5(file);
   return `${domain}-${language}-${md5Path}.json`;
+}
+
+interface LocaleDataDefault<Domain extends string> {
+  domain: Domain;
+  lang: string;
+  'plural-forms': string;
+}
+
+type LocaleData<Domain extends string> = {
+  [key in Domain]: Record<string, string[]> & { '': LocaleDataDefault<Domain> };
+};
+
+interface JedFormat<Domain extends string = 'messages'> {
+  domain: Domain;
+  locale_data: LocaleData<Domain>;
+}
+
+function toJED<Domain extends string>(po: PO, domain: Domain): JedFormat<Domain> {
+  let translations: Record<string, string[]> = {};
+  for (let item of po.items) {
+    translations[item.msgid] = item.msgstr;
+  }
+
+  let lang = po.headers.Language ?? '';
+  let pluralForms = po.headers['Plural-Forms'] ?? '';
+
+  return {
+    domain,
+    locale_data: {
+      [domain]: {
+        '': { domain, lang, 'plural-forms': pluralForms },
+        ...translations,
+      },
+    } as LocaleData<Domain>,
+  };
 }

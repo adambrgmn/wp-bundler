@@ -63,7 +63,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
      * Write all po- and pot-files to disk.
      */
     build.onEnd(async ({ metafile, warnings }) => {
-      await pot.write();
+      await Promise.all([pot.write(), pos.map((po) => po.write())]);
 
       if (metafile == null) return;
 

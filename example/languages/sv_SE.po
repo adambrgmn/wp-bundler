@@ -1,0 +1,41 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: ExampleLast-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2021-09-25T15:57:11+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: sv_SE\n"
+"X-Domain: wp-bundler\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+
+#: src/admin.ts:10
+msgctxt "any"
+msgid "wtf 1"
+msgstr "vad 1"
+
+#: src/admin.ts:12
+msgid "wtf 2"
+msgid_plural "wtf's 2"
+msgstr[0] "vad 2"
+msgstr[1] "vads 2"
+
+#: src/admin.ts:13
+msgid "wtf 3"
+msgstr "vad 3"
+
+#: src/admin.ts:15
+msgid "wtf 4"
+msgstr "vad 4"
+
+#: src/admin.ts:16
+msgid "wtf 5"
+msgstr "vad 5"
+
+#: src/admin.ts:18
+msgid "wtf 6"
+msgstr "vad 6"
