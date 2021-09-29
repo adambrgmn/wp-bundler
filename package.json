@@ -7,6 +7,11 @@
   "bin": {
     "wp-bundler": "./cli.js"
   },
+  "files": [
+    "dist",
+    "assets",
+    "cli.js"
+  ],
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/adambrgmn/wp-bundler.git"
@@ -17,6 +22,11 @@
   },
   "homepage": "https://github.com/adambrgmn/wp-bundler#readme",
   "license": "MIT",
+  "keywords": [
+    "wordpress",
+    "esbuild",
+    "bundler"
+  ],
   "scripts": {
     "build": "node bundle.mjs",
     "dev": "node bundle.mjs --watch",
