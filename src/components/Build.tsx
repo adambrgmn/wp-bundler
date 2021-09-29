@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import figures from 'figures';
+import { figures } from '../utils/figures';
 import { Bundler } from '../bundler';
 import { BuildContext, useBuildMode } from '../hooks/useBuildMode';
 import { CwdProvider } from '../hooks/useCwd';

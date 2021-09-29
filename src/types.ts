@@ -1,5 +1,5 @@
 import { Plugin } from 'esbuild';
-import { NormalizedReadResult } from 'read-pkg-up';
+import { PackageJson } from 'type-fest';
 import { BundlerConfig } from './schema';
 
 export type Mode = 'dev' | 'prod';
@@ -15,7 +15,7 @@ export interface ProjectPaths {
   relative: (to: string) => string;
 }
 
-export type ProjectInfo = NormalizedReadResult & { paths: ProjectPaths };
+export type ProjectInfo = { packageJson: PackageJson & { 'wp-bundler'?: unknown }; path: string; paths: ProjectPaths };
 
 export interface BundlerPluginOptions {
   mode: Mode;

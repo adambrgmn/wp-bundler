@@ -4,8 +4,8 @@ import * as fs from 'fs';
 import { Location, Message } from 'esbuild';
 import { codeFrameColumns } from '@babel/code-frame';
 import { Box, Text } from 'ink';
-import Link from 'ink-link';
-import figures from 'figures';
+import { Link } from './Link';
+import { figures } from '../utils/figures';
 import { useCwd } from '../hooks/useCwd';
 
 export const ErrorCodeFrame: React.FC<{
@@ -20,11 +20,7 @@ export const ErrorCodeFrame: React.FC<{
     return (
       <Box flexDirection="column">
         <Text>
-          {figures.circle} {prefix}{' '}
-          <Link url={`file://${frame.sourcePath}`} fallback={false}>
-            {frame.location.file}
-          </Link>
-          :
+          {figures.circle} {prefix} <Link url={`file://${frame.sourcePath}`}>{frame.location.file}</Link>:
         </Text>
         <Box flexDirection="column">
           {frame.text.split('\n').map((line, i) => (

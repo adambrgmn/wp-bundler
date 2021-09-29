@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import figures from 'figures';
+import { figures } from '../utils/figures';
 import { Bundler } from '../bundler';
 import { useWatchMode, WatchContext } from '../hooks/useWatchMode';
 import { CwdProvider } from '../hooks/useCwd';
