@@ -2,7 +2,16 @@
   "name": "@fransvilhelm/wp-bundler",
   "version": "0.0.1",
   "description": "A fast bundler tailored for WordPress based on esbuild",
-  "main": "index.js",
+  "type": "module",
+  "module": "./dist/index.js",
+  "bin": {
+    "wp-bundler": "./cli.js"
+  },
+  "files": [
+    "dist",
+    "assets",
+    "cli.js"
+  ],
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/adambrgmn/wp-bundler.git"
@@ -13,21 +22,65 @@
   },
   "homepage": "https://github.com/adambrgmn/wp-bundler#readme",
   "license": "MIT",
+  "keywords": [
+    "wordpress",
+    "esbuild",
+    "bundler"
+  ],
   "scripts": {
+    "build": "node bundle.mjs",
+    "dev": "node bundle.mjs --watch",
     "lint": "eslint . --ext .ts",
-    "test": "jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "type-check": "tsc --noEmit",
     "release": "yarn build && yarn changeset publish",
     "prepare": "husky install"
   },
+  "dependencies": {
+    "@babel/code-frame": "^7.14.5",
+    "@swc/core": "^1.2.91",
+    "@xstate/react": "^1.6.1",
+    "autoprefixer": "^10.3.6",
+    "cli-spinners": "^2.6.0",
+    "esbuild": "^0.13.0",
+    "figures": "^4.0.0",
+    "filesize": "^8.0.3",
+    "ink": "^3.0.9",
+    "ink-link": "^2.0.0",
+    "lodash.merge": "^4.6.2",
+    "md5": "^2.3.0",
+    "po2json": "^0.4.5",
+    "pofile": "^1.1.1",
+    "postcss": "^8.3.7",
+    "postcss-preset-env": "^6.7.0",
+    "react": "^17.0.2",
+    "read-pkg-up": "^8.0.0",
+    "rimraf": "^3.0.2",
+    "strman": "^2.0.1",
+    "tailwindcss": "^2.2.15",
+    "typescript": "^4.4.3",
+    "xstate": "^4.25.0",
+    "yargs": "^17.2.1",
+    "zod": "^3.8.2"
+  },
   "devDependencies": {
     "@babel/core": "^7.15.5",
     "@babel/preset-env": "^7.15.6",
+    "@babel/preset-react": "^7.14.5",
     "@babel/preset-typescript": "^7.15.0",
     "@changesets/cli": "^2.17.0",
     "@fransvilhelm/changeset-changelog": "^1.0.0",
+    "@prettier/plugin-php": "^0.17.5",
+    "@types/babel__code-frame": "^7.0.3",
+    "@types/fs-extra": "^9.0.13",
     "@types/jest": "^27.0.2",
+    "@types/lodash.merge": "^4.6.6",
+    "@types/md5": "^2.3.1",
     "@types/node": "^16.9.6",
+    "@types/react": "^17.0.24",
+    "@types/rimraf": "^3.0.2",
+    "@types/strman": "^2.0.0",
+    "@types/yargs": "^17.0.3",
     "@typescript-eslint/eslint-plugin": "^4.31.2",
     "@typescript-eslint/parser": "^4.31.2",
     "babel-eslint": "^10.1.0",
@@ -44,7 +97,7 @@
     "jest": "^27.2.1",
     "lint-staged": ">=10",
     "prettier": "^2.4.1",
-    "typescript": "^4.4.3"
+    "ts-node": "^10.2.1"
   },
   "bugs": {
     "url": "https://github.com/adambrgmn/wp-bundler/issues"
@@ -62,6 +115,6 @@
   },
   "lint-staged": {
     "*.{ts,js}": "eslint --cache --fix",
-    "*.{ts,js,md}": "prettier --write"
+    "*.{ts,js,md,php}": "prettier --write"
   }
 }
