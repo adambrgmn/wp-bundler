@@ -12,7 +12,7 @@ export async function cli(argv: typeof process.argv) {
   });
 
   if (args.version) {
-    console.log(`v${pkg.version}`);
+    console.log(pkg.version);
     return process.exit(0);
   }
 
