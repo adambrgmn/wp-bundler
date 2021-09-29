@@ -81,6 +81,12 @@ export class ExtendedPO extends PO {
     if (po.items.length < 1) return null;
     let result = parse(po.toString(), { format: 'jed', domain });
 
+    /**
+     * For some reason the po->json parser sets creates an null value at the
+     * start of each translation. This is not spec compliant, or at least
+     * doesn't work well with WordPress. Therefore we need to loop thru all
+     * keys and remove that initial element in the array.
+     */
     for (let key of Object.keys(result.locale_data[domain])) {
       if (key === '') continue;
       result.locale_data[domain][key] =

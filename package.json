@@ -60,6 +60,7 @@
     "@babel/preset-typescript": "^7.15.0",
     "@changesets/cli": "^2.17.0",
     "@fransvilhelm/changeset-changelog": "^1.0.0",
+    "@prettier/plugin-php": "^0.17.5",
     "@types/babel__code-frame": "^7.0.3",
     "@types/fs-extra": "^9.0.13",
     "@types/jest": "^27.0.2",
@@ -104,6 +105,6 @@
   },
   "lint-staged": {
     "*.{ts,js}": "eslint --cache --fix",
-    "*.{ts,js,md}": "prettier --write"
+    "*.{ts,js,md,php}": "prettier --write"
   }
 }

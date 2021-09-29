@@ -8,6 +8,7 @@ import * as plugin from './plugins';
 import { readPkg } from './utils/read-pkg';
 import { dirname } from './utils/dirname';
 import { BundlerConfigSchema, BundlerConfig } from './schema';
+import { createAssetLoaderTemplate } from './utils/asset-loader';
 
 const rimraf = promisify(_rimraf);
 const { __dirname } = dirname(import.meta.url);
@@ -34,8 +35,8 @@ export class Bundler extends EventEmitter {
 
   async build() {
     let results = await Promise.all([
-      esbuild.build(this.createBundlerOptions()),
-      esbuild.build(this.createBundlerOptions({ nomodule: true })),
+      esbuild.build(this.createBundlerOptions({ build: true })),
+      esbuild.build(this.createBundlerOptions({ build: true, nomodule: true })),
     ]);
 
     let result = results.reduce(
@@ -44,6 +45,17 @@ export class Bundler extends EventEmitter {
     );
 
     ensureMetafile(result);
+
+    let pluginOptions: BundlerPluginOptions = {
+      mode: this.mode,
+      config: this.config,
+      project: this.project,
+      bundler: this.bundler,
+    };
+
+    let writeTemplate = createAssetLoaderTemplate(pluginOptions);
+    await writeTemplate({ metafile: result.metafile });
+
     return result;
   }
 
@@ -69,8 +81,9 @@ export class Bundler extends EventEmitter {
   }
 
   private createBundlerOptions({
+    build,
     nomodule,
-  }: { nomodule?: boolean } = {}): BuildOptions {
+  }: { build?: boolean; nomodule?: boolean } = {}): BuildOptions {
     let pluginOptions: BundlerPluginOptions = {
       mode: this.mode,
       config: this.config,
@@ -104,9 +117,10 @@ export class Bundler extends EventEmitter {
 
       plugins: [
         this.timingPlugin(),
-        plugin.externals(pluginOptions),
-        plugin.manifest(pluginOptions),
         plugin.define(pluginOptions),
+        plugin.externals(pluginOptions),
+        plugin.metafile(pluginOptions),
+        plugin.php(pluginOptions),
         plugin.postcss(pluginOptions),
         plugin.translations(pluginOptions),
       ],
@@ -114,12 +128,19 @@ export class Bundler extends EventEmitter {
 
     if (nomodule) {
       options.format = 'iife';
-      options.plugins!.push(plugin.swc(pluginOptions));
       options.entryNames = `${options.entryNames}.nomodule`;
       options.target = 'es5';
+      let ignored = ['wp-bundler-translations', 'wp-bundler-manifest'];
       options.plugins = options.plugins?.filter(
-        (p) =>
-          !['wp-bundler-translations', 'wp-bundler-manifest'].includes(p.name),
+        (p) => !ignored.includes(p.name),
+      );
+      options.plugins!.push(plugin.swc(pluginOptions));
+    }
+
+    if (build || nomodule) {
+      let ignored = ['wp-bundler-php'];
+      options.plugins = options.plugins?.filter(
+        (p) => !ignored.includes(p.name),
       );
     }
 
