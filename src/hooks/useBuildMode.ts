@@ -57,7 +57,10 @@ function createBuildMachine(ctx: Pick<BuildContext, 'bundler'>) {
           id: 'prepare',
           src: (ctx) => ctx.bundler.prepare(),
           onDone: 'building',
-          onError: 'error',
+          onError: {
+            target: 'error',
+            actions: assign({ error: (_, event) => event.data }),
+          },
         },
       },
       building: {

@@ -1,4 +1,3 @@
-import * as fs from 'fs/promises';
 import EventEmitter from 'events';
 import esbuild, { BuildOptions, BuildResult, Metafile, Message } from 'esbuild';
 import merge from 'lodash.merge';
@@ -7,6 +6,7 @@ import * as plugin from './plugins';
 import { readPkg } from './utils/read-pkg';
 import { BundlerConfigSchema, BundlerConfig } from './schema';
 import { createAssetLoaderTemplate } from './utils/asset-loader';
+import { rimraf } from './utils/rimraf';
 
 interface BundlerEvents {
   'rebuild.init': void;
@@ -66,7 +66,7 @@ export class Bundler extends EventEmitter {
 
     this.config = await BundlerConfigSchema.parseAsync(this.project.packageJson['wp-bundler']);
 
-    await fs.rm(this.project.paths.absolute(this.config.outdir), { recursive: true });
+    await rimraf(this.project.paths.absolute(this.config.outdir));
     this.prepared = true;
   }
 
