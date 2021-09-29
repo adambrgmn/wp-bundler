@@ -30,7 +30,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
 
     let [pot, ...pos] = await Promise.all([
       ExtendedPO.create(project.paths.absolute(translationsConfig.pot)),
-      ...translationsConfig.pos.map((po) =>
+      ...(translationsConfig.pos ?? []).map((po) =>
         ExtendedPO.create(project.paths.absolute(po)),
       ),
     ]);
@@ -47,18 +47,14 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
         let loader = loaders[path.extname(args.path)];
 
         let warnings: PartialMessage[] | undefined = undefined;
+        let watchFiles: string[] | undefined = undefined;
+
         if (mightHaveTranslations(source)) {
           let fileTranslations = extractTranslations(source);
 
           for (let translation of fileTranslations) {
             if (translation.domain !== translationsConfig.domain) continue;
             pot.append(translation, { path: relativePath, source: source });
-            pos.forEach((po) => {
-              return po.append(translation, {
-                path: relativePath,
-                source: source,
-              });
-            });
           }
 
           warnings = validateTranslations(
@@ -66,9 +62,15 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
             source,
             relativePath,
           );
+
+          if (translationsConfig.pos != null) {
+            watchFiles = translationsConfig.pos.map((po) =>
+              project.paths.relative(po),
+            );
+          }
         }
 
-        return { contents: source, loader, warnings };
+        return { contents: source, loader, warnings, watchFiles };
       },
     );
 
@@ -76,7 +78,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
      * Write all po- and pot-files to disk.
      */
     build.onEnd(async ({ metafile, warnings }) => {
-      await Promise.all([pot.write(), ...pos.map((po) => po.write())]);
+      await pot.write();
 
       if (metafile == null) return;
 

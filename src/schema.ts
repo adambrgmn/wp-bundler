@@ -15,7 +15,7 @@ export const BundlerConfigSchema = z.object({
     .object({
       domain: z.string(),
       pot: z.string(),
-      pos: z.array(z.string()),
+      pos: z.array(z.string()).optional(),
     })
     .optional(),
 });
