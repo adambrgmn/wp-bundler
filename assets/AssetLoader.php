@@ -82,7 +82,17 @@ class AssetLoader
                     return str_replace(' src', ' nomodule src', $tag);
                 }
 
-                return str_replace('text/javascript', 'module', $tag);
+                $tag = str_replace('text/javascript', 'module', $tag);
+                if (!str_contains('module', $tag)) {
+                    /**
+                     * When loaded as part of the block editor the script tag,
+                     * for some reason doesn't include `type="text/javascript"`.
+                     * In that case we need to do one more str_replace.
+                     */
+                    $tag = str_replace('<script', '<script type="module"', $tag);
+                }
+
+                return $tag;
             },
             10,
             2
