@@ -15,6 +15,14 @@ jobs:
         with:
           node-version: 14.x
 
+      - name: Restore dep cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+            */*/node_modules
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+
       - name: Install
         run: yarn
 
@@ -29,3 +37,5 @@ jobs:
 
       - name: Build
         run: yarn build
+# Old cache 1+1+41+62=105
+# Without cache 1+1+41+62=105
