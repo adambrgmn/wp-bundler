@@ -168,13 +168,22 @@ class AssetLoader
      * @since 1.0.0
      *
      * @param string $name     Name of asset to register.
-     * @param array  $deps     Optional. Dependency array (e.g. jquery, wp-i18n etc.).
+     * @param array  $deps     Optional. Array with two keys, js and css containing each types dependencies. Note that js dependencies are often automatically detected.
      * @param bool   $inFooter Optional. Render script tag in footer (defaults to `true`).
      * @return array Returns array of registered handles by type (js, css, nomodule).
      */
     public static function register(string $name, array $deps = [], bool $inFooter = true): array
     {
         $handles = [];
+
+        $jsDeps = [];
+        $cssDeps = [];
+        if (key_exists('js', $deps)) {
+            $jsDeps = $deps['js'];
+        }
+        if (key_exists('css', $deps)) {
+            $cssDeps = $deps['css'];
+        }
 
         if (!key_exists($name, self::$assets)) {
             return $handles;
@@ -189,7 +198,7 @@ class AssetLoader
             \wp_register_script(
                 $handle,
                 self::outDirUri($asset['js']),
-                array_merge($asset['deps'], $deps),
+                array_merge($asset['deps'], $jsDeps),
                 false,
                 $inFooter
             );
@@ -204,7 +213,7 @@ class AssetLoader
             \wp_register_script(
                 $handle,
                 self::outDirUri($asset['nomodule']),
-                array_merge($asset['deps'], $deps),
+                array_merge($asset['deps'], $jsDeps),
                 false,
                 $inFooter
             );
@@ -214,7 +223,7 @@ class AssetLoader
             $handle = 'wp-bundler.' . $name;
             $handles['css'] = $handle;
 
-            \wp_register_style($handle, self::outDirUri($asset['css']), [], false, 'all');
+            \wp_register_style($handle, self::outDirUri($asset['css']), $cssDeps, false, 'all');
         }
 
         return $handles;
@@ -252,7 +261,7 @@ class AssetLoader
      * @param string $blockName   Name of the block to register
      * @param array  $blockConfig Optional. Array of block type arguments. Accepts any public property of `WP_Block_Type`. See WP_Block_Type::__construct() for information on accepted arguments. Default empty array.
      * @param array  $deps        Optional. Dependency array (e.g. jquery, wp-i18n etc.).
-     * @return WP_Block_Type|false The registered block type on success, or false on failure.
+     * @return \WP_Block_Type|false The registered block type on success, or false on failure.
      */
     public static function registerBlockType(string $name, string $blockName, array $blockConfig = [], array $deps = [])
     {
