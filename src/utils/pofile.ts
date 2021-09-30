@@ -45,7 +45,7 @@ export class ExtendedPO extends PO {
 
   append(translation: TranslationMessage, reference: { path: string; source: string }) {
     let msgid = 'single' in translation ? translation.single : translation.text;
-    let existing = this.items.find((item) => item.msgid === msgid && item);
+    let existing = this.items.find((item) => item.msgid === msgid);
 
     if (existing == null) {
       existing = new PO.Item();

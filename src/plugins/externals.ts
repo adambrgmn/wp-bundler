@@ -8,7 +8,6 @@ export const externals: BundlerPlugin = ({ config, project }) => ({
   setup(build) {
     setupProjectExternals(build, config.externals);
     setupWpExternals(build);
-    setupNodeExternals(project.packageJson.dependencies ?? {}, build);
   },
 });
 
@@ -46,45 +45,3 @@ function setupWpExternals(build: PluginBuild) {
     };
   });
 }
-
-function setupNodeExternals(dependecies: Record<string, string>, build: PluginBuild) {
-  if (!Array.isArray(build.initialOptions.external)) {
-    build.initialOptions.external = [];
-  }
-
-  for (let builtIn of nodeBuiltIns) {
-    if (builtIn in dependecies) continue;
-    build.initialOptions.external.push(builtIn);
-  }
-}
-
-const nodeBuiltIns = [
-  'assert',
-  'buffer',
-  'child_process',
-  'cluster',
-  'crypto',
-  'dgram',
-  'dns',
-  'domain',
-  'events',
-  'fs',
-  'http',
-  'https',
-  'net',
-  'os',
-  'path',
-  'punycode',
-  'querystring',
-  'readline',
-  'stream',
-  'string_decoder',
-  'timers',
-  'tls',
-  'tty',
-  'url',
-  'util',
-  'v8',
-  'vm',
-  'zlib',
-];
