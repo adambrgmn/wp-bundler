@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { TranslationMessage } from './types';
 
 export function mightHaveTranslations(source: string): boolean {
   return source.includes('wp.i18n') || source.includes('@wordpress/i18n');
@@ -12,17 +13,6 @@ export function extractTranslations(source: string) {
 
   return messages;
 }
-
-type MessageBase = { node: ts.Node };
-type PluralMessage = MessageBase & {
-  single: string;
-  plural: string;
-  domain?: string;
-};
-type PluralMessageWithContext = MessageBase & PluralMessage & { context: string };
-type SingleMessage = MessageBase & { text: string; domain?: string };
-type SingleMessageWithContext = MessageBase & SingleMessage & { context: string };
-export type TranslationMessage = PluralMessage | PluralMessageWithContext | SingleMessage | SingleMessageWithContext;
 
 const translatableMethods = ['_n', '_nx', '_x', '__'] as const;
 type TranslatableMethod = typeof translatableMethods[number];

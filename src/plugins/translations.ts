@@ -2,7 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import { Loader, PartialMessage, Plugin } from 'esbuild';
 import { BundlerPlugin } from '../types';
-import { extractTranslations, mightHaveTranslations, TranslationMessage } from '../utils/extract-translations';
+import { js, TranslationMessage } from '../utils/extract-translations';
 import { ExtendedPO, generateTranslationFilename } from '../utils/pofile';
 import { nodeToLocation } from '../utils/ts-ast';
 
@@ -40,8 +40,8 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
 
       let warnings: PartialMessage[] | undefined = undefined;
 
-      if (mightHaveTranslations(source)) {
-        let fileTranslations = extractTranslations(source);
+      if (js.mightHaveTranslations(source)) {
+        let fileTranslations = js.extractTranslations(source);
 
         for (let translation of fileTranslations) {
           if (translation.domain !== translationsConfig.domain) continue;

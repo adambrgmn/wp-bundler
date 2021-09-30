@@ -1,4 +1,4 @@
-import { extractTranslations } from './extract-translations';
+import { extractTranslations } from './javascript';
 
 it('extract translations from regular ts files', () => {
   let source = `
