@@ -46,6 +46,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
         for (let translation of fileTranslations) {
           if (translation.domain !== translationsConfig.domain) continue;
           pot.append(translation, { path: relativePath, source: source });
+          pos.forEach((po) => po.append(translation, { path: relativePath, source: source }));
         }
 
         warnings = validateTranslations(fileTranslations, source, relativePath);
