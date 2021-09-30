@@ -8,6 +8,7 @@ export const DEPENDENCIES: Dependencies = {
   react: { wpId: 'react', global: 'React' },
   'react-dom': { wpId: 'react-dom', global: 'ReactDOM' },
   jquery: { wpId: 'jquery', global: '$' },
+  lodash: { wpId: 'lodash', global: '_' },
 };
 
 export const DEfAULT_EXTERNALS = Object.entries(DEPENDENCIES).reduce<Record<string, string>>((acc, [key, dep]) => {
