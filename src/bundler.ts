@@ -61,6 +61,9 @@ export class Bundler extends EventEmitter {
 
   async prepare() {
     if (this.prepared) return;
+
+    process.env.NODE_ENV = process.env.NODE_ENV || this.mode === 'dev' ? 'development' : 'production';
+
     this.bundler = await readPkg(__dirname);
     this.project = await readPkg(this.cwd);
 
