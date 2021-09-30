@@ -2,6 +2,7 @@ import * as fs from 'fs/promises';
 import PO from 'pofile';
 import merge from 'lodash.merge';
 import md5 from 'md5';
+import { uniq } from './uniq';
 import { TranslationMessage } from './extract-translations';
 import { nodeToLocation } from './ts-ast';
 
@@ -24,13 +25,13 @@ export class ExtendedPO extends PO {
 
   constructor(filename: string, original: PO) {
     super();
-    this.filename = filename;
-    this.po = original;
-
     for (let key of Object.keys(original)) {
       // @ts-ignore
       this[key] = original[key];
     }
+
+    this.filename = filename;
+    this.po = original;
   }
 
   clone(filterItems: (item: typeof this['items'][number]) => boolean) {
@@ -62,6 +63,7 @@ export class ExtendedPO extends PO {
     };
 
     merge(existing, next);
+    existing.references = uniq(existing.references);
   }
 
   toJED(domain: string, filterItems?: (item: typeof this['items'][number]) => boolean) {
