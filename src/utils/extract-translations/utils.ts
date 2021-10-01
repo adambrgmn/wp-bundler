@@ -31,3 +31,27 @@ export function tsNodeToLocation(node: TsNode, fnName: string, source: string, f
     suggestion: '',
   };
 }
+
+export function trimComment(value: string): string {
+  let lines = value.split('\n').map((line) => {
+    return (
+      line
+        .trim()
+        // //
+        .replace(/^\/\//, '')
+        // /*
+        .replace(/^\/\*+/, '')
+        // *
+        .replace(/\*+\/$/, '')
+        // */
+        .replace(/^\*+/, '')
+        .trim()
+    );
+  });
+
+  return lines.filter(Boolean).join('\n');
+}
+
+export function isTranslatorsComment(comment: string): comment is `translators:${string}` {
+  return comment.toLowerCase().startsWith('translators:');
+}

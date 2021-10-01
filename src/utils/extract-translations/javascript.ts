@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { TranslationMessage } from './types';
-import { tsNodeToLocation } from './utils';
+import { isTranslatorsComment, trimComment, tsNodeToLocation } from './utils';
 
 export function mightHaveTranslations(source: string): boolean {
   return source.includes('wp.i18n') || source.includes('@wordpress/i18n');
@@ -145,6 +145,7 @@ function extractMessage(
   if (!isTranslatableMethod(id)) return null;
 
   let location = tsNodeToLocation(caller, id, source, filename);
+  let translators = getTranslatorComment(caller, source);
 
   switch (id) {
     case '_n':
@@ -153,6 +154,7 @@ function extractMessage(
         single: getStringValue(args[0]),
         plural: getStringValue(args[1]),
         domain: args[3] ? getStringValue(args[3]) : undefined,
+        translators,
       };
 
     case '_nx':
@@ -162,6 +164,7 @@ function extractMessage(
         plural: getStringValue(args[1]),
         context: getStringValue(args[3]),
         domain: args[4] ? getStringValue(args[4]) : undefined,
+        translators,
       };
 
     case '__':
@@ -169,6 +172,7 @@ function extractMessage(
         location,
         text: getStringValue(args[0]),
         domain: args[1] ? getStringValue(args[1]) : undefined,
+        translators,
       };
 
     case '_x':
@@ -177,6 +181,7 @@ function extractMessage(
         text: getStringValue(args[0]),
         context: getStringValue(args[1]),
         domain: args[2] ? getStringValue(args[2]) : undefined,
+        translators,
       };
   }
 }
@@ -229,4 +234,16 @@ function getStringValue(expression: ts.Expression): string {
   }
 
   throw new Error('Given expression is not a string literal.');
+}
+
+function getTranslatorComment(node: ts.Node, source: string): string | undefined {
+  let comments = ts.getLeadingCommentRanges(source, node.pos);
+  if (Array.isArray(comments)) {
+    for (let commentNode of comments) {
+      let comment = trimComment(source.substring(commentNode.pos, commentNode.end));
+      if (isTranslatorsComment(comment)) return comment;
+    }
+  }
+
+  return undefined;
 }

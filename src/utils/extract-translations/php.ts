@@ -1,6 +1,6 @@
 import { Call, Comment, CommentBlock, Engine, Node, String } from 'php-parser';
 import { TranslationMessage } from './types';
-import { phpNodeToLocation } from './utils';
+import { isTranslatorsComment, phpNodeToLocation, trimComment } from './utils';
 
 export function extractTranslations(source: string, filename: string): TranslationMessage[] {
   let parser = new Engine({ parser: { php7: true, extractDoc: true }, ast: { withPositions: true } });
@@ -82,6 +82,7 @@ function extractTranslationFromCall(call: Call, filename: string, parent: Node |
   const getStringVal = (val: Node) => (isStringNode(val) && typeof val.value === 'string' ? val.value : null);
 
   let translators = getTranslatorComment(parent);
+  let location = phpNodeToLocation(call, filename);
 
   switch (name) {
     case '__':
@@ -93,7 +94,7 @@ function extractTranslationFromCall(call: Call, filename: string, parent: Node |
       return {
         text: getStringVal(call.arguments[0]) ?? '',
         domain: getStringVal(call.arguments[1]) ?? undefined,
-        location: phpNodeToLocation(call, filename),
+        location,
         translators,
       };
 
@@ -105,7 +106,7 @@ function extractTranslationFromCall(call: Call, filename: string, parent: Node |
         text: getStringVal(call.arguments[0]) ?? '',
         context: getStringVal(call.arguments[1]) ?? '',
         domain: getStringVal(call.arguments[2]) ?? undefined,
-        location: phpNodeToLocation(call, filename),
+        location,
         translators,
       };
 
@@ -115,7 +116,7 @@ function extractTranslationFromCall(call: Call, filename: string, parent: Node |
         single: getStringVal(call.arguments[0]) ?? '',
         plural: getStringVal(call.arguments[1]) ?? '',
         domain: getStringVal(call.arguments[3]) ?? undefined,
-        location: phpNodeToLocation(call, filename),
+        location,
         translators,
       };
 
@@ -126,7 +127,7 @@ function extractTranslationFromCall(call: Call, filename: string, parent: Node |
         plural: getStringVal(call.arguments[1]) ?? '',
         context: getStringVal(call.arguments[3]) ?? '',
         domain: getStringVal(call.arguments[4]) ?? undefined,
-        location: phpNodeToLocation(call, filename),
+        location,
         translators,
       };
 
@@ -136,30 +137,10 @@ function extractTranslationFromCall(call: Call, filename: string, parent: Node |
 }
 function getTranslatorComment(node?: Node): string | undefined {
   if (hasLeadingComments(node)) {
-    let comments = node.leadingComments.map((comment) => {
-      let lines = comment.value.split('\n').map((line) => {
-        return (
-          line
-            .trim()
-            // //
-            .replace(/^\/\//, '')
-            // /*
-            .replace(/^\/\*+/, '')
-            // *
-            .replace(/\*+\/$/, '')
-            // */
-            .replace(/^\*+/, '')
-            .trim()
-        );
-      });
-
-      return lines.filter(Boolean).join('\n');
-    });
+    let comments = node.leadingComments.map((comment) => trimComment(comment.value));
 
     for (let comment of comments) {
-      if (comment.toLowerCase().startsWith('translators:')) {
-        return comment;
-      }
+      if (isTranslatorsComment(comment)) return comment;
     }
 
     return undefined;

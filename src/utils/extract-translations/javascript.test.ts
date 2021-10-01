@@ -160,3 +160,27 @@ it('outputs correct location for translations', () => {
     suggestion: '',
   });
 });
+
+it('extracts translator comments', () => {
+  let source = `
+    import { __ } from '@wordpress/i18n';
+
+    // translators: a comment 1
+    __('Translation 1', 'wp-bundler');
+
+    /* translators: a comment 2 */
+    __('Translation 3', 'wp-bundler');
+
+    function translate() {
+      /**
+       * translators: a comment 3
+       */
+      __('Translation 3', 'wp-bundler');
+    }
+  `;
+
+  let result = extractTranslations(source, 'test.php');
+  expect(result[0].translators).toEqual('translators: a comment 1');
+  expect(result[1].translators).toEqual('translators: a comment 2');
+  expect(result[2].translators).toEqual('translators: a comment 3');
+});
