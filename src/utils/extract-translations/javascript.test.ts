@@ -6,8 +6,8 @@ it('extract translations from regular ts files', () => {
     let translated: string = __('Translate this', 'wp-bundler');
   `;
 
-  let result = extractTranslations(source);
-  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', node: expect.anything() }]);
+  let result = extractTranslations(source, 'test.ts');
+  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', location: expect.anything() }]);
 });
 
 it('extract translations from tsx files', () => {
@@ -16,13 +16,13 @@ it('extract translations from tsx files', () => {
     const Comp: React.FC = () => <p>{_x('Translate this', 'context', 'wp-bundler')}</p>;
   `;
 
-  let result = extractTranslations(source);
+  let result = extractTranslations(source, 'test.ts');
   expect(result).toEqual([
     {
       text: 'Translate this',
       context: 'context',
       domain: 'wp-bundler',
-      node: expect.anything(),
+      location: expect.anything(),
     },
   ]);
 });
@@ -33,12 +33,12 @@ it('extract translations from js files', () => {
     let translated = __('Translate this', 'wp-bundler');
   `;
 
-  let result = extractTranslations(source);
+  let result = extractTranslations(source, 'test.ts');
   expect(result).toEqual([
     {
       text: 'Translate this',
       domain: 'wp-bundler',
-      node: expect.anything(),
+      location: expect.anything(),
     },
   ]);
 });
@@ -49,13 +49,13 @@ it('extract translations from jsx files', () => {
     const Comp = () => <p>{_x('Translate this', 'context', 'wp-bundler')}</p>;
   `;
 
-  let result = extractTranslations(source);
+  let result = extractTranslations(source, 'test.ts');
   expect(result).toEqual([
     {
       text: 'Translate this',
       context: 'context',
       domain: 'wp-bundler',
-      node: expect.anything(),
+      location: expect.anything(),
     },
   ]);
 });
@@ -66,8 +66,8 @@ it('extract translations from named imports', () => {
     __('Translate this', 'wp-bundler');
   `;
 
-  let result = extractTranslations(source);
-  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', node: expect.anything() }]);
+  let result = extractTranslations(source, 'test.ts');
+  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', location: expect.anything() }]);
 });
 
 it('extract translations from default imports', () => {
@@ -76,8 +76,8 @@ it('extract translations from default imports', () => {
     i18n.__('Translate this', 'wp-bundler');
   `;
 
-  let result = extractTranslations(source);
-  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', node: expect.anything() }]);
+  let result = extractTranslations(source, 'test.ts');
+  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', location: expect.anything() }]);
 });
 
 it('extract translations from namespace imports', () => {
@@ -86,8 +86,8 @@ it('extract translations from namespace imports', () => {
     i18n.__('Translate this', 'wp-bundler');
   `;
 
-  let result = extractTranslations(source);
-  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', node: expect.anything() }]);
+  let result = extractTranslations(source, 'test.ts');
+  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', location: expect.anything() }]);
 });
 
 it('extract translations from calls to window.wp.i18n', () => {
@@ -95,12 +95,12 @@ it('extract translations from calls to window.wp.i18n', () => {
     let translated = window.wp.i18n.__('Translate this', 'wp-bundler');
   `;
 
-  let result = extractTranslations(source);
+  let result = extractTranslations(source, 'test.ts');
   expect(result).toEqual([
     {
       text: 'Translate this',
       domain: 'wp-bundler',
-      node: expect.anything(),
+      location: expect.anything(),
     },
   ]);
 });
@@ -110,12 +110,12 @@ it('extract translations from calls to wp.i18n', () => {
     let translated = wp.i18n.__('Translate this', 'wp-bundler');
   `;
 
-  let result = extractTranslations(source);
+  let result = extractTranslations(source, 'test.ts');
   expect(result).toEqual([
     {
       text: 'Translate this',
       domain: 'wp-bundler',
-      node: expect.anything(),
+      location: expect.anything(),
     },
   ]);
 });
@@ -127,18 +127,36 @@ it('can extract translations if the named import is renamed on import', () => {
     let translated2 = translateX('Translate this', 'context', 'wp-bundler');
   `;
 
-  let result = extractTranslations(source);
+  let result = extractTranslations(source, 'test.ts');
   expect(result).toEqual([
     {
       text: 'Translate this',
       domain: 'wp-bundler',
-      node: expect.anything(),
+      location: expect.anything(),
     },
     {
       text: 'Translate this',
       context: 'context',
       domain: 'wp-bundler',
-      node: expect.anything(),
+      location: expect.anything(),
     },
   ]);
+});
+
+it('outputs correct location for translations', () => {
+  let source = `
+    import { __ } from '@wordpress/i18n';
+    __('Translate this', 'wp-bundler');
+  `.trim();
+
+  let result = extractTranslations(source, 'test.ts');
+  expect(result[0].location).toEqual({
+    file: 'test.ts',
+    namespace: '',
+    line: 2, // 1-based
+    column: 4, // 0-based, in bytes
+    length: 0, // in bytes
+    lineText: '',
+    suggestion: '',
+  });
 });

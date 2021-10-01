@@ -4,7 +4,6 @@ import merge from 'lodash.merge';
 import md5 from 'md5';
 import { uniq } from './uniq';
 import { TranslationMessage } from './extract-translations';
-import { nodeToLocation } from './ts-ast';
 
 export class ExtendedPO extends PO {
   public filename: string;
@@ -53,7 +52,7 @@ export class ExtendedPO extends PO {
       this.items.push(existing);
     }
 
-    let location = nodeToLocation(translation.node, reference.source, reference.path);
+    let location = translation.location;
 
     let next = {
       msgid,

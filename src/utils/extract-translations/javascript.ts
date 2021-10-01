@@ -1,15 +1,16 @@
 import ts from 'typescript';
 import { TranslationMessage } from './types';
+import { tsNodeToLocation } from './utils';
 
 export function mightHaveTranslations(source: string): boolean {
   return source.includes('wp.i18n') || source.includes('@wordpress/i18n');
 }
 
-export function extractTranslations(source: string) {
+export function extractTranslations(source: string, filename: string): TranslationMessage[] {
   let sourceFile = ts.createSourceFile('admin.ts', source, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
 
   let relevantImports = findRelevantImports(sourceFile);
-  let messages = findTranslatableMessages(sourceFile, relevantImports);
+  let messages = findTranslatableMessages(sourceFile, relevantImports, { source, filename });
 
   return messages;
 }
@@ -70,7 +71,11 @@ function findRelevantImports(sourceFile: ts.SourceFile): ts.Identifier[] {
  * @param imports Relevant imported variables to look for
  * @returns An array of translation messages
  */
-function findTranslatableMessages(sourceFile: ts.SourceFile, imports: ts.Identifier[]) {
+function findTranslatableMessages(
+  sourceFile: ts.SourceFile,
+  imports: ts.Identifier[],
+  locationMeta: { source: string; filename: string },
+) {
   let messages: TranslationMessage[] = [];
 
   let referencesImport = (expression: { getText(): string }) => {
@@ -82,14 +87,14 @@ function findTranslatableMessages(sourceFile: ts.SourceFile, imports: ts.Identif
 
     // __(...)
     if (ts.isIdentifier(node.expression) && referencesImport(node.expression)) {
-      let message = extractMessage(node.expression, node.arguments, imports);
+      let message = extractMessage(node.expression, node.arguments, imports, locationMeta);
       if (message != null) messages.push(message);
       return false;
     }
 
     // i18n.__(...)
     if (ts.isPropertyAccessExpression(node.expression) && referencesImport(node.expression.expression)) {
-      let message = extractMessage(node.expression.name, node.arguments);
+      let message = extractMessage(node.expression.name, node.arguments, null, locationMeta);
       if (message != null) messages.push(message);
       return false;
     }
@@ -99,7 +104,7 @@ function findTranslatableMessages(sourceFile: ts.SourceFile, imports: ts.Identif
       ts.isPropertyAccessExpression(node.expression) &&
       (node.expression.expression.getText() === 'window.wp.i18n' || node.expression.expression.getText() === 'wp.i18n')
     ) {
-      let message = extractMessage(node.expression.name, node.arguments);
+      let message = extractMessage(node.expression.name, node.arguments, null, locationMeta);
       if (message != null) messages.push(message);
       return false;
     }
@@ -118,7 +123,8 @@ function findTranslatableMessages(sourceFile: ts.SourceFile, imports: ts.Identif
 function extractMessage(
   caller: ts.LeftHandSideExpression | ts.MemberName,
   args: ts.NodeArray<ts.Expression>,
-  imports?: ts.Identifier[],
+  imports: ts.Identifier[] | null,
+  { source, filename }: { source: string; filename: string },
 ): TranslationMessage | null {
   let id = caller.getText();
 
@@ -138,10 +144,12 @@ function extractMessage(
 
   if (!isTranslatableMethod(id)) return null;
 
+  let location = tsNodeToLocation(caller, id, source, filename);
+
   switch (id) {
     case '_n':
       return {
-        node: caller,
+        location,
         single: getStringValue(args[0]),
         plural: getStringValue(args[1]),
         domain: args[3] ? getStringValue(args[3]) : undefined,
@@ -149,7 +157,7 @@ function extractMessage(
 
     case '_nx':
       return {
-        node: caller,
+        location,
         single: getStringValue(args[0]),
         plural: getStringValue(args[1]),
         context: getStringValue(args[3]),
@@ -158,14 +166,14 @@ function extractMessage(
 
     case '__':
       return {
-        node: caller,
+        location,
         text: getStringValue(args[0]),
         domain: args[1] ? getStringValue(args[1]) : undefined,
       };
 
     case '_x':
       return {
-        node: caller,
+        location,
         text: getStringValue(args[0]),
         context: getStringValue(args[1]),
         domain: args[2] ? getStringValue(args[2]) : undefined,

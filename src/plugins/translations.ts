@@ -4,7 +4,6 @@ import { Loader, PartialMessage, Plugin } from 'esbuild';
 import { BundlerPlugin } from '../types';
 import { js, TranslationMessage } from '../utils/extract-translations';
 import { ExtendedPO, generateTranslationFilename } from '../utils/pofile';
-import { nodeToLocation } from '../utils/ts-ast';
 
 let name = 'wp-bundler-translations';
 
@@ -41,7 +40,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
       let warnings: PartialMessage[] | undefined = undefined;
 
       if (js.mightHaveTranslations(source)) {
-        let fileTranslations = js.extractTranslations(source);
+        let fileTranslations = js.extractTranslations(source, relativePath);
 
         for (let translation of fileTranslations) {
           if (translation.domain !== translationsConfig.domain) continue;
@@ -49,7 +48,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
           pos.forEach((po) => po.append(translation, { path: relativePath, source: source }));
         }
 
-        warnings = validateTranslations(fileTranslations, source, relativePath);
+        warnings = validateTranslations(fileTranslations);
       }
 
       return { contents: source, loader, warnings };
@@ -113,7 +112,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
   },
 });
 
-function validateTranslations(translations: TranslationMessage[], source: string, file: string): PartialMessage[] {
+function validateTranslations(translations: TranslationMessage[]): PartialMessage[] {
   let warnings: PartialMessage[] = [];
 
   for (let translation of translations) {
@@ -121,7 +120,7 @@ function validateTranslations(translations: TranslationMessage[], source: string
       warnings.push({
         pluginName: name,
         text: 'Missing domain.',
-        location: nodeToLocation(translation.node, source, file),
+        location: translation.location,
       });
     }
   }
