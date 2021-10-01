@@ -85,6 +85,7 @@
     "lint-staged": ">=10",
     "lodash.merge": "^4.6.2",
     "md5": "^2.3.0",
+    "php-parser": "^3.0.3",
     "pofile": "^1.1.1",
     "postcss": "^8.3.7",
     "postcss-preset-env": "^6.7.0",

@@ -1,12 +1,8 @@
-import ts from 'typescript';
+import { Location } from 'esbuild';
 
-type MessageBase = { node: ts.Node };
-type PluralMessage = MessageBase & {
-  single: string;
-  plural: string;
-  domain?: string;
-};
-type PluralMessageWithContext = MessageBase & PluralMessage & { context: string };
-type SingleMessage = MessageBase & { text: string; domain?: string };
-type SingleMessageWithContext = MessageBase & SingleMessage & { context: string };
+type MessageBase = { location: Location; domain?: string; translators?: string };
+type PluralMessage = MessageBase & { single: string; plural: string };
+type PluralMessageWithContext = PluralMessage & { context: string };
+type SingleMessage = MessageBase & { text: string };
+type SingleMessageWithContext = SingleMessage & { context: string };
 export type TranslationMessage = PluralMessage | PluralMessageWithContext | SingleMessage | SingleMessageWithContext;
