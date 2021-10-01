@@ -91,6 +91,29 @@ it('extracts the correct location for translations', () => {
   });
 });
 
+it('extracts translator comments', () => {
+  let source = `
+    <?php
+    // translators: a comment 1
+    __('Translation 1', 'wp-bundler');
+
+    /* translators: a comment 2 */
+    __('Translation 3', 'wp-bundler');
+
+    function translate() {
+      /**
+       * translators: a comment 3
+       */
+      __('Translation 3', 'wp-bundler');
+    }
+  `;
+
+  let result = extractTranslations(source, 'test.php');
+  expect(result[0].translators).toEqual('translators: a comment 1');
+  expect(result[1].translators).toEqual('translators: a comment 2');
+  expect(result[2].translators).toEqual('translators: a comment 3');
+});
+
 function removeLocation(messages: TranslationMessage[]) {
   return messages.map(({ location, ...t }) => t);
 }

@@ -63,6 +63,12 @@ function isStringNode(node?: Node | null): node is String {
   return node != null && node.kind === 'string';
 }
 
+function hasLeadingComments(
+  node?: Node | null,
+): node is Omit<Node, 'leadingComments'> & { leadingComments: Comment[] | CommentBlock[] } {
+  return node != null && Array.isArray(node.leadingComments);
+}
+
 function getCalledFunction(call: Call): string | null {
   if (call.kind === 'call' && typeof call.what.name === 'string') {
     return call.what.name.replace(/^\\/g, '');
@@ -75,6 +81,8 @@ function extractTranslationFromCall(call: Call, filename: string, parent: Node |
   let name = getCalledFunction(call);
   const getStringVal = (val: Node) => (isStringNode(val) && typeof val.value === 'string' ? val.value : null);
 
+  let translators = getTranslatorComment(parent);
+
   switch (name) {
     case '__':
     case '_e':
@@ -86,6 +94,7 @@ function extractTranslationFromCall(call: Call, filename: string, parent: Node |
         text: getStringVal(call.arguments[0]) ?? '',
         domain: getStringVal(call.arguments[1]) ?? undefined,
         location: phpNodeToLocation(call, filename),
+        translators,
       };
 
     case '_x':
@@ -97,6 +106,7 @@ function extractTranslationFromCall(call: Call, filename: string, parent: Node |
         context: getStringVal(call.arguments[1]) ?? '',
         domain: getStringVal(call.arguments[2]) ?? undefined,
         location: phpNodeToLocation(call, filename),
+        translators,
       };
 
     case '_n':
@@ -106,6 +116,7 @@ function extractTranslationFromCall(call: Call, filename: string, parent: Node |
         plural: getStringVal(call.arguments[1]) ?? '',
         domain: getStringVal(call.arguments[3]) ?? undefined,
         location: phpNodeToLocation(call, filename),
+        translators,
       };
 
     case '_nx':
@@ -116,9 +127,43 @@ function extractTranslationFromCall(call: Call, filename: string, parent: Node |
         context: getStringVal(call.arguments[3]) ?? '',
         domain: getStringVal(call.arguments[4]) ?? undefined,
         location: phpNodeToLocation(call, filename),
+        translators,
       };
 
     default:
       return null;
   }
+}
+function getTranslatorComment(node?: Node): string | undefined {
+  if (hasLeadingComments(node)) {
+    let comments = node.leadingComments.map((comment) => {
+      let lines = comment.value.split('\n').map((line) => {
+        return (
+          line
+            .trim()
+            // //
+            .replace(/^\/\//, '')
+            // /*
+            .replace(/^\/\*+/, '')
+            // *
+            .replace(/\*+\/$/, '')
+            // */
+            .replace(/^\*+/, '')
+            .trim()
+        );
+      });
+
+      return lines.filter(Boolean).join('\n');
+    });
+
+    for (let comment of comments) {
+      if (comment.toLowerCase().startsWith('translators:')) {
+        return comment;
+      }
+    }
+
+    return undefined;
+  }
+
+  return undefined;
 }
