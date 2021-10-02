@@ -60,6 +60,33 @@ it('extracts translations from within loops', () => {
   expect(removeLocation(result)).toEqual([{ text: 'Translation', domain: 'wp-bundler' }]);
 });
 
+it('extracts translations defined as part of a function argument', () => {
+  let source = `
+    <?php
+    sprintf(__('Translation', 'wp-bundler'), '');
+  `.trim();
+
+  let result = extractTranslations(source, 'test.php');
+  expect(removeLocation(result)).toEqual([{ text: 'Translation', domain: 'wp-bundler' }]);
+});
+
+it('extracts translations defined as part of an array', () => {
+  let source = `
+    <?php
+    $var = [
+      't' => __('Translation 1', 'wp-bundler')
+    ];
+
+    $var2 = [__('Translation 2', 'wp-bundler')];
+  `.trim();
+
+  let result = extractTranslations(source, 'test.php');
+  expect(removeLocation(result)).toEqual([
+    { text: 'Translation 1', domain: 'wp-bundler' },
+    { text: 'Translation 2', domain: 'wp-bundler' },
+  ]);
+});
+
 it('extracts translations with leading slashes (e.g. \\__(...))', () => {
   let source = `
     <?php
@@ -98,7 +125,7 @@ it('extracts translator comments', () => {
     __('Translation 1', 'wp-bundler');
 
     /* translators: a comment 2 */
-    __('Translation 3', 'wp-bundler');
+    $variable = __('Translation 3', 'wp-bundler');
 
     function translate() {
       /**
@@ -106,12 +133,16 @@ it('extracts translator comments', () => {
        */
       __('Translation 3', 'wp-bundler');
     }
+
+    // translators: a comment 4
+    sprintf(__('Translation 4', 'wp-bundler'), '');
   `;
 
   let result = extractTranslations(source, 'test.php');
   expect(result[0].translators).toEqual('translators: a comment 1');
   expect(result[1].translators).toEqual('translators: a comment 2');
   expect(result[2].translators).toEqual('translators: a comment 3');
+  expect(result[3]?.translators).toEqual('translators: a comment 4');
 });
 
 function removeLocation(messages: TranslationMessage[]) {

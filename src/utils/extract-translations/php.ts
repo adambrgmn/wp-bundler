@@ -26,30 +26,33 @@ export function extractTranslations(source: string, filename: string): Translati
   let program = parser.parseCode(source, filename);
   let translations: TranslationMessage[] = [];
 
-  visitAll(program, (node, parent) => {
+  let lastTranslators: string | undefined = undefined;
+  visitAll(program, (node) => {
+    let translators = getTranslatorComment(node);
+    if (translators) lastTranslators = translators;
+
     if (isCallNode(node)) {
-      let translation = extractTranslationFromCall(node, filename, parent);
-      if (translation != null) translations.push(translation);
-      return false;
+      let translation = extractTranslationFromCall(node, filename);
+      if (translation != null) {
+        translation.translators = lastTranslators;
+        lastTranslators = undefined;
+        translations.push(translation);
+      }
     }
   });
 
   return translations;
 }
 
-function visitAll(
-  nodes: Node[] | Node,
-  callback: (node: Node, parent?: Node) => boolean | undefined | null | void,
-  parent?: Node,
-) {
+function visitAll(nodes: Node[] | Node, callback: (node: Node, parent?: Node) => boolean | undefined | null | void) {
   for (let node of Array.isArray(nodes) ? nodes : [nodes]) {
-    let shouldContinue = callback(node, parent);
+    let shouldContinue = callback(node);
     if (shouldContinue === false) return;
 
     for (let key of childrenKeys) {
       let children = (node as any)[key];
       if (children != null) {
-        visitAll(children, callback, node);
+        visitAll(children, callback);
       }
     }
   }
@@ -96,11 +99,10 @@ function getCalledFunction(call: Call): string | null {
   return null;
 }
 
-function extractTranslationFromCall(call: Call, filename: string, parent: Node | undefined): TranslationMessage | null {
+function extractTranslationFromCall(call: Call, filename: string): TranslationMessage | null {
   let name = getCalledFunction(call);
   const getStringVal = (val: Node) => (isStringNode(val) && typeof val.value === 'string' ? val.value : null);
 
-  let translators = getTranslatorComment(parent);
   let location = phpNodeToLocation(call, filename);
 
   switch (name) {
@@ -114,7 +116,6 @@ function extractTranslationFromCall(call: Call, filename: string, parent: Node |
         text: getStringVal(call.arguments[0]) ?? '',
         domain: getStringVal(call.arguments[1]) ?? undefined,
         location,
-        translators,
       };
 
     case '_x':
@@ -126,7 +127,6 @@ function extractTranslationFromCall(call: Call, filename: string, parent: Node |
         context: getStringVal(call.arguments[1]) ?? '',
         domain: getStringVal(call.arguments[2]) ?? undefined,
         location,
-        translators,
       };
 
     case '_n':
@@ -136,7 +136,6 @@ function extractTranslationFromCall(call: Call, filename: string, parent: Node |
         plural: getStringVal(call.arguments[1]) ?? '',
         domain: getStringVal(call.arguments[3]) ?? undefined,
         location,
-        translators,
       };
 
     case '_nx':
@@ -147,13 +146,13 @@ function extractTranslationFromCall(call: Call, filename: string, parent: Node |
         context: getStringVal(call.arguments[3]) ?? '',
         domain: getStringVal(call.arguments[4]) ?? undefined,
         location,
-        translators,
       };
 
     default:
       return null;
   }
 }
+
 function getTranslatorComment(node?: Node): string | undefined {
   if (hasLeadingComments(node)) {
     let comments = node.leadingComments.map((comment) => trimComment(comment.value));

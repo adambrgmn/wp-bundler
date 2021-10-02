@@ -82,21 +82,23 @@ function findTranslatableMessages(
     return imports.findIndex((imported) => imported.getText() === expression.getText()) > -1;
   };
 
+  let lastTranslators: string | undefined = undefined;
+
   visitAll(sourceFile, (node) => {
+    let message: TranslationMessage | null = null;
+    let translators = getTranslatorComment(node, locationMeta.source);
+    if (translators) lastTranslators = translators;
+
     if (!ts.isCallExpression(node)) return;
 
     // __(...)
     if (ts.isIdentifier(node.expression) && referencesImport(node.expression)) {
-      let message = extractMessage(node.expression, node.arguments, imports, locationMeta);
-      if (message != null) messages.push(message);
-      return false;
+      message = extractMessage(node.expression, node.arguments, imports, locationMeta);
     }
 
     // i18n.__(...)
     if (ts.isPropertyAccessExpression(node.expression) && referencesImport(node.expression.expression)) {
-      let message = extractMessage(node.expression.name, node.arguments, null, locationMeta);
-      if (message != null) messages.push(message);
-      return false;
+      message = extractMessage(node.expression.name, node.arguments, null, locationMeta);
     }
 
     // wp.i18n.__(...) || window.wp.i18n.__(...)
@@ -104,8 +106,13 @@ function findTranslatableMessages(
       ts.isPropertyAccessExpression(node.expression) &&
       (node.expression.expression.getText() === 'window.wp.i18n' || node.expression.expression.getText() === 'wp.i18n')
     ) {
-      let message = extractMessage(node.expression.name, node.arguments, null, locationMeta);
-      if (message != null) messages.push(message);
+      message = extractMessage(node.expression.name, node.arguments, null, locationMeta);
+    }
+
+    if (message != null) {
+      message.translators = lastTranslators;
+      lastTranslators = undefined;
+      messages.push(message);
       return false;
     }
   });
@@ -145,7 +152,6 @@ function extractMessage(
   if (!isTranslatableMethod(id)) return null;
 
   let location = tsNodeToLocation(caller, id, source, filename);
-  let translators = getTranslatorComment(caller, source);
 
   switch (id) {
     case '_n':
@@ -154,7 +160,6 @@ function extractMessage(
         single: getStringValue(args[0]),
         plural: getStringValue(args[1]),
         domain: args[3] ? getStringValue(args[3]) : undefined,
-        translators,
       };
 
     case '_nx':
@@ -164,7 +169,6 @@ function extractMessage(
         plural: getStringValue(args[1]),
         context: getStringValue(args[3]),
         domain: args[4] ? getStringValue(args[4]) : undefined,
-        translators,
       };
 
     case '__':
@@ -172,7 +176,6 @@ function extractMessage(
         location,
         text: getStringValue(args[0]),
         domain: args[1] ? getStringValue(args[1]) : undefined,
-        translators,
       };
 
     case '_x':
@@ -181,7 +184,6 @@ function extractMessage(
         text: getStringValue(args[0]),
         context: getStringValue(args[1]),
         domain: args[2] ? getStringValue(args[2]) : undefined,
-        translators,
       };
   }
 }

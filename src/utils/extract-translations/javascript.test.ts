@@ -166,10 +166,10 @@ it('extracts translator comments', () => {
     import { __ } from '@wordpress/i18n';
 
     // translators: a comment 1
-    __('Translation 1', 'wp-bundler');
+    const variable = __('Translation 1', 'wp-bundler');
 
     /* translators: a comment 2 */
-    __('Translation 3', 'wp-bundler');
+    console.log(__('Translation 3', 'wp-bundler'));
 
     function translate() {
       /**
