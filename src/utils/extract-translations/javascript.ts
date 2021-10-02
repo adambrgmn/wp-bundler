@@ -1,28 +1,19 @@
 import ts from 'typescript';
+import { TranslationMessage } from './types';
+import { isTranslatorsComment, trimComment, tsNodeToLocation } from './utils';
 
 export function mightHaveTranslations(source: string): boolean {
   return source.includes('wp.i18n') || source.includes('@wordpress/i18n');
 }
 
-export function extractTranslations(source: string) {
+export function extractTranslations(source: string, filename: string): TranslationMessage[] {
   let sourceFile = ts.createSourceFile('admin.ts', source, ts.ScriptTarget.ES2015, true, ts.ScriptKind.TSX);
 
   let relevantImports = findRelevantImports(sourceFile);
-  let messages = findTranslatableMessages(sourceFile, relevantImports);
+  let messages = findTranslatableMessages(sourceFile, relevantImports, { source, filename });
 
   return messages;
 }
-
-type MessageBase = { node: ts.Node };
-type PluralMessage = MessageBase & {
-  single: string;
-  plural: string;
-  domain?: string;
-};
-type PluralMessageWithContext = MessageBase & PluralMessage & { context: string };
-type SingleMessage = MessageBase & { text: string; domain?: string };
-type SingleMessageWithContext = MessageBase & SingleMessage & { context: string };
-export type TranslationMessage = PluralMessage | PluralMessageWithContext | SingleMessage | SingleMessageWithContext;
 
 const translatableMethods = ['_n', '_nx', '_x', '__'] as const;
 type TranslatableMethod = typeof translatableMethods[number];
@@ -80,28 +71,34 @@ function findRelevantImports(sourceFile: ts.SourceFile): ts.Identifier[] {
  * @param imports Relevant imported variables to look for
  * @returns An array of translation messages
  */
-function findTranslatableMessages(sourceFile: ts.SourceFile, imports: ts.Identifier[]) {
+function findTranslatableMessages(
+  sourceFile: ts.SourceFile,
+  imports: ts.Identifier[],
+  locationMeta: { source: string; filename: string },
+) {
   let messages: TranslationMessage[] = [];
 
   let referencesImport = (expression: { getText(): string }) => {
     return imports.findIndex((imported) => imported.getText() === expression.getText()) > -1;
   };
 
+  let lastTranslators: string | undefined = undefined;
+
   visitAll(sourceFile, (node) => {
+    let message: TranslationMessage | null = null;
+    let translators = getTranslatorComment(node, locationMeta.source);
+    if (translators) lastTranslators = translators;
+
     if (!ts.isCallExpression(node)) return;
 
     // __(...)
     if (ts.isIdentifier(node.expression) && referencesImport(node.expression)) {
-      let message = extractMessage(node.expression, node.arguments, imports);
-      if (message != null) messages.push(message);
-      return false;
+      message = extractMessage(node.expression, node.arguments, imports, locationMeta);
     }
 
     // i18n.__(...)
     if (ts.isPropertyAccessExpression(node.expression) && referencesImport(node.expression.expression)) {
-      let message = extractMessage(node.expression.name, node.arguments);
-      if (message != null) messages.push(message);
-      return false;
+      message = extractMessage(node.expression.name, node.arguments, null, locationMeta);
     }
 
     // wp.i18n.__(...) || window.wp.i18n.__(...)
@@ -109,8 +106,13 @@ function findTranslatableMessages(sourceFile: ts.SourceFile, imports: ts.Identif
       ts.isPropertyAccessExpression(node.expression) &&
       (node.expression.expression.getText() === 'window.wp.i18n' || node.expression.expression.getText() === 'wp.i18n')
     ) {
-      let message = extractMessage(node.expression.name, node.arguments);
-      if (message != null) messages.push(message);
+      message = extractMessage(node.expression.name, node.arguments, null, locationMeta);
+    }
+
+    if (message != null) {
+      message.translators = lastTranslators;
+      lastTranslators = undefined;
+      messages.push(message);
       return false;
     }
   });
@@ -128,7 +130,8 @@ function findTranslatableMessages(sourceFile: ts.SourceFile, imports: ts.Identif
 function extractMessage(
   caller: ts.LeftHandSideExpression | ts.MemberName,
   args: ts.NodeArray<ts.Expression>,
-  imports?: ts.Identifier[],
+  imports: ts.Identifier[] | null,
+  { source, filename }: { source: string; filename: string },
 ): TranslationMessage | null {
   let id = caller.getText();
 
@@ -148,10 +151,12 @@ function extractMessage(
 
   if (!isTranslatableMethod(id)) return null;
 
+  let location = tsNodeToLocation(caller, id, source, filename);
+
   switch (id) {
     case '_n':
       return {
-        node: caller,
+        location,
         single: getStringValue(args[0]),
         plural: getStringValue(args[1]),
         domain: args[3] ? getStringValue(args[3]) : undefined,
@@ -159,7 +164,7 @@ function extractMessage(
 
     case '_nx':
       return {
-        node: caller,
+        location,
         single: getStringValue(args[0]),
         plural: getStringValue(args[1]),
         context: getStringValue(args[3]),
@@ -168,14 +173,14 @@ function extractMessage(
 
     case '__':
       return {
-        node: caller,
+        location,
         text: getStringValue(args[0]),
         domain: args[1] ? getStringValue(args[1]) : undefined,
       };
 
     case '_x':
       return {
-        node: caller,
+        location,
         text: getStringValue(args[0]),
         context: getStringValue(args[1]),
         domain: args[2] ? getStringValue(args[2]) : undefined,
@@ -231,4 +236,16 @@ function getStringValue(expression: ts.Expression): string {
   }
 
   throw new Error('Given expression is not a string literal.');
+}
+
+function getTranslatorComment(node: ts.Node, source: string): string | undefined {
+  let comments = ts.getLeadingCommentRanges(source, node.pos);
+  if (Array.isArray(comments)) {
+    for (let commentNode of comments) {
+      let comment = trimComment(source.substring(commentNode.pos, commentNode.end));
+      if (isTranslatorsComment(comment)) return comment;
+    }
+  }
+
+  return undefined;
 }
