@@ -1,9 +1,11 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { Loader, PartialMessage, Plugin } from 'esbuild';
+import globby from 'globby';
+import md5 from 'md5';
 import { BundlerPlugin } from '../types';
-import { js, TranslationMessage } from '../utils/extract-translations';
-import { ExtendedPO, generateTranslationFilename } from '../utils/pofile';
+import { js, php, TranslationMessage } from '../utils/extract-translations';
+import { Po } from '../utils/po';
 
 let name = 'wp-bundler-translations';
 
@@ -22,15 +24,14 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
     if (config.translations == null) return;
 
     let translationsConfig = config.translations;
+    let translations: TranslationMessage[] = [];
 
-    let [pot, ...pos] = await Promise.all([
-      ExtendedPO.create(project.paths.absolute(translationsConfig.pot)),
-      ...(translationsConfig.pos ?? []).map((po) => ExtendedPO.create(project.paths.absolute(po))),
-    ]);
+    build.onStart(() => {
+      translations = [];
+    });
 
     /**
-     * Parse each source file and extract all translations. Append them to our
-     * po- and pot-files.
+     * Parse each source file and extract all translations.
      */
     build.onLoad({ filter: /.(js|ts|tsx|jsx)$/, namespace: '' }, async (args) => {
       let relativePath = project.paths.relative(args.path);
@@ -41,13 +42,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
 
       if (js.mightHaveTranslations(source)) {
         let fileTranslations = js.extractTranslations(source, relativePath);
-
-        for (let translation of fileTranslations) {
-          if (translation.domain !== translationsConfig.domain) continue;
-          pot.append(translation, { path: relativePath, source: source });
-          pos.forEach((po) => po.append(translation, { path: relativePath, source: source }));
-        }
-
+        translations.push(...fileTranslations.filter(({ domain }) => domain === translationsConfig.domain));
         warnings = validateTranslations(fileTranslations);
       }
 
@@ -58,55 +53,71 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
      * Write all po- and pot-files to disk.
      */
     build.onEnd(async ({ metafile, warnings }) => {
-      await Promise.all([pot.write(), pos.map((po) => po.write())]);
-
       if (metafile == null) return;
+
+      let phpTranslations = await findPhpTranslations(project.paths.root);
+      translations.push(...phpTranslations);
+
+      let pot = await Po.load(project.paths.absolute(translationsConfig.pot));
+      let pos = await Promise.all(translationsConfig.pos?.map((po) => Po.load(project.paths.absolute(po))) ?? []);
+
+      pot.clear();
+      for (let t of translations) pot.set(t);
+
+      pos.forEach((po) => po.updateFromTemplate(pot));
+      await Promise.all([pot.write(), ...pos.map((po) => po.write())]);
 
       let langDir = project.paths.absolute(config.outdir, 'languages');
       await fs.mkdir(langDir, { recursive: true });
+      let missingLangWarnings: Po[] = [];
 
-      let missingLangWarnings: ExtendedPO[] = [];
+      let writes: Promise<unknown>[] = [];
+      for (let po of pos) {
+        if (po.language == null) {
+          missingLangWarnings.push(po);
+          continue;
+        }
 
-      for (let distFile of Object.keys(metafile.outputs)) {
-        let meta = metafile.outputs[distFile];
-        let srcFiles = Object.keys(meta.inputs);
-        for (let po of pos) {
-          if (po.headers.Language == null || po.headers.Language === '') {
-            missingLangWarnings.push(po);
-            continue;
-          }
+        let buffer = po.toMo((translation) => {
+          if (translation.comments == null || translation.comments.reference === '') return true;
+          return translation.comments.reference.includes('.php');
+        });
 
-          let jed = po.toJED(translationsConfig.domain, ({ references }) =>
-            references.some((ref) => srcFiles.includes(ref.replace(/:\d+$/, ''))),
-          );
+        writes.push(fs.writeFile(po.filename.replace(/\.po$/, '.mo'), buffer));
+
+        for (let distFile of Object.keys(metafile.outputs)) {
+          let meta = metafile.outputs[distFile];
+          let srcFiles = Object.keys(meta.inputs);
+
+          let jed = po.toJed(translationsConfig.domain, ({ comments }) => {
+            return comments != null && srcFiles.some((file) => comments.reference.includes(file));
+          });
+
           if (jed == null) continue;
-
           let filename = generateTranslationFilename(translationsConfig.domain, po.headers.Language, distFile);
-
-          await fs.writeFile(path.join(langDir, filename), JSON.stringify(jed));
+          writes.push(fs.writeFile(path.join(langDir, filename), JSON.stringify(jed)));
         }
       }
 
+      await Promise.all(writes);
       warnings.push(
-        ...missingLangWarnings
-          .filter((po, i, arr) => arr.indexOf(po) === i)
-          .map((po) => {
-            return {
-              pluginName: name,
-              text: 'The po file is missing a language header',
-              location: {
-                file: project.paths.relative(po.filename),
-                line: 1,
-                column: 1,
-                namespace: '',
-                lineText: '',
-                length: 0,
-                suggestion: '',
-              },
-              detail: {},
-              notes: [],
-            };
-          }),
+        ...missingLangWarnings.map((po) => {
+          return {
+            pluginName: name,
+            text: 'Missing language header in po file. No translations will be emitted.',
+            location: {
+              file: project.paths.relative(po.filename),
+              line: 1,
+              column: 1,
+              namespace: '',
+              lineText: '',
+              length: 0,
+              suggestion: '',
+            },
+            detail: {},
+            notes: [],
+          };
+        }),
       );
     });
   },
@@ -126,4 +137,23 @@ function validateTranslations(translations: TranslationMessage[]): PartialMessag
   }
 
   return warnings;
+}
+
+async function findPhpTranslations(cwd: string): Promise<TranslationMessage[]> {
+  let files = await globby(['**/*.php', '!vendor', '!node_modules'], { cwd });
+
+  let translations: Array<TranslationMessage[]> = await Promise.all(
+    files.map(async (file) => {
+      let source = await fs.readFile(path.join(cwd, file), 'utf-8');
+      if (!php.mightHaveTranslations(source)) return [];
+      return php.extractTranslations(source, file);
+    }),
+  );
+
+  return translations.flat();
+}
+
+function generateTranslationFilename(domain: string, language: string, file: string): string {
+  let md5Path = md5(file);
+  return `${domain}-${language}-${md5Path}.json`;
 }

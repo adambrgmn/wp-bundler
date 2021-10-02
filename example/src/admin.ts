@@ -12,6 +12,8 @@ console.log(add(1, 2, 3));
 _x('wtf 1', 'any', 'wp-bundler');
 _n('wtf 2', "wtf's 2", 2, 'wp-bundler');
 __('wtf 3', 'wp-bundler');
+// translators: No wtf's given
+__('wtf 3', 'wp-bundler');
 i18n.__('wtf 4', 'wp-bundler');
 i18n2.__('wtf 5', 'wp-bundler');
 // @ts-ignore
