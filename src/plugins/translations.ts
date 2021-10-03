@@ -4,7 +4,7 @@ import { Loader, PartialMessage, Plugin } from 'esbuild';
 import globby from 'globby';
 import md5 from 'md5';
 import { BundlerPlugin } from '../types';
-import { js, php, TranslationMessage } from '../utils/extract-translations';
+import { js, php, twig, TranslationMessage } from '../utils/extract-translations';
 import { Po } from '../utils/po';
 
 let name = 'wp-bundler-translations';
@@ -55,8 +55,10 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
     build.onEnd(async ({ metafile, warnings }) => {
       if (metafile == null) return;
 
-      let phpTranslations = await findPhpTranslations(project.paths.root);
-      translations.push(...phpTranslations);
+      translations.push(
+        ...(await findPhpTranslations(project.paths.root)),
+        ...(await findTwigTranslations(project.paths.root)),
+      );
 
       let pot = await Po.load(project.paths.absolute(translationsConfig.pot));
       let pos = await Promise.all(translationsConfig.pos?.map((po) => Po.load(project.paths.absolute(po))) ?? []);
@@ -147,6 +149,20 @@ async function findPhpTranslations(cwd: string): Promise<TranslationMessage[]> {
       let source = await fs.readFile(path.join(cwd, file), 'utf-8');
       if (!php.mightHaveTranslations(source)) return [];
       return php.extractTranslations(source, file);
+    }),
+  );
+
+  return translations.flat();
+}
+
+async function findTwigTranslations(cwd: string): Promise<TranslationMessage[]> {
+  let files = await globby(['**/*.twig', '!vendor', '!node_modules'], { cwd });
+
+  let translations: Array<TranslationMessage[]> = await Promise.all(
+    files.map(async (file) => {
+      let source = await fs.readFile(path.join(cwd, file), 'utf-8');
+      if (!twig.mightHaveTranslations(source)) return [];
+      return twig.extractTranslations(source, file);
     }),
   );
 

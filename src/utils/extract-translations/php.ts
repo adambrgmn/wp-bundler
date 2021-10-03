@@ -2,23 +2,25 @@ import { Call, Comment, CommentBlock, Engine, Node, String } from 'php-parser';
 import { TranslationMessage } from './types';
 import { isTranslatorsComment, phpNodeToLocation, trimComment } from './utils';
 
+export const WP_TRANSLATION_FUNCTIONS = [
+  '__',
+  '_e',
+  'esc_attr__',
+  'esc_attr_e',
+  'esc_html__',
+  'esc_html_e',
+  '_x',
+  '_ex',
+  'esc_attr_x',
+  'esc_html_x',
+  '_n',
+  '_n_noop',
+  '_nx',
+  '_nx_noop',
+];
+
 export function mightHaveTranslations(source: string): boolean {
-  return [
-    '__',
-    '_e',
-    'esc_attr__',
-    'esc_attr_e',
-    'esc_html__',
-    'esc_html_e',
-    '_x',
-    '_ex',
-    'esc_attr_x',
-    'esc_html_x',
-    '_n',
-    '_n_noop',
-    '_nx',
-    '_nx_noop',
-  ].some((fn) => source.includes(fn));
+  return WP_TRANSLATION_FUNCTIONS.some((fn) => source.includes(fn));
 }
 
 export function extractTranslations(source: string, filename: string): TranslationMessage[] {
