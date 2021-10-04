@@ -4,7 +4,7 @@ import { Loader, PartialMessage, Plugin } from 'esbuild';
 import globby from 'globby';
 import md5 from 'md5';
 import { BundlerPlugin } from '../types';
-import { js, php, twig, TranslationMessage } from '../utils/extract-translations';
+import { js, php, twig, theme, TranslationMessage } from '../utils/extract-translations';
 import { Po } from '../utils/po';
 
 let name = 'wp-bundler-translations';
@@ -55,9 +55,10 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
     build.onEnd(async ({ metafile, warnings }) => {
       if (metafile == null) return;
 
+      translations.unshift(...(await findThemeTranslations(project.paths.root, translationsConfig.domain)));
       translations.push(
-        ...(await findPhpTranslations(project.paths.root)),
-        ...(await findTwigTranslations(project.paths.root)),
+        ...(await findPhpTranslations(project.paths.root, translationsConfig.domain, translationsConfig.ignore)),
+        ...(await findTwigTranslations(project.paths.root, translationsConfig.domain, translationsConfig.ignore)),
       );
 
       let pot = await Po.load(project.paths.absolute(translationsConfig.pot));
@@ -80,11 +81,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
           continue;
         }
 
-        let buffer = po.toMo((translation) => {
-          if (translation.comments == null || translation.comments.reference === '') return true;
-          return translation.comments.reference.includes('.php');
-        });
-
+        let buffer = po.toMo();
         writes.push(fs.writeFile(po.filename.replace(/\.po$/, '.mo'), buffer));
 
         for (let distFile of Object.keys(metafile.outputs)) {
@@ -141,8 +138,8 @@ function validateTranslations(translations: TranslationMessage[]): PartialMessag
   return warnings;
 }
 
-async function findPhpTranslations(cwd: string): Promise<TranslationMessage[]> {
-  let files = await globby(['**/*.php', '!vendor', '!node_modules'], { cwd });
+async function findPhpTranslations(cwd: string, domain: string, ignore: string[] = []): Promise<TranslationMessage[]> {
+  let files = await globby(['**/*.php', '!vendor', '!node_modules', ...ignore.map((i) => '!' + i)], { cwd });
 
   let translations: Array<TranslationMessage[]> = await Promise.all(
     files.map(async (file) => {
@@ -152,11 +149,11 @@ async function findPhpTranslations(cwd: string): Promise<TranslationMessage[]> {
     }),
   );
 
-  return translations.flat();
+  return translations.flat().filter((translation) => translation.domain === domain);
 }
 
-async function findTwigTranslations(cwd: string): Promise<TranslationMessage[]> {
-  let files = await globby(['**/*.twig', '!vendor', '!node_modules'], { cwd });
+async function findTwigTranslations(cwd: string, domain: string, ignore: string[] = []): Promise<TranslationMessage[]> {
+  let files = await globby(['**/*.twig', '!vendor', '!node_modules', ...ignore.map((i) => '!' + i)], { cwd });
 
   let translations: Array<TranslationMessage[]> = await Promise.all(
     files.map(async (file) => {
@@ -166,7 +163,16 @@ async function findTwigTranslations(cwd: string): Promise<TranslationMessage[]> 
     }),
   );
 
-  return translations.flat();
+  return translations.flat().filter((translation) => translation.domain === domain);
+}
+
+async function findThemeTranslations(cwd: string, domain: string) {
+  try {
+    let source = await fs.readFile(path.join(cwd, 'style.css'), 'utf-8');
+    return theme.extractTranslations(source, 'style.css', domain);
+  } catch (error) {
+    return [];
+  }
 }
 
 function generateTranslationFilename(domain: string, language: string, file: string): string {
