@@ -1,57 +1,83 @@
+import { TwingEnvironment, TwingLoaderNull, TwingSource, TwingTokenStream } from 'twing';
+import { Token, TokenType } from 'twig-lexer';
 import { Location } from 'esbuild';
 import { TranslationMessage } from './types';
+import { WP_TRANSLATION_FUNCTIONS } from './php';
 
 export { mightHaveTranslations } from './php';
 
 export function extractTranslations(source: string, filename: string): TranslationMessage[] {
   let messages: TranslationMessage[] = [];
-  let matches = gettextRegex
-    .flatMap((re) => Array.from(source.matchAll(re)))
-    .sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
-
-  for (let match of matches) {
-    let message = extractTranslationFromCall(match, source, filename);
+  let stream = getTokenStream(source, filename);
+  let calls = findTranslationCalls(stream);
+  for (let call of calls) {
+    let message = extractTranslationFromCall2(call, filename);
     if (message != null) messages.push(message);
   }
 
   return messages;
 }
 
-const gettextRegex = [
-  // _e( "text", "domain" )
-  // __( "text", "domain" )
-  // translate( "text", "domain" )
-  // esc_attr__( "text", "domain" )
-  // esc_attr_e( "text", "domain" )
-  // esc_html__( "text", "domain" )
-  // esc_html_e( "text", "domain" )
-  /(?<name>__|_e|translate|esc_attr__|esc_attr_e|esc_html__|esc_html_e)\((?<args>\s*?['"].+?['"]\s*?,\s*?['"].+?['"]\s*?)\)/g,
+const env = new TwingEnvironment(new TwingLoaderNull());
+function getTokenStream(code: string, filename: string) {
+  let source = new TwingSource(code, filename);
+  let stream = env.tokenize(source);
+  return stream;
+}
 
-  // _n( "single", "plural", number, "domain" )
-  /(?<name>_n)\((?<args>\s*?['"].*?['"]\s*?,\s*?['"].*?['"]\s*?,\s*?.+?\s*?,\s*?['"].+?['"]\s*?)\)/g,
+function findTranslationCalls(stream: TwingTokenStream) {
+  let calls: { name: string; args: string[]; token: Token }[] = [];
+  let previous: Token | undefined;
 
-  // _x( "text", "context", "domain" )
-  // _ex( "text", "context", "domain" )
-  // esc_attr_x( "text", "context", "domain" )
-  // esc_html_x( "text", "context", "domain" )
-  // _nx( "single", "plural", "number", "context", "domain" )
-  /(?<name>_x|_ex|_nx|esc_attr_x|esc_html_x)\((?<args>\s*?['"].+?['"]\s*?,\s*?['"].+?['"]\s*?,\s*?['"].+?['"]\s*?)\)/g,
+  while (!stream.isEOF()) {
+    let current = stream.next();
+    if (
+      current.type === TokenType.PUNCTUATION &&
+      current.value === '(' &&
+      previous != null &&
+      previous.type === TokenType.NAME &&
+      WP_TRANSLATION_FUNCTIONS.includes(previous.value)
+    ) {
+      let args = getArgs(stream);
+      calls.push({ name: previous.value, args, token: previous });
+    }
 
-  // _n_noop( "singular", "plural", "domain" )
-  // _nx_noop( "singular", "plural", "context", "domain" )
-  /(?<name>_n_noop|_nx_noop)\((?<args>(\s*?['"].+?['"]\s*?),(\s*?['"]\w+?['"]\s*?,){0,1}\s*?['"].+?['"]\s*?)\)/g,
-];
+    previous = current;
+  }
 
-function extractTranslationFromCall(match: RegExpMatchArray, source: string, file: string): TranslationMessage | null {
-  let name = match.groups?.name;
-  let args = match.groups?.args;
+  return calls;
+}
 
-  if (name == null || args == null) return null;
+function getArgs(stream: TwingTokenStream) {
+  let args: string[] = [];
+  let current = stream.next();
+  while (!stream.isEOF() && current.value !== ')') {
+    if (current.type === TokenType.STRING) {
+      args.push(current.value);
+    } else if (current.type === TokenType.PUNCTUATION && current.value === '(') {
+      getArgs(stream);
+    }
+    current = stream.next();
+  }
 
-  let parsedArgs = parseArgs(args);
-  let location = matchToLocation(match, source, file);
+  return args;
+}
 
-  switch (name) {
+function extractTranslationFromCall2(
+  call: { name: string; args: string[]; token: Token },
+  file: string,
+): TranslationMessage | null {
+  let location: Location = {
+    file,
+    namespace: '',
+    line: call.token.line,
+    column: call.token.column - 1,
+    length: 0,
+    lineText: '',
+    suggestion: '',
+  };
+
+  switch (call.name) {
     case '__':
     case '_e':
     case 'esc_attr__':
@@ -59,8 +85,8 @@ function extractTranslationFromCall(match: RegExpMatchArray, source: string, fil
     case 'esc_html__':
     case 'esc_html_e':
       return {
-        text: parsedArgs[0] ?? '',
-        domain: parsedArgs[1] ?? undefined,
+        text: call.args[0] ?? '',
+        domain: call.args[1] ?? undefined,
         location,
       };
 
@@ -69,28 +95,28 @@ function extractTranslationFromCall(match: RegExpMatchArray, source: string, fil
     case 'esc_attr_x':
     case 'esc_html_x':
       return {
-        text: parsedArgs[0] ?? '',
-        context: parsedArgs[1] ?? '',
-        domain: parsedArgs[2] ?? undefined,
+        text: call.args[0] ?? '',
+        context: call.args[1] ?? '',
+        domain: call.args[2] ?? undefined,
         location,
       };
 
     case '_n':
     case '_n_noop':
       return {
-        single: parsedArgs[0] ?? '',
-        plural: parsedArgs[1] ?? '',
-        domain: parsedArgs[3] ?? undefined,
+        single: call.args[0] ?? '',
+        plural: call.args[1] ?? '',
+        domain: call.args[2] ?? undefined,
         location,
       };
 
     case '_nx':
     case '_nx_noop':
       return {
-        single: parsedArgs[0] ?? '',
-        plural: parsedArgs[1] ?? '',
-        context: parsedArgs[3] ?? '',
-        domain: parsedArgs[4] ?? undefined,
+        single: call.args[0] ?? '',
+        plural: call.args[1] ?? '',
+        context: call.args[2] ?? '',
+        domain: call.args[3] ?? undefined,
         location,
       };
 
@@ -98,51 +124,3 @@ function extractTranslationFromCall(match: RegExpMatchArray, source: string, fil
       return null;
   }
 }
-
-function parseArgs(args: string): (string | undefined)[] {
-  return args.split(',').map<string | undefined>((arg) => {
-    try {
-      let val = JSON.parse(arg.replace(/'|"|`/g, '"'));
-      if (typeof val === 'string') return val;
-      return undefined;
-    } catch (error) {
-      return undefined;
-    }
-  });
-}
-
-function matchToLocation(match: RegExpMatchArray, source: string, file: string): Location {
-  let pos = match.index ?? 0;
-  let substring = source.substr(0, pos);
-  let lines = substring.split('\n');
-  let line = lines.length;
-  let column = lines[line - 1].length;
-
-  return {
-    file,
-    namespace: '',
-    line,
-    column,
-    length: 0,
-    lineText: '',
-    suggestion: '',
-  };
-}
-
-// export function tsNodeToLocation(node: TsNode, fnName: string, source: string, file: string): Location {
-//   let pos = source.indexOf(fnName, node.pos);
-//   let substring = source.substr(0, pos);
-//   let lines = substring.split('\n');
-//   let line = lines.length;
-//   let column = lines[line - 1].length;
-
-//   return {
-//     file,
-//     namespace: '',
-//     line,
-//     column,
-//     length: 0,
-//     lineText: '',
-//     suggestion: '',
-//   };
-// }

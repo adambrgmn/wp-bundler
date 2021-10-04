@@ -71,7 +71,7 @@ it('extracts translations from special cases', () => {
       {{ _x('Translation 3', 'context', 'wp-bundler') }}
     {% endfor %}
 
-    {% set test = sprintf(_n('Translation 4 single', 'Translation 4 plural', num, 'wp-bundler')) %}
+    {% set test = sprintf(_n('Translation 4 single', 'Translation 4 plural', getNum('2'), 'wp-bundler')) %}
   `;
 
   let result = extractTranslations(source, 'test.twig');
@@ -85,9 +85,10 @@ it('extracts translations from special cases', () => {
 
 it('extracts translations within blocks', () => {
   let source = `
-    {% block main %}
-      <p>{{ __('Translation', 'wp-bundler') }}</p>
-    {% endblock %}
+      {{ __(
+        'Translation',
+        'wp-bundler'
+        ) }}</p>
   `;
 
   let result = extractTranslations(source, 'test.twig');
@@ -100,6 +101,18 @@ it('extracts translations from multiline definitions', () => {
         'Translation',
         'wp-bundler'
         ) }}</p>
+  `;
+
+  let result = extractTranslations(source, 'test.twig');
+  expect(removeLocation(result)).toEqual([{ text: 'Translation', domain: 'wp-bundler' }]);
+});
+
+it('extracts translations from language extensions', () => {
+  let source = `
+    {% switch input.type %}
+      {% case "checkbox" %}
+        {{ __('Translation', 'wp-bundler') }}</p>
+    {% endswitch %}
   `;
 
   let result = extractTranslations(source, 'test.twig');
