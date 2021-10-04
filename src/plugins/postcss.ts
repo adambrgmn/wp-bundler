@@ -1,5 +1,6 @@
 import * as fs from 'fs/promises';
 import postcss, { AcceptedPlugin } from 'postcss';
+import esbuild from 'esbuild';
 import postcssPresetEnv from 'postcss-preset-env';
 import { BundlerPlugin } from '../types';
 
@@ -7,6 +8,8 @@ const postcssPlugin: BundlerPlugin = ({ project }) => ({
   name: 'wp-bundler-postcss',
   async setup(build) {
     build.initialOptions.metafile = true;
+    let minify = build.initialOptions.minify ?? false;
+
     build.onEnd(async ({ metafile = { outputs: {} } }) => {
       let { outputs } = metafile;
       for (let outputFile of Object.keys(outputs)) {
@@ -16,7 +19,7 @@ const postcssPlugin: BundlerPlugin = ({ project }) => ({
 
         let plugins: AcceptedPlugin[] = [postcssPresetEnv()];
         let tailwindPath = project.paths.absolute('tailwind.config.js');
-        if (await exists(tailwindPath)) {
+        if ((await exists(tailwindPath)) && content.includes('@tailwind')) {
           plugins.unshift(require('tailwindcss')(tailwindPath));
         }
 
@@ -25,7 +28,13 @@ const postcssPlugin: BundlerPlugin = ({ project }) => ({
           to: outputPath,
         });
 
-        await fs.writeFile(outputPath, result.css);
+        let minified = result.css;
+        if (minify) {
+          let { code } = await esbuild.transform(minified, { loader: 'css', minify: true });
+          minified = code;
+        }
+
+        await fs.writeFile(outputPath, minified);
       }
     });
   },
