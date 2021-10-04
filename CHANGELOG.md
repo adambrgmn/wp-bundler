@@ -1,5 +1,33 @@
 # @fransvilhelm/wp-bundler
 
+## 1.2.0
+
+### Minor Changes
+
+- Extract translations from style.css (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#14](https://github.com/adambrgmn/wp-bundler/pull/14))
+- Extract translations from twig files (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#11](https://github.com/adambrgmn/wp-bundler/pull/11))
+- Extract translator comments when extracting translations (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#10](https://github.com/adambrgmn/wp-bundler/pull/10))
+- Extract translations from PHP files as part of the build step (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#10](https://github.com/adambrgmn/wp-bundler/pull/10))
+
+### Patch Changes
+
+- Ensure uniq references in po(t) files (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#8](https://github.com/adambrgmn/wp-bundler/pull/8))
+- Fix writing out proper po file (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#14](https://github.com/adambrgmn/wp-bundler/pull/14))
+- Emit proper translator comments (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#14](https://github.com/adambrgmn/wp-bundler/pull/14))
+- Properly minify css after postcss (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#13](https://github.com/adambrgmn/wp-bundler/pull/13))
+- Enable ignoring folders for message extraction (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#14](https://github.com/adambrgmn/wp-bundler/pull/14))
+- Fix merging po and pot files (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#13](https://github.com/adambrgmn/wp-bundler/pull/13))
+
 ## 1.1.1
 
 ### Patch Changes
