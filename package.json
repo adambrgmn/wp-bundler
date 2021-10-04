@@ -97,6 +97,7 @@
     "react": "^17.0.2",
     "strman": "^2.0.1",
     "ts-node": "^10.2.1",
+    "twing": "^5.0.2",
     "type-fest": "^2.3.4",
     "typescript": "^4.4.3",
     "xstate": "^4.25.0",
