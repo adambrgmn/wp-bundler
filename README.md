@@ -24,6 +24,7 @@ browsers as well.
   - [Usage](#usage)
 - [External dependencies](#external-dependencies)
 - [Translations](#translations)
+  - [PHP and Twig translations](#php-and-twig-translations)
 - [Other WordPress focused bundlers](#other-wordpress-focused-bundlers)
 - [Roadmap](#roadmap)
 - [LICENSE](#license)
@@ -267,9 +268,11 @@ every time you add a new translation a new entry will be created in your pot fil
 The `.po` files, configured in `translations.pos`, will then be used to emit `jed` formatted json files that the
 WordPress i18n package can handle.
 
-The bundler will also look for and extract translations from your projects `.php` and `.twig` files. It will find all of
-these files in you project, but ignoring the `vendor` and `node_modules` folders. This means that using this means you
-are no longer need to use `wp-cli i18n make-pot/make-json` to extract and generate translations.
+### PHP and Twig translations
+
+The bundler will also look for, and extract, translations from your projects `.php` and `.twig` files. It will find all
+of these files in you project, but ignoring the `vendor` and `node_modules` folders. This means that using this package
+means you are no longer need to use `wp-cli i18n make-pot/make-json` to extract and generate translations.
 
 `.mo` files will also me compiled from all your `.po` files.
 
