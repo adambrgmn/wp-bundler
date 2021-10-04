@@ -1,5 +1,14 @@
 # @fransvilhelm/wp-bundler
 
+## 1.2.0-next.1
+
+### Patch Changes
+
+- Properly minify css after postcss (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#13](https://github.com/adambrgmn/wp-bundler/pull/13))
+- Fix merging po and pot files (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#13](https://github.com/adambrgmn/wp-bundler/pull/13))
+
 ## 1.2.0-next.0
 
 ### Minor Changes
