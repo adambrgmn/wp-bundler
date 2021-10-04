@@ -4,7 +4,7 @@ import { Loader, PartialMessage, Plugin } from 'esbuild';
 import globby from 'globby';
 import md5 from 'md5';
 import { BundlerPlugin } from '../types';
-import { js, php, twig, TranslationMessage } from '../utils/extract-translations';
+import { js, php, twig, theme, TranslationMessage } from '../utils/extract-translations';
 import { Po } from '../utils/po';
 
 let name = 'wp-bundler-translations';
@@ -55,6 +55,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
     build.onEnd(async ({ metafile, warnings }) => {
       if (metafile == null) return;
 
+      translations.unshift(...(await findThemeTranslations(project.paths.root, translationsConfig.domain)));
       translations.push(
         ...(await findPhpTranslations(project.paths.root)),
         ...(await findTwigTranslations(project.paths.root)),
@@ -163,6 +164,15 @@ async function findTwigTranslations(cwd: string): Promise<TranslationMessage[]> 
   );
 
   return translations.flat();
+}
+
+async function findThemeTranslations(cwd: string, domain: string) {
+  try {
+    let source = await fs.readFile(path.join(cwd, 'style.css'), 'utf-8');
+    return theme.extractTranslations(source, 'style.css', domain);
+  } catch (error) {
+    return [];
+  }
 }
 
 function generateTranslationFilename(domain: string, language: string, file: string): string {
