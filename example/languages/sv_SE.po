@@ -39,7 +39,25 @@ msgstr "vad 5"
 msgid "wtf 6"
 msgstr "vad 6"
 
+#: src/admin.ts:22
+msgid "wtf 7"
+msgstr "vad 7"
+
+#: theme.php:11
+msgid "My string"
+msgstr "Min sträng"
+
+#: view.twig:1
+msgid "Hello world"
+msgstr "Hej världen"
+
 #: src/admin.ts:12
 msgctxt "any"
 msgid "wtf 1"
 msgstr "vad 1"
+
+# translators: Hello world
+#: theme.php:10
+msgctxt "context"
+msgid "My string"
+msgstr "Min sträng"
