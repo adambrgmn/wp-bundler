@@ -1,5 +1,21 @@
 # @fransvilhelm/wp-bundler
 
+## 1.2.0-next.0
+
+### Minor Changes
+
+- Extract translations from twig files (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#11](https://github.com/adambrgmn/wp-bundler/pull/11))
+- Extract translator comments when extracting translations (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#10](https://github.com/adambrgmn/wp-bundler/pull/10))
+- Extract translations from PHP files as part of the build step (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#10](https://github.com/adambrgmn/wp-bundler/pull/10))
+
+### Patch Changes
+
+- Ensure uniq references in po(t) files (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#8](https://github.com/adambrgmn/wp-bundler/pull/8))
+
 ## 1.1.1
 
 ### Patch Changes

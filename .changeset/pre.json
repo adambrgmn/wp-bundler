@@ -1,0 +1,13 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@fransvilhelm/wp-bundler": "1.1.1"
+  },
+  "changesets": [
+    "curly-ways-clean",
+    "empty-cars-cheer",
+    "forty-kiwis-invite",
+    "itchy-rings-approve"
+  ]
+}
