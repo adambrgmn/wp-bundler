@@ -80,11 +80,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
           continue;
         }
 
-        let buffer = po.toMo((translation) => {
-          if (translation.comments == null || translation.comments.reference === '') return true;
-          return translation.comments.reference.includes('.php');
-        });
-
+        let buffer = po.toMo();
         writes.push(fs.writeFile(po.filename.replace(/\.po$/, '.mo'), buffer));
 
         for (let distFile of Object.keys(metafile.outputs)) {
