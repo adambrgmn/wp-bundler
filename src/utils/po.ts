@@ -10,6 +10,7 @@ export class Po {
   constructor(source: string | Buffer, filename: string) {
     this.parsedTranslations = po.parse(source, 'utf-8');
     this.filename = filename;
+    this.parsedTranslations.headers['Plural-Forms'] = 'nplurals=2; plural=(n != 1);';
   }
 
   static async load(filename: string): Promise<Po> {
@@ -65,17 +66,16 @@ export class Po {
       translations[next.msgid] ?? {},
       next,
       (objValue: unknown, srcValue: unknown, key: string) => {
-        if (key === 'translator' && typeof srcValue === 'string') {
-          return srcValue !== '' ? srcValue : objValue;
-        }
-
         if (
-          ['reference', 'extracted', 'flag', 'previous'].includes(key) &&
+          ['extracted', 'reference', 'translator', 'flag', 'previous'].includes(key) &&
           typeof objValue === 'string' &&
           typeof srcValue === 'string'
         ) {
           let lines = [...objValue.trim().split('\n'), ...srcValue.trim().split('\n')];
-          return lines.filter((line, i, self) => !!line && self.indexOf(line) === i).join('\n');
+          return lines
+            .filter((line, i, self) => !!line && self.indexOf(line) === i)
+            .join('\n')
+            .replace(/translators:/gi, 'translators:');
         }
       },
     );
@@ -99,9 +99,6 @@ export class Po {
   }
 
   updateFromTemplate(pot: Po) {
-    this.parsedTranslations.headers['Plural-Forms'] =
-      pot.parsedTranslations.headers['Plural-Forms'] ?? 'nplurals=2; plural=(n != 1);';
-
     // Remove all unused translations
     for (let translation of this.translations) {
       if (!pot.has(translation.msgid, translation.msgctxt)) {
@@ -219,9 +216,9 @@ function messageToTranslationItem(message: TranslationMessage): GetTextTranslati
     msgid_plural: 'plural' in message ? message.plural : undefined,
     msgstr: [],
     comments: {
-      translator: message.translators ?? '',
+      translator: '',
       reference: `${message.location.file}:${message.location.line}`,
-      extracted: '',
+      extracted: message.translators ?? '',
       flag: '',
       previous: '',
     },
