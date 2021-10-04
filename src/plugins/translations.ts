@@ -57,8 +57,8 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
 
       translations.unshift(...(await findThemeTranslations(project.paths.root, translationsConfig.domain)));
       translations.push(
-        ...(await findPhpTranslations(project.paths.root)),
-        ...(await findTwigTranslations(project.paths.root)),
+        ...(await findPhpTranslations(project.paths.root, translationsConfig.domain, translationsConfig.ignore)),
+        ...(await findTwigTranslations(project.paths.root, translationsConfig.domain, translationsConfig.ignore)),
       );
 
       let pot = await Po.load(project.paths.absolute(translationsConfig.pot));
@@ -138,22 +138,27 @@ function validateTranslations(translations: TranslationMessage[]): PartialMessag
   return warnings;
 }
 
-async function findPhpTranslations(cwd: string): Promise<TranslationMessage[]> {
-  let files = await globby(['**/*.php', '!vendor', '!node_modules'], { cwd });
+async function findPhpTranslations(cwd: string, domain: string, ignore: string[] = []): Promise<TranslationMessage[]> {
+  let files = await globby(['**/*.php', '!vendor', '!node_modules', ...ignore.map((i) => '!' + i)], { cwd });
 
-  let translations: Array<TranslationMessage[]> = await Promise.all(
-    files.map(async (file) => {
-      let source = await fs.readFile(path.join(cwd, file), 'utf-8');
-      if (!php.mightHaveTranslations(source)) return [];
-      return php.extractTranslations(source, file);
-    }),
-  );
+  try {
+    let translations: Array<TranslationMessage[]> = await Promise.all(
+      files.map(async (file) => {
+        let source = await fs.readFile(path.join(cwd, file), 'utf-8');
+        if (!php.mightHaveTranslations(source)) return [];
+        return php.extractTranslations(source, file);
+      }),
+    );
 
-  return translations.flat();
+    return translations.flat().filter((translation) => translation.domain === domain);
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
 }
 
-async function findTwigTranslations(cwd: string): Promise<TranslationMessage[]> {
-  let files = await globby(['**/*.twig', '!vendor', '!node_modules'], { cwd });
+async function findTwigTranslations(cwd: string, domain: string, ignore: string[] = []): Promise<TranslationMessage[]> {
+  let files = await globby(['**/*.twig', '!vendor', '!node_modules', ...ignore.map((i) => '!' + i)], { cwd });
 
   let translations: Array<TranslationMessage[]> = await Promise.all(
     files.map(async (file) => {
@@ -163,7 +168,7 @@ async function findTwigTranslations(cwd: string): Promise<TranslationMessage[]> 
     }),
   );
 
-  return translations.flat();
+  return translations.flat().filter((translation) => translation.domain === domain);
 }
 
 async function findThemeTranslations(cwd: string, domain: string) {
