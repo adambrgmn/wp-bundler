@@ -141,20 +141,15 @@ function validateTranslations(translations: TranslationMessage[]): PartialMessag
 async function findPhpTranslations(cwd: string, domain: string, ignore: string[] = []): Promise<TranslationMessage[]> {
   let files = await globby(['**/*.php', '!vendor', '!node_modules', ...ignore.map((i) => '!' + i)], { cwd });
 
-  try {
-    let translations: Array<TranslationMessage[]> = await Promise.all(
-      files.map(async (file) => {
-        let source = await fs.readFile(path.join(cwd, file), 'utf-8');
-        if (!php.mightHaveTranslations(source)) return [];
-        return php.extractTranslations(source, file);
-      }),
-    );
+  let translations: Array<TranslationMessage[]> = await Promise.all(
+    files.map(async (file) => {
+      let source = await fs.readFile(path.join(cwd, file), 'utf-8');
+      if (!php.mightHaveTranslations(source)) return [];
+      return php.extractTranslations(source, file);
+    }),
+  );
 
-    return translations.flat().filter((translation) => translation.domain === domain);
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
+  return translations.flat().filter((translation) => translation.domain === domain);
 }
 
 async function findTwigTranslations(cwd: string, domain: string, ignore: string[] = []): Promise<TranslationMessage[]> {
