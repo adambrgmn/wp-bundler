@@ -109,7 +109,6 @@ export class Bundler extends EventEmitter {
         this.timingPlugin(),
         plugin.define(pluginOptions),
         plugin.externals(pluginOptions),
-        plugin.metafile(pluginOptions),
         plugin.php(pluginOptions),
         plugin.postcss(pluginOptions),
       ],
