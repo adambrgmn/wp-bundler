@@ -1,41 +1,34 @@
+import { PartialMessage } from 'esbuild';
 import * as fs from 'fs/promises';
-import postcss, { AcceptedPlugin } from 'postcss';
-import esbuild from 'esbuild';
+import * as path from 'path';
+import postcss, { AcceptedPlugin, Warning } from 'postcss';
 import postcssPresetEnv from 'postcss-preset-env';
 import { BundlerPlugin } from '../types';
 
+const pluginName = 'wp-bundler-postcss';
+
 const postcssPlugin: BundlerPlugin = ({ project }) => ({
-  name: 'wp-bundler-postcss',
+  name: pluginName,
   async setup(build) {
-    build.initialOptions.metafile = true;
-    let minify = build.initialOptions.minify ?? false;
+    let plugins: AcceptedPlugin[] = [postcssPresetEnv()];
+    let tailwindPath = project.paths.absolute('tailwind.config.js');
+    if (await exists(tailwindPath)) {
+      plugins.unshift(require('tailwindcss')(tailwindPath));
+    }
 
-    build.onEnd(async ({ metafile = { outputs: {} } }) => {
-      let { outputs } = metafile;
-      for (let outputFile of Object.keys(outputs)) {
-        if (!outputFile.match(/\.css$/)) continue;
-        let outputPath = project.paths.absolute(outputFile);
-        let content = await fs.readFile(outputPath, 'utf-8');
+    let processor = postcss(plugins);
+    let namespace = 'wp-bundler-postcss';
 
-        let plugins: AcceptedPlugin[] = [postcssPresetEnv()];
-        let tailwindPath = project.paths.absolute('tailwind.config.js');
-        if ((await exists(tailwindPath)) && content.includes('@tailwind')) {
-          plugins.unshift(require('tailwindcss')(tailwindPath));
-        }
+    build.onResolve({ filter: /\.css$/ }, (args) => {
+      return { path: path.join(path.dirname(args.importer), args.path), namespace, pluginName };
+    });
 
-        let result = await postcss(plugins).process(content, {
-          from: outputPath,
-          to: outputPath,
-        });
+    build.onLoad({ filter: /.*/, namespace }, async (args) => {
+      let content = await fs.readFile(args.path, 'utf-8');
+      let result = await processor.process(content, { from: args.path, to: args.path });
+      let warnings = transformPostcssWarnings(args.path.replace(/^wp-bundler-postcss:/, ''), result.warnings());
 
-        let minified = result.css;
-        if (minify) {
-          let { code } = await esbuild.transform(minified, { loader: 'css', minify: true });
-          minified = code;
-        }
-
-        await fs.writeFile(outputPath, minified);
-      }
+      return { contents: result.css, loader: 'css', pluginName, warnings };
     });
   },
 });
@@ -49,4 +42,21 @@ async function exists(file: string) {
   } catch (error) {
     return false;
   }
+}
+
+function transformPostcssWarnings(file: string, warnings: Warning[]): PartialMessage[] {
+  return warnings.map((warn) => {
+    return {
+      text: warn.text,
+      location: {
+        file,
+        namespace: '',
+        line: warn.line, // 1-based
+        column: warn.column, // 0-based, in bytes
+        length: 0, // in bytes
+        lineText: warn.node.toString(),
+        suggestion: '',
+      },
+    };
+  });
 }
