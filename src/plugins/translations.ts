@@ -76,7 +76,8 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
 
       let writes: Promise<unknown>[] = [];
       for (let po of pos) {
-        if (po.language == null) {
+        let language = po.header('Language');
+        if (language == null) {
           missingLangWarnings.push(po);
           continue;
         }
@@ -93,7 +94,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
           });
 
           if (jed == null) continue;
-          let filename = generateTranslationFilename(translationsConfig.domain, po.headers.Language, distFile);
+          let filename = generateTranslationFilename(translationsConfig.domain, language, distFile);
           writes.push(fs.writeFile(path.join(langDir, filename), JSON.stringify(jed)));
         }
       }

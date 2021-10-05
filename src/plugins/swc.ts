@@ -3,7 +3,7 @@ import swcCore from '@swc/core';
 import { BundlerPlugin } from '../types';
 
 export const swc: BundlerPlugin = () => ({
-  name: 'babel',
+  name: 'wp-bundler-swc',
   setup(build) {
     build.onLoad({ filter: /.(js|ts|tsx|jsx)$/, namespace: '' }, async (args) => {
       const contents = await fs.readFile(args.path, 'utf-8');

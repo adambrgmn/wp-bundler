@@ -37,5 +37,3 @@ jobs:
 
       - name: Build
         run: yarn build
-# Old cache 1+1+41+62=105
-# Without cache 1+1+41+62=105

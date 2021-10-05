@@ -112,7 +112,6 @@ export class Bundler extends EventEmitter {
         plugin.metafile(pluginOptions),
         plugin.php(pluginOptions),
         plugin.postcss(pluginOptions),
-        plugin.translations(pluginOptions),
       ],
     };
 
@@ -128,6 +127,7 @@ export class Bundler extends EventEmitter {
     if (build || nomodule) {
       let ignored = ['wp-bundler-php'];
       options.plugins = options.plugins?.filter((p) => !ignored.includes(p.name));
+      options.plugins?.push(plugin.translations(pluginOptions));
     }
 
     return options;
