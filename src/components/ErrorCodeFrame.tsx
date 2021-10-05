@@ -20,7 +20,8 @@ export const ErrorCodeFrame: React.FC<{
     return (
       <Box flexDirection="column">
         <Text>
-          {figures.circle} {prefix} <Link url={`file://${frame.sourcePath}`}>{frame.location.file}</Link>:
+          {figures.circle} {prefix}{' '}
+          <Link url={`file://${frame.sourcePath}`}>{cleanupPath(frame.location.file, cwd)}</Link>:
         </Text>
         <Box flexDirection="column">
           {frame.text.split('\n').map((line, i) => (
@@ -60,11 +61,15 @@ function getFrame(error: Message, cwd: string): { text: string; location: Locati
 
   try {
     let { location } = error;
-    let sourcePath = path.join(cwd, location.file.replace(cwd, ''));
+    let sourcePath = path.join(cwd, cleanupPath(location.file, cwd));
     let source = fs.readFileSync(sourcePath, 'utf-8');
-    let sourceLocation = {
-      start: { line: error.location.line, column: error.location.column },
-    };
+
+    let lines = source.split('\n');
+    let line = Math.min(error.location.line, lines.length);
+    let column = Math.min(error.location.column, lines[line - 1].length - 1);
+
+    let sourceLocation = { start: { line, column } };
+
     let frame = codeFrameColumns(source, sourceLocation, {
       highlightCode: true,
       message: error.text,
@@ -83,4 +88,11 @@ function getFrame(error: Message, cwd: string): { text: string; location: Locati
   } catch (error) {
     return null;
   }
+}
+
+function cleanupPath(file: string, cwd: string) {
+  return file
+    .replace(/^wp-bundler-.+:/, '')
+    .replace(cwd, '')
+    .replace(/^\//, './');
 }
