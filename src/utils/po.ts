@@ -1,14 +1,52 @@
 import * as fs from 'fs/promises';
 import { po, mo, GetTextTranslations, GetTextTranslation } from 'gettext-parser';
 import mergeWith from 'lodash.mergewith';
-import { TranslationMessage } from './extract-translations';
+import * as z from 'zod';
+import { TranslationMessage, isTranslationMessage, isContextMessage, isPluralMessage } from './extract-translations';
+
+const GetTextTranslationSchema = z.object({
+  msgctxt: z.string().optional(),
+  msgid: z.string().nonempty(),
+  msgid_plural: z.string().nonempty().optional(),
+  msgstr: z.array(z.string()),
+  comments: z
+    .object({
+      translator: z.string().default(''),
+      reference: z.string().default(''),
+      extracted: z.string().default(''),
+      flag: z.string().default(''),
+      previous: z.string().default(''),
+    })
+    .default({}),
+});
+
+function parse(source: string | Buffer) {
+  let result = po.parse(source);
+  for (let key of Object.keys(result.translations)) {
+    let context = result.translations[key];
+    result.translations[key] = Object.entries(context).reduce<GetTextTranslations['translations'][string]>(
+      (acc, [key, translation]) => {
+        if (key === '') {
+          acc[key] = translation;
+        } else {
+          acc[key] = GetTextTranslationSchema.parse(translation);
+        }
+
+        return acc;
+      },
+      {},
+    );
+  }
+
+  return result;
+}
 
 export class Po {
   private parsedTranslations: GetTextTranslations;
   public filename: string;
 
   constructor(source: string | Buffer, filename: string) {
-    this.parsedTranslations = po.parse(source, 'utf-8');
+    this.parsedTranslations = parse(source);
     this.filename = filename;
     this.parsedTranslations.headers['Plural-Forms'] = 'nplurals=2; plural=(n != 1);';
   }
@@ -60,7 +98,10 @@ export class Po {
   }
 
   set(message: TranslationMessage | GetTextTranslation, mergeComments: boolean = true) {
-    let next = isTranslationMessage(message) ? messageToTranslationItem(message) : message;
+    let next = isTranslationMessage(message)
+      ? messageToTranslationItem(message)
+      : GetTextTranslationSchema.parse(message);
+
     let context = this.createContext(next.msgctxt ?? '');
     let current = this.get(next.msgid, next.msgctxt) ?? next;
 
@@ -219,24 +260,17 @@ interface JedFormat<Domain extends string = 'messages'> {
   locale_data: LocaleData<Domain>;
 }
 
-function isTranslationMessage(value: any): value is TranslationMessage {
-  return value != null && ('text' in value || 'single' in value);
-}
-
-function messageToTranslationItem(message: TranslationMessage): GetTextTranslation {
-  return {
-    msgctxt: 'context' in message ? message.context : undefined,
-    msgid: 'single' in message ? message.single : message.text,
-    msgid_plural: 'plural' in message ? message.plural : undefined,
+function messageToTranslationItem(message: TranslationMessage) {
+  return GetTextTranslationSchema.parse({
+    msgctxt: isContextMessage(message) ? message.context : undefined,
+    msgid: isPluralMessage(message) ? message.single : message.text,
+    msgid_plural: isPluralMessage(message) ? message.plural : undefined,
     msgstr: [],
     comments: {
-      translator: '',
       reference: `${message.location.file}:${message.location.line}`,
       extracted: message.translators ?? '',
-      flag: '',
-      previous: '',
     },
-  };
+  });
 }
 
 function compareTranslations(a: GetTextTranslation, b: GetTextTranslation) {
