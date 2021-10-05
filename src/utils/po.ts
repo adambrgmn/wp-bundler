@@ -13,6 +13,12 @@ export class Po {
     this.parsedTranslations.headers['Plural-Forms'] = 'nplurals=2; plural=(n != 1);';
   }
 
+  static UNUSED_COMMENT = 'THIS TRANSLATION IS NO LONGER REFERENCED INSIDE YOUR PROJECT';
+
+  static isUnused(translation: GetTextTranslation) {
+    return translation.comments?.translator === Po.UNUSED_COMMENT;
+  }
+
   static async load(filename: string): Promise<Po> {
     try {
       let source = await fs.readFile(filename);
@@ -33,7 +39,7 @@ export class Po {
   }
 
   async write(filename = this.filename) {
-    await fs.writeFile(filename, this.toString());
+    await fs.writeFile(filename, this.toString() + '\n');
   }
 
   has(id: string, context: string = '') {
@@ -53,32 +59,29 @@ export class Po {
     return this.parsedTranslations.translations[context] ?? undefined;
   }
 
-  set(message: TranslationMessage | GetTextTranslation) {
+  set(message: TranslationMessage | GetTextTranslation, mergeComments: boolean = true) {
     let next = isTranslationMessage(message) ? messageToTranslationItem(message) : message;
+    let context = this.createContext(next.msgctxt ?? '');
+    let current = this.get(next.msgid, next.msgctxt) ?? next;
 
-    let translations = this.parsedTranslations.translations[next.msgctxt ?? ''];
-    if (translations == null) {
-      this.parsedTranslations.translations[next.msgctxt ?? ''] = {};
-      translations = this.parsedTranslations.translations[next.msgctxt ?? ''];
-    }
+    context[next.msgid] = mergeWith(current, next, (objValue: unknown, srcValue: unknown, key: string) => {
+      let keysToMerge = mergeComments ? ['reference', 'extracted', 'translator', 'flag', 'previous'] : ['translator'];
+      if (keysToMerge.includes(key) && typeof objValue === 'string' && typeof srcValue === 'string') {
+        let lines = [...objValue.trim().split('\n'), ...srcValue.trim().split('\n')];
+        return lines
+          .filter((line, i, self) => !!line && self.indexOf(line) === i)
+          .join('\n')
+          .replace(/translators:/gi, 'translators:');
+      }
+    });
+  }
 
-    translations[next.msgid] = mergeWith(
-      translations[next.msgid] ?? {},
-      next,
-      (objValue: unknown, srcValue: unknown, key: string) => {
-        if (
-          ['extracted', 'reference', 'translator', 'flag', 'previous'].includes(key) &&
-          typeof objValue === 'string' &&
-          typeof srcValue === 'string'
-        ) {
-          let lines = [...objValue.trim().split('\n'), ...srcValue.trim().split('\n')];
-          return lines
-            .filter((line, i, self) => !!line && self.indexOf(line) === i)
-            .join('\n')
-            .replace(/translators:/gi, 'translators:');
-        }
-      },
-    );
+  createContext(context: string): GetTextTranslations['translations'][string] {
+    let existing = this.getContext(context);
+    if (existing != null) return existing;
+
+    this.parsedTranslations.translations[context] = {};
+    return this.parsedTranslations.translations[context];
   }
 
   remove(id: string, context: string = '') {
@@ -99,21 +102,37 @@ export class Po {
   }
 
   updateFromTemplate(pot: Po) {
+    let removed: GetTextTranslation[] = [];
+
     // Remove all unused translations
     for (let translation of this.translations) {
       if (!pot.has(translation.msgid, translation.msgctxt)) {
+        removed.push(translation);
         this.remove(translation.msgid, translation.msgctxt);
       }
     }
 
     // Set or update existing ones
     for (let translation of pot.translations) {
+      this.set(translation, false);
+    }
+
+    // Append removed translations at the end
+    for (let translation of removed) {
+      translation.comments = {
+        translator: Po.UNUSED_COMMENT,
+        reference: '',
+        extracted: '',
+        flag: '',
+        previous: '',
+      };
+
       this.set(translation);
     }
   }
 
   toString() {
-    let buffer = po.compile(this.parsedTranslations);
+    let buffer = po.compile(this.parsedTranslations, { sort: compareTranslations });
     return buffer.toString('utf-8');
   }
 
@@ -155,8 +174,8 @@ export class Po {
 
     if (Object.keys(translations).length < 1) return null;
 
-    let lang = this.parsedTranslations.headers['Language'] ?? '';
-    let pluralForms = this.parsedTranslations.headers['Plural-Forms'] ?? '';
+    let lang = this.header('Language') ?? '';
+    let pluralForms = this.header('Plural-Forms') ?? '';
 
     return {
       domain,
@@ -169,24 +188,19 @@ export class Po {
     };
   }
 
-  get translations() {
-    let translations: GetTextTranslation[] = [];
-
-    for (let ctx of Object.values(this.parsedTranslations.translations)) {
-      translations.push(...Object.values(ctx));
-    }
-
-    return translations;
-  }
-
-  get language(): string | null {
-    let language = this.parsedTranslations.headers['Language'];
-    if (language == null || language === '') return null;
-    return language;
+  header(header: string): string | null {
+    return this.headers[header] ?? null;
   }
 
   get headers() {
     return this.parsedTranslations.headers;
+  }
+
+  get translations() {
+    return Object.values(this.parsedTranslations.translations)
+      .flatMap((ctx) => Object.values(ctx))
+      .filter(({ msgid }) => msgid !== '')
+      .sort(compareTranslations);
   }
 }
 
@@ -223,4 +237,14 @@ function messageToTranslationItem(message: TranslationMessage): GetTextTranslati
       previous: '',
     },
   };
+}
+
+function compareTranslations(a: GetTextTranslation, b: GetTextTranslation) {
+  if (Po.isUnused(a) && !Po.isUnused(b)) return 1;
+  if (!Po.isUnused(a) && Po.isUnused(b)) return -1;
+
+  let sort = a.msgid.localeCompare(b.msgid);
+  if (sort === 0) sort = (a.msgctxt ?? '').localeCompare(b.msgctxt ?? '');
+
+  return sort;
 }
