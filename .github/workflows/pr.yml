@@ -3,8 +3,8 @@ name: Pull Request
 on: pull_request
 
 jobs:
-  validate:
-    name: Validate
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -13,7 +13,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@master
         with:
-          node-version: 14.x
+          node-version: 12.x
 
       - name: Restore dep cache
         uses: actions/cache@v2
@@ -26,16 +26,34 @@ jobs:
       - name: Install
         run: yarn
 
+  lint:
+    name: Lint
+    needs: 'setup'
+    runs-on: 'ubuntu-latest'
+    steps:
       - name: Lint
         run: yarn lint
 
+  type:
+    name: Type Check
+    needs: 'setup'
+    runs-on: 'ubuntu-latest'
+    steps:
       - name: Type Check
         run: yarn type-check
 
+  test:
+    name: Test
+    needs: 'setup'
+    runs-on: 'ubuntu-latest'
+    steps:
       - name: Test
         run: yarn test --coverage
 
+  build:
+    name: Build
+    needs: 'setup'
+    runs-on: 'ubuntu-latest'
+    steps:
       - name: Build
-        run: yarn build
-# Old cache 1+1+41+62=105
-# Without cache 1+1+41+62=105
+        run: yarn Build
