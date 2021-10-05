@@ -1,4 +1,7 @@
 module.exports = {
   testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  transform: {
+    '^.+\\.tsx?$': require.resolve('./test/transformer.js'),
+    '^.+\\.jsx?$': require.resolve('./test/transformer.js'),
+  },
 };
