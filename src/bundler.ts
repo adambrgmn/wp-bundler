@@ -7,6 +7,7 @@ import { readPkg } from './utils/read-pkg';
 import { BundlerConfigSchema, BundlerConfig } from './schema';
 import { createAssetLoaderTemplate } from './utils/asset-loader';
 import { rimraf } from './utils/rimraf';
+import { isNotNullable } from './utils/assert';
 
 interface BundlerEvents {
   'rebuild.init': void;
@@ -109,24 +110,17 @@ export class Bundler extends EventEmitter {
         this.timingPlugin(),
         plugin.define(pluginOptions),
         plugin.externals(pluginOptions),
-        plugin.php(pluginOptions),
         plugin.postcss(pluginOptions),
-      ],
+        !build && !nomodule ? plugin.php(pluginOptions) : null,
+        build && !nomodule ? plugin.translations(pluginOptions) : null,
+        nomodule ? plugin.swc(pluginOptions) : null,
+      ].filter(isNotNullable),
     };
 
     if (nomodule) {
       options.format = 'iife';
       options.entryNames = `${options.entryNames}.nomodule`;
       options.target = 'es5';
-      let ignored = ['wp-bundler-translations', 'wp-bundler-manifest'];
-      options.plugins = options.plugins?.filter((p) => !ignored.includes(p.name));
-      options.plugins!.push(plugin.swc(pluginOptions));
-    }
-
-    if (build || nomodule) {
-      let ignored = ['wp-bundler-php'];
-      options.plugins = options.plugins?.filter((p) => !ignored.includes(p.name));
-      options.plugins?.push(plugin.translations(pluginOptions));
     }
 
     return options;

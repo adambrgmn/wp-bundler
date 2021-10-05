@@ -105,28 +105,28 @@ it('outputs proper JED with `.toJed`', async () => {
   po.set({ msgid: 'Hello', msgstr: ['Hejsan'], msgctxt: 'relaxed' });
 
   expect(po.toJed('wp')).toMatchInlineSnapshot(`
-Object {
-  "domain": "wp",
-  "locale_data": Object {
-    "wp": Object {
-      "": Object {
-        "domain": "wp",
-        "lang": "",
-        "plural-forms": "nplurals=2; plural=(n != 1);",
+    Object {
+      "domain": "wp",
+      "locale_data": Object {
+        "wp": Object {
+          "": Object {
+            "domain": "wp",
+            "lang": "",
+            "plural-forms": "nplurals=2; plural=(n != 1);",
+          },
+          "Hello": Array [
+            "Hej",
+          ],
+          "World": Array [
+            "Världen",
+          ],
+          "relaxedHello": Array [
+            "Hejsan",
+          ],
+        },
       },
-      "Hello": Array [
-        "Hej",
-      ],
-      "World": Array [
-        "Världen",
-      ],
-      "relaxedHello": Array [
-        "Hejsan",
-      ],
-    },
-  },
-}
-`);
+    }
+  `);
 });
 
 it('outputs proper JED with `.toJed` with filtered translations', async () => {
@@ -137,22 +137,22 @@ it('outputs proper JED with `.toJed` with filtered translations', async () => {
   po.set({ msgid: 'Hello', msgstr: ['Hejsan'], msgctxt: 'relaxed' });
 
   expect(po.toJed('wp', ({ msgctxt }) => msgctxt === 'relaxed')).toMatchInlineSnapshot(`
-Object {
-  "domain": "wp",
-  "locale_data": Object {
-    "wp": Object {
-      "": Object {
-        "domain": "wp",
-        "lang": "",
-        "plural-forms": "nplurals=2; plural=(n != 1);",
+    Object {
+      "domain": "wp",
+      "locale_data": Object {
+        "wp": Object {
+          "": Object {
+            "domain": "wp",
+            "lang": "",
+            "plural-forms": "nplurals=2; plural=(n != 1);",
+          },
+          "relaxed\u0004Hello": Array [
+            "Hejsan",
+          ],
+        },
       },
-      "relaxed\u0004Hello": Array [
-        "Hejsan",
-      ],
-    },
-  },
-}
-`);
+    }
+  `);
 });
 
 it('will output translations sorted by their msgid then their msgctxt', async () => {
@@ -168,26 +168,60 @@ it('will output translations sorted by their msgid then their msgctxt', async ()
 
   expect(po1.toString()).toEqual(po2.toString());
   expect(po1.toString()).toMatchInlineSnapshot(`
-"msgid \\"\\"
-msgstr \\"\\"
-\\"Plural-Forms: nplurals=2; plural=(n != 1);\\\\n\\"
-\\"Content-Type: text/plain; charset=utf-8\\\\n\\"
-\\"Content-Transfer-Encoding: 8bit\\\\n\\"
-\\"MIME-Version: 1.0\\\\n\\"
+    "msgid \\"\\"
+    msgstr \\"\\"
+    \\"Plural-Forms: nplurals=2; plural=(n != 1);\\\\n\\"
+    \\"Content-Type: text/plain; charset=utf-8\\\\n\\"
+    \\"Content-Transfer-Encoding: 8bit\\\\n\\"
+    \\"MIME-Version: 1.0\\\\n\\"
 
-#: test.ts:1
-msgid \\"A\\"
-msgstr \\"\\"
+    #: test.ts:1
+    msgid \\"A\\"
+    msgstr \\"\\"
 
-#: test.ts:1
-msgctxt \\"context\\"
-msgid \\"A\\"
-msgstr \\"\\"
+    #: test.ts:1
+    msgctxt \\"context\\"
+    msgid \\"A\\"
+    msgstr \\"\\"
 
-#: test.ts:1
-msgid \\"B\\"
-msgstr \\"\\""
-`);
+    #: test.ts:1
+    msgid \\"B\\"
+    msgstr \\"\\""
+  `);
+});
+
+it('should not overwrite headers in po file when updating from pot', async () => {
+  let po = new Po(
+    `
+  msgid ""
+  msgstr ""
+  "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+  "Content-Type: text/plain; charset=UTF-8\n"
+  "Content-Transfer-Encoding: 8bit\n"
+  "MIME-Version: 1.0\n"
+  "Language: en_US\n"
+  `,
+    'test.po',
+  );
+  let pot = await Po.load('test.pot');
+
+  pot.set({ text: 'a', domain: 'wp', location: createLocation() });
+
+  po.updateFromTemplate(pot);
+
+  expect(po.toString()).toMatchInlineSnapshot(`
+    "msgid \\"\\"
+    msgstr \\"\\"
+    \\"Plural-Forms: nplurals=2; plural=(n != 1);\\\\n\\"
+    \\"Content-Type: text/plain; charset=utf-8\\\\n\\"
+    \\"Content-Transfer-Encoding: 8bit\\\\n\\"
+    \\"MIME-Version: 1.0\\\\n\\"
+    \\"Language: en_US\\\\n\\"
+
+    #: test.ts:1
+    msgid \\"a\\"
+    msgstr \\"\\""
+  `);
 });
 
 function createLocation(replace: Partial<Location> = {}): Location {
