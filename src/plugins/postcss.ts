@@ -17,18 +17,20 @@ const postcssPlugin: BundlerPlugin = ({ project }) => ({
     }
 
     let processor = postcss(plugins);
-    let namespace = 'wp-bundler-postcss';
 
     build.onResolve({ filter: /\.css$/ }, (args) => {
-      return { path: path.join(path.dirname(args.importer), args.path), namespace, pluginName };
+      return { path: path.join(args.resolveDir, args.path), namespace: 'file', pluginName };
     });
 
-    build.onLoad({ filter: /.*/, namespace }, async (args) => {
-      let content = await fs.readFile(args.path, 'utf-8');
-      let result = await processor.process(content, { from: args.path, to: args.path });
-      let warnings = transformPostcssWarnings(args.path.replace(/^wp-bundler-postcss:/, ''), result.warnings());
+    build.onLoad({ filter: /\.css$/, namespace: 'file' }, async (args) => {
+      let contents = await fs.readFile(args.path, 'utf-8');
+      let result = await processor.process(contents, { from: args.path, to: args.path });
+      let warnings = transformPostcssWarnings(args.path, result.warnings());
 
-      return { contents: result.css, loader: 'css', pluginName, warnings };
+      // There's an issue with tailwinds [focus-within] utils that this is trying to resolve
+      contents = result.css.replace(/\\\[focus-within\]/g, '[focus-within]');
+
+      return { contents, loader: 'css', pluginName, warnings, resolveDir: path.dirname(args.path) };
     });
   },
 });
