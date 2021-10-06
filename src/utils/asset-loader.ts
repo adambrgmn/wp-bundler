@@ -27,6 +27,7 @@ export function createAssetLoaderTemplate({ config, bundler, project }: BundlerP
   let compile = createTemplate(readFileSync(templatePath, 'utf-8'));
 
   return async ({ metafile }: Pick<TemplateCompileOptions, 'metafile'>) => {
+    await fs.mkdir(path.dirname(templateOutPath), { recursive: true });
     await fs.writeFile(templateOutPath, compile({ metafile, config, bundler }));
   };
 }

@@ -29,12 +29,17 @@ export class Bundler extends EventEmitter {
   }
 
   async build() {
-    let results = await Promise.all([
-      esbuild.build(this.createBundlerOptions({ build: true })),
-      esbuild.build(this.createBundlerOptions({ build: true, nomodule: true })),
-    ]);
+    let options = this.createBundlerOptions();
+    options.plugins!.push(plugin.translations(this.pluginOptions()));
 
-    let result = results.reduce((acc, next) => merge(acc, next), {} as BuildResult);
+    let nomoduleOptions = this.createBundlerOptions();
+    nomoduleOptions.format = 'iife';
+    nomoduleOptions.entryNames = `${nomoduleOptions.entryNames}.nomodule`;
+    nomoduleOptions.target = 'es5';
+    nomoduleOptions.plugins!.push(plugin.swc(this.pluginOptions()));
+
+    let results = await Promise.all([esbuild.build(options), esbuild.build(nomoduleOptions)]);
+    let result = merge(...results);
 
     ensureMetafile(result);
 
@@ -54,6 +59,8 @@ export class Bundler extends EventEmitter {
   async watch() {
     let buildOptions = this.createBundlerOptions();
     buildOptions.watch = true;
+    buildOptions.plugins!.push(plugin.php(this.pluginOptions()));
+
     let result = await esbuild.build(buildOptions);
     ensureMetafile(result);
     return result;
@@ -73,13 +80,17 @@ export class Bundler extends EventEmitter {
     this.prepared = true;
   }
 
-  private createBundlerOptions({ build, nomodule }: { build?: boolean; nomodule?: boolean } = {}): BuildOptions {
-    let pluginOptions: BundlerPluginOptions = {
+  private pluginOptions(): BundlerPluginOptions {
+    return {
       mode: this.mode,
       config: this.config,
       project: this.project,
       bundler: this.bundler,
     };
+  }
+
+  private createBundlerOptions(): BuildOptions {
+    let pluginOptions = this.pluginOptions();
 
     let options: BuildOptions = {
       entryPoints: this.config.entryPoints,
@@ -109,26 +120,9 @@ export class Bundler extends EventEmitter {
         this.timingPlugin(),
         plugin.define(pluginOptions),
         plugin.externals(pluginOptions),
-        plugin.metafile(pluginOptions),
-        plugin.php(pluginOptions),
         plugin.postcss(pluginOptions),
       ],
     };
-
-    if (nomodule) {
-      options.format = 'iife';
-      options.entryNames = `${options.entryNames}.nomodule`;
-      options.target = 'es5';
-      let ignored = ['wp-bundler-translations', 'wp-bundler-manifest'];
-      options.plugins = options.plugins?.filter((p) => !ignored.includes(p.name));
-      options.plugins!.push(plugin.swc(pluginOptions));
-    }
-
-    if (build || nomodule) {
-      let ignored = ['wp-bundler-php'];
-      options.plugins = options.plugins?.filter((p) => !ignored.includes(p.name));
-      options.plugins?.push(plugin.translations(pluginOptions));
-    }
 
     return options;
   }

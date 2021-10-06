@@ -2,9 +2,9 @@ import React from 'react';
 import { Transform, Text } from 'ink';
 
 export const Link: React.FC<{ url: string }> = ({ url, children }) => {
-  let supportsHyperlinks = process.stdout.isTTY && 'CI' in process.env;
+  let supportsHyperlinks = process.stdout.isTTY && !('CI' in process.env);
   if (!supportsHyperlinks) {
-    return <Text>{children}</Text>;
+    return <Text>nolink{children}</Text>;
   }
 
   return (
