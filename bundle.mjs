@@ -6,11 +6,7 @@ const args = process.argv.slice(2);
 (async () => {
   const pkg = JSON.parse(await fs.readFile('./package.json', 'utf-8'));
   const watch = args.includes('--watch') || args.includes('-w');
-  let external = [
-    ...Object.keys(pkg.dependencies),
-    ...Object.keys(pkg.peerDependencies),
-    ...Object.keys(pkg.optionalDependencies),
-  ];
+  let external = [...Object.keys(pkg.dependencies), ...Object.keys(pkg.peerDependencies)];
 
   try {
     await build({
