@@ -4,11 +4,11 @@ import * as fs from 'fs/promises';
 const args = process.argv.slice(2);
 
 (async () => {
-  const pkg = JSON.parse(await fs.readFile('./package.json', 'utf-8'));
-  const watch = args.includes('--watch') || args.includes('-w');
-  let external = [...Object.keys(pkg.dependencies), ...Object.keys(pkg.peerDependencies)];
-
   try {
+    const pkg = JSON.parse(await fs.readFile('./package.json', 'utf-8'));
+    const watch = args.includes('--watch') || args.includes('-w');
+    let external = [...Object.keys(pkg.dependencies), ...Object.keys(pkg.peerDependencies)];
+
     await build({
       entryPoints: ['./src/index.ts'],
       bundle: true,
