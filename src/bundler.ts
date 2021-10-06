@@ -30,7 +30,7 @@ export class Bundler extends EventEmitter {
 
   async build() {
     let options = this.createBundlerOptions();
-    options.plugins!.push(plugin.translations(this.pluginOptions()));
+    options.plugins!.push(plugin.translations(this.pluginOptions()), plugin.postcss(this.pluginOptions()));
 
     let nomoduleOptions = this.createBundlerOptions();
     nomoduleOptions.format = 'iife';
@@ -59,7 +59,7 @@ export class Bundler extends EventEmitter {
   async watch() {
     let buildOptions = this.createBundlerOptions();
     buildOptions.watch = true;
-    buildOptions.plugins!.push(plugin.php(this.pluginOptions()));
+    buildOptions.plugins!.push(plugin.php(this.pluginOptions()), plugin.postcss(this.pluginOptions()));
 
     let result = await esbuild.build(buildOptions);
     ensureMetafile(result);
@@ -78,15 +78,6 @@ export class Bundler extends EventEmitter {
 
     await rimraf(this.project.paths.absolute(this.config.outdir));
     this.prepared = true;
-  }
-
-  private pluginOptions(): BundlerPluginOptions {
-    return {
-      mode: this.mode,
-      config: this.config,
-      project: this.project,
-      bundler: this.bundler,
-    };
   }
 
   private createBundlerOptions(): BuildOptions {
@@ -116,15 +107,19 @@ export class Bundler extends EventEmitter {
       logLevel: 'silent',
       // publicPath: 'https://www.example.com/v1',
 
-      plugins: [
-        this.timingPlugin(),
-        plugin.define(pluginOptions),
-        plugin.externals(pluginOptions),
-        plugin.postcss(pluginOptions),
-      ],
+      plugins: [this.timingPlugin(), plugin.define(pluginOptions), plugin.externals(pluginOptions)],
     };
 
     return options;
+  }
+
+  private pluginOptions(): BundlerPluginOptions {
+    return {
+      mode: this.mode,
+      config: this.config,
+      project: this.project,
+      bundler: this.bundler,
+    };
   }
 
   private timingPlugin(): esbuild.Plugin {

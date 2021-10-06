@@ -7,15 +7,10 @@ import { BundlerPlugin } from '../types';
 
 const pluginName = 'wp-bundler-postcss';
 
-const postcssPlugin: BundlerPlugin = ({ project }) => ({
+const postcssPlugin: BundlerPlugin = () => ({
   name: pluginName,
   async setup(build) {
     let plugins: AcceptedPlugin[] = [postcssPresetEnv()];
-    let tailwindPath = project.paths.absolute('tailwind.config.js');
-    if (await exists(tailwindPath)) {
-      plugins.unshift(require('tailwindcss')(tailwindPath));
-    }
-
     let processor = postcss(plugins);
 
     build.onResolve({ filter: /\.css$/ }, (args) => {
@@ -27,24 +22,12 @@ const postcssPlugin: BundlerPlugin = ({ project }) => ({
       let result = await processor.process(contents, { from: args.path, to: args.path });
       let warnings = transformPostcssWarnings(args.path, result.warnings());
 
-      // There's an issue with tailwinds [focus-within] utils that this is trying to resolve
-      contents = result.css.replace(/\\\[focus-within\]/g, '[focus-within]');
-
       return { contents, loader: 'css', pluginName, warnings, resolveDir: path.dirname(args.path) };
     });
   },
 });
 
 export { postcssPlugin as postcss };
-
-async function exists(file: string) {
-  try {
-    await fs.access(file);
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
 
 function transformPostcssWarnings(file: string, warnings: Warning[]): PartialMessage[] {
   return warnings.map((warn) => {
