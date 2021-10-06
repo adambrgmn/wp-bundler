@@ -13,9 +13,17 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "Last-Translator: \n"
 
+#: src/app.tsx:11
+msgid "Click me"
+msgstr "Klicka"
+
 #: view.twig:1
 msgid "Hello world"
 msgstr "Hej världen"
+
+#: src/app.tsx:10
+msgid "Hello world!"
+msgstr "Hej världen!"
 
 #: theme.php:11
 msgid "My string"

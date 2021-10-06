@@ -1,15 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { __ } from '@wordpress/i18n';
 import { Button } from './components/Button';
 import './app.css';
 
 const App: React.FC = () => {
-  // @ts-ignore
-  console.log(process.env.NODE_ENV, __DEV__);
   return (
     <div>
-      <h1 className="header">Hello world!</h1>
-      <Button>Click me!</Button>
+      <h1 className="header">{__('Hello world!', 'wp-bundler')}</h1>
+      <Button>{__('Click me', 'wp-bundler')}</Button>
     </div>
   );
 };
