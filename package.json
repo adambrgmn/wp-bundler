@@ -38,9 +38,6 @@
   "peerDependencies": {
     "typescript": ">4.0.0"
   },
-  "optionalDependencies": {
-    "tailwindcss": ">2.0.0"
-  },
   "dependencies": {
     "@swc/core": "^1.2.93",
     "esbuild": "^0.13.3"
