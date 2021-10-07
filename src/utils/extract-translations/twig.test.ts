@@ -85,10 +85,31 @@ it('extracts translations from special cases', () => {
 
 it('extracts translations within blocks', () => {
   let source = `
-      {{ __(
-        'Translation',
-        'wp-bundler'
-        ) }}</p>
+    {% block title %}
+      {{ __('Translation', 'wp-bundler') }}</p>
+    {% endblock %}
+  `;
+
+  let result = extractTranslations(source, 'test.twig');
+  expect(removeLocation(result)).toEqual([{ text: 'Translation', domain: 'wp-bundler' }]);
+});
+
+it('extracts translations within extends', () => {
+  let source = `
+    {% block title %}
+      {{ __('Translation', 'wp-bundler') }}</p>
+    {% endblock %}
+  `;
+
+  let result = extractTranslations(source, 'test.twig');
+  expect(removeLocation(result)).toEqual([{ text: 'Translation', domain: 'wp-bundler' }]);
+});
+
+it('extracts translations within macros', () => {
+  let source = `
+    {% macro title() %}
+      {{ __('Translation', 'wp-bundler') }}</p>
+    {% endmacro %}
   `;
 
   let result = extractTranslations(source, 'test.twig');
@@ -107,7 +128,7 @@ it('extracts translations from multiline definitions', () => {
   expect(removeLocation(result)).toEqual([{ text: 'Translation', domain: 'wp-bundler' }]);
 });
 
-it('extracts translations from language extensions', () => {
+it.skip('extracts translations from language extensions', () => {
   let source = `
     {% switch input.type %}
       {% case "checkbox" %}
@@ -134,6 +155,18 @@ it('extracts the correct location for translations', () => {
     lineText: '',
     suggestion: '',
   });
+});
+
+it('can extract translator comments from twig', () => {
+  let source = `
+    {# translators: a translation #}
+    <p>{{ __('Translation', 'wp-bundler') }}</p>
+  `;
+
+  let result = extractTranslations(source, 'test.twig');
+  expect(removeLocation(result)).toEqual([
+    { text: 'Translation', domain: 'wp-bundler', translators: 'translators: a translation' },
+  ]);
 });
 
 function removeLocation(messages: TranslationMessage[]): Omit<TranslationMessage, 'location'>[] {
