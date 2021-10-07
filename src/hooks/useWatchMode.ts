@@ -130,7 +130,7 @@ function createWatchMachine(ctx: Pick<WatchContext, 'bundler' | 'server'>) {
       services: {
         setup: (ctx) => async (send) => {
           await ctx.bundler.prepare();
-          ctx.server.prepare();
+          await ctx.server.prepare();
           ctx.server.listen();
 
           async function onFileChange({ files }: { files: string[] }) {

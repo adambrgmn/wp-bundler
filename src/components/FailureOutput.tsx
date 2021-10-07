@@ -3,6 +3,7 @@ import { Box, Text } from 'ink';
 import { figures } from '../utils/figures';
 import { ErrorCodeFrame } from './ErrorCodeFrame';
 import { BuildFailure, BuildResult } from 'esbuild';
+import { ZodError } from 'zod';
 
 export const FailureOutput: React.FC<{
   message: string;
@@ -22,6 +23,10 @@ export const FailureOutput: React.FC<{
 };
 
 const ErrorOutput: React.FC<{ error: unknown }> = ({ error }) => {
+  if (error instanceof ZodError) {
+    // Handle configuration errors
+  }
+
   if (isBuildFailure(error)) {
     return <BuildFailureOutput result={error} />;
   }
@@ -66,15 +71,15 @@ const ErrorOutput: React.FC<{ error: unknown }> = ({ error }) => {
 export const BuildFailureOutput: React.FC<{
   result: BuildFailure | BuildResult;
 }> = ({ result }) => {
-  let errorsCount = result.errors.length;
-  let warningsCount = result.warnings.length;
+  let errorsCount = result.errors?.length ?? 0;
+  let warningsCount = result.warnings?.length ?? 0;
 
   return (
     <Fragment>
       {errorsCount > 0 && (
         <Fragment>
           <Box marginBottom={1}>
-            <Text color="red">{result.errors.length} build error(s) occured:</Text>
+            <Text color="red">{errorsCount} build error(s) occured:</Text>
           </Box>
           <Box flexDirection="column">
             {result.errors.map((error, i) => (
@@ -88,7 +93,7 @@ export const BuildFailureOutput: React.FC<{
       {warningsCount > 0 && (
         <Fragment>
           <Box marginBottom={1}>
-            <Text color="yellow">{result.warnings.length} build warning(s) occured:</Text>
+            <Text color="yellow">{warningsCount} build warning(s) occured:</Text>
           </Box>
           <Box flexDirection="column">
             {result.warnings.map((warning, i) => (
@@ -104,7 +109,7 @@ export const BuildFailureOutput: React.FC<{
 };
 
 function isBuildFailure(value: any): value is BuildFailure {
-  return value != null && ('errors' in value || 'warnings' in value);
+  return value != null && value.errors != null && value.warnings != null;
 }
 
 function isError(value: any): value is Error {

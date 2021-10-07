@@ -3,8 +3,8 @@ import esbuild, { BuildOptions, BuildResult, Metafile, Message } from 'esbuild';
 import merge from 'lodash.merge';
 import { BundlerPluginOptions, Mode, ProjectInfo } from './types';
 import * as plugin from './plugins';
-import { readPkg } from './utils/read-pkg';
-import { BundlerConfigSchema, BundlerConfig } from './schema';
+import { getMetadata } from './utils/read-pkg';
+import { BundlerConfig } from './schema';
 import { createAssetLoaderTemplate } from './utils/asset-loader';
 import { rimraf } from './utils/rimraf';
 
@@ -29,7 +29,6 @@ export class Bundler extends EventEmitter {
   private project: ProjectInfo = {} as unknown as any;
   private bundler: ProjectInfo = {} as unknown as any;
   private config: BundlerConfig = {} as unknown as any;
-  private prepared = false;
 
   constructor({ mode, cwd, host, port }: BundlerOptions) {
     super();
@@ -69,17 +68,15 @@ export class Bundler extends EventEmitter {
   }
 
   async prepare() {
-    if (this.prepared) return;
-
     process.env.NODE_ENV = process.env.NODE_ENV || this.mode === 'dev' ? 'development' : 'production';
 
-    this.bundler = await readPkg(__dirname);
-    this.project = await readPkg(this.cwd);
+    let { bundler, project, config } = await getMetadata(this.cwd, __dirname);
 
-    this.config = await BundlerConfigSchema.parseAsync(this.project.packageJson['wp-bundler']);
+    this.bundler = bundler;
+    this.project = project;
+    this.config = config;
 
     await rimraf(this.project.paths.absolute(this.config.outdir));
-    this.prepared = true;
   }
 
   private createBundlerOptions(): BuildOptions {

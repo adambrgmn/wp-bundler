@@ -4,6 +4,9 @@ import { WebSocketServer, WebSocket } from 'ws';
 import chokidar from 'chokidar';
 import debounce from 'lodash.debounce';
 import { WebSocketEvent } from './types';
+import { getMetadata } from './utils/read-pkg';
+import { BundlerConfig } from './schema';
+import { isNotNullable } from './utils/assert';
 
 interface ServerEvents {
   'server.listen': void;
@@ -19,13 +22,15 @@ interface ServerOptions {
 }
 
 export class Server extends EventEmitter {
-  protected port: number;
-  protected host: string;
-  protected cwd: string;
+  private port: number;
+  private host: string;
+  private cwd: string;
 
-  protected server: http.Server = undefined as any;
-  protected wss: WebSocketServer = undefined as any;
-  protected watcher: chokidar.FSWatcher | undefined = undefined;
+  private config: BundlerConfig = undefined as any;
+
+  private server: http.Server = undefined as any;
+  private wss: WebSocketServer = undefined as any;
+  private watcher: chokidar.FSWatcher | undefined = undefined;
 
   constructor({ port, host, cwd }: ServerOptions) {
     super();
@@ -41,13 +46,16 @@ export class Server extends EventEmitter {
   }
 
   async prepare() {
+    let { config } = await getMetadata(this.cwd, __dirname);
+    this.config = config;
+
     let server = http.createServer();
 
     this.server = server;
     this.wss = new WebSocketServer({ server });
 
     this.setupWebsockets();
-    this.setupFileWatcher();
+    await this.setupFileWatcher();
   }
 
   close() {
@@ -65,7 +73,7 @@ export class Server extends EventEmitter {
     }
   }
 
-  protected setupWebsockets() {
+  private setupWebsockets() {
     this.wss.on('connection', (ws) => {
       this.emit('server.connection', ws);
       ws.on('close', (code, reason) => {
@@ -74,21 +82,26 @@ export class Server extends EventEmitter {
     });
   }
 
-  protected setupFileWatcher() {
-    let watcher = chokidar.watch('.', {
-      cwd: this.cwd,
-      persistent: true,
-      ignored: /(vendor|node_modules|dist|\.mo$|\.pot?$)/,
-    });
+  private async setupFileWatcher() {
+    let ignored = [
+      'vendor',
+      'node_modules',
+      this.config.outdir,
+      this.config.assetLoader.path,
+      this.config.translations?.pot,
+      ...(this.config.translations?.pos ?? []),
+    ].filter(isNotNullable);
 
-    let changedFiles: string[] = [];
+    let watcher = chokidar.watch('.', { cwd: this.cwd, persistent: true, ignored });
+
+    let changed = new Set<string>();
     const emit = debounce(() => {
-      this.emit('watcher.change', { files: changedFiles });
-      changedFiles = [];
+      this.emit('watcher.change', { files: Array.from(changed) });
+      changed.clear();
     }, 500);
 
     const onFileChange = (path: string) => {
-      changedFiles.push(path);
+      changed.add(path);
       emit();
     };
 
