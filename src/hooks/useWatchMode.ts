@@ -39,13 +39,13 @@ const watchModel = createModel(
     error: null as null | unknown,
     result: null as null | (BuildResult & { metafile: Metafile }),
     rejection: null as null | unknown,
-    file: null as null | string,
+    files: null as null | string[],
   },
   {
     events: {
       error: (error: unknown) => ({ value: error }),
       prepared: () => ({}),
-      rebuild: (file: string) => ({ value: file }),
+      rebuild: (files: string[]) => ({ value: files }),
       rebuildError: (error: unknown) => ({ value: error }),
       rebuildSuccess: (value: BuildResult & { metafile: Metafile }) => ({
         value,
@@ -94,7 +94,7 @@ function createWatchMachine(ctx: Pick<WatchContext, 'bundler' | 'server'>) {
           on: {
             rebuild: {
               target: 'rebuilding',
-              actions: watchModel.assign({ file: (_, evt) => evt.value }),
+              actions: watchModel.assign({ files: (_, evt) => evt.value }),
             },
           },
         },
@@ -105,7 +105,7 @@ function createWatchMachine(ctx: Pick<WatchContext, 'bundler' | 'server'>) {
               actions: watchModel.assign({
                 result: () => null,
                 error: (_: any, event: any) => event.value,
-                file: () => null,
+                files: () => null,
               }),
             },
             rebuildSuccess: {
@@ -113,7 +113,7 @@ function createWatchMachine(ctx: Pick<WatchContext, 'bundler' | 'server'>) {
               actions: watchModel.assign({
                 result: (_, event) => event.value,
                 error: () => null,
-                file: () => null,
+                files: () => null,
               }),
             },
           },
@@ -133,11 +133,11 @@ function createWatchMachine(ctx: Pick<WatchContext, 'bundler' | 'server'>) {
           ctx.server.prepare();
           ctx.server.listen();
 
-          async function onFileChange({ path }: { path: string }) {
+          async function onFileChange({ files }: { files: string[] }) {
             try {
-              send(watchModel.events.rebuild(path));
+              send(watchModel.events.rebuild(files));
               let result = await ctx.bundler.build();
-              ctx.server.broadcast({ type: 'reload', path });
+              ctx.server.broadcast({ type: 'reload', files });
               send(watchModel.events.rebuildSuccess(result));
             } catch (error) {
               send(watchModel.events.rebuildError(error));

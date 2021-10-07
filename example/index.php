@@ -24,7 +24,7 @@ $tags = get_tags();
   <title><?php echo $title; ?></title>
 
   <?php foreach ($tags['styles'] as $style) {
-      echo sprintf('<link href="%s" rel="stylesheet">', $style['src']);
+      echo sprintf('<link href="%1$s" rel="stylesheet" id="%2$s">', $style['src'], $style['handle']);
   } ?>
 
   <?php foreach ($tags['inline'] as $inline) {

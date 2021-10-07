@@ -38,6 +38,7 @@ const args = process.argv.slice(2);
       outdir: './dist',
       platform: 'browser',
       sourcemap: false,
+      minify: true,
       watch: watch
         ? {
             onRebuild(error) {

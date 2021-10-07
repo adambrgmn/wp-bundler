@@ -28,10 +28,10 @@ interface TemplateCompileOptions {
 export function createAssetLoaderTemplate({ config, bundler, project, mode, host, port }: BundlerPluginOptions) {
   let templatePath = bundler.paths.absolute('./assets/AssetLoader.php');
   let templateOutPath = project.paths.absolute(config.assetLoader.path);
-  let client = readFileSync(path.join(__dirname, './dev-client.js'), 'utf-8');
   let compile = createTemplate(readFileSync(templatePath, 'utf-8'));
 
   return async ({ metafile }: Pick<TemplateCompileOptions, 'metafile'>) => {
+    let client = await fs.readFile(path.join(__dirname, './dev-client.js'), 'utf-8');
     await fs.mkdir(path.dirname(templateOutPath), { recursive: true });
     await fs.writeFile(templateOutPath, compile({ metafile, config, bundler, mode, client, host, port }));
   };

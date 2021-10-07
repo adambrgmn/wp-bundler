@@ -9,7 +9,7 @@ interface ServerEvents {
   'server.listen': void;
   'server.connection': WebSocket;
   'server.disconnect': { code: number; reason: string };
-  'watcher.change': { path: string };
+  'watcher.change': { files: string[] };
 }
 
 interface ServerOptions {
@@ -81,9 +81,16 @@ export class Server extends EventEmitter {
       ignored: /(vendor|node_modules|dist|\.mo$|\.pot?$)/,
     });
 
-    const onFileChange = debounce((path: string) => {
-      this.emit('watcher.change', { path });
+    let changedFiles: string[] = [];
+    const emit = debounce(() => {
+      this.emit('watcher.change', { files: changedFiles });
+      changedFiles = [];
     }, 500);
+
+    const onFileChange = (path: string) => {
+      changedFiles.push(path);
+      emit();
+    };
 
     watcher.on('ready', () => {
       watcher.on('change', onFileChange);
