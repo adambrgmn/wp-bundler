@@ -86,6 +86,7 @@ export class Server extends EventEmitter {
     let ignored = [
       'vendor',
       'node_modules',
+      '**/*.mo',
       this.config.outdir,
       this.config.assetLoader.path,
       this.config.translations?.pot,
