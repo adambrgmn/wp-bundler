@@ -25,3 +25,5 @@ export interface BundlerPluginOptions {
 }
 
 export type BundlerPlugin = (options: BundlerPluginOptions) => Plugin;
+
+export type WebSocketEvent = { type: 'reload' };

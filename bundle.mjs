@@ -22,9 +22,29 @@ const args = process.argv.slice(2);
         ? {
             onRebuild(error) {
               if (error == null) {
-                console.log('Rebuild succeeded.');
+                console.log('Rebuild server succeeded.');
               } else {
-                console.error('Rebuild failed.');
+                console.error('Rebuild server failed.');
+              }
+            },
+          }
+        : false,
+    });
+
+    await build({
+      entryPoints: ['./src/dev-client.ts'],
+      bundle: true,
+      format: 'esm',
+      outdir: './dist',
+      platform: 'browser',
+      sourcemap: true,
+      watch: watch
+        ? {
+            onRebuild(error) {
+              if (error == null) {
+                console.log('Rebuild client succeeded.');
+              } else {
+                console.error('Rebuild client failed.');
               }
             },
           }

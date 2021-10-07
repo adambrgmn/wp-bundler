@@ -30,6 +30,10 @@ $tags = get_tags();
 <body>
   <div id="root"></div>
 
+  <script type="module">
+    <?php readfile('../dist/dev-client.js'); ?>
+  </script>
+
   <script type="application/javascript">
     window.wp = {};
     window.wp.i18n = {
