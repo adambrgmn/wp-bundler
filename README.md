@@ -17,6 +17,7 @@ browsers as well.
   - [`BundlerConfig.externals` (optional)](#bundlerconfigexternals-optional)
   - [`BundlerConfig.assetLoader` (optional)](#bundlerconfigassetloader-optional)
   - [`BundlerConfig.translations` (optional)](#bundlerconfigtranslations-optional)
+- [Development](#development)
 - [Asset types](#asset-types)
   - [Javascript and Typescript](#javascript-and-typescript)
   - [CSS](#css)
@@ -143,6 +144,15 @@ which namespace should be used. [Read more](#asset-loader).
 Configure if translations are enabled and if so where translations should live and how to handle them.
 [Read more](#translations).
 
+## Development
+
+During development a minimal web-socket server is initiated and a small dev client is injected on all your apps pages.
+This means that as soon as you make changes to any of you source files the page will automatically reload. If you only
+change a `.css` file the page will not be reloaded, instead the css will be replaced "in-flight".
+
+By default the web socket will be setup to listen on `localhost` and port `3000`. You can configure this by passing
+flags to the CLI; `wp-bundler --watch --host <host> --port <port>`.
+
 ## Asset types
 
 `wp-bundler` can handle the same asset types as [`esbuild`](https://esbuild.github.io/content-types/) can. Outside of
@@ -161,13 +171,7 @@ loaded with `nomodule` set on the script tag.
 
 Your css is "post processed" by [`postcss`](https://postcss.org/). `wp-bundler` uses
 [`postcss-preset-env`](https://preset-env.cssdb.org/) to compile the css to a version that is more friendly to older
-browsers. See `postcss-preset-env`'s documentation for details around which features available for compilation.
-
-#### Tailwindcss
-
-`wp-bundler` also has built-in support for [`tailwindcss`](https://tailwindcss.com/). If the bundler finds a
-`tailwinds.config.js` within your projects root directory the plugin will be enabled. In order to use this functionality
-you also need to install `tailwindcss` as a dependnecy of your project.
+browsers. See `postcss-preset-env`'s documentation for details around which features are available for compilation.
 
 ## Asset loader
 
@@ -191,7 +195,7 @@ require_once __DIR__ . '/AssetLoader.php';
 
 After that you should be able to use the `AssetLoader` class anywhere in your application code. The loader will take
 care of loading both javascript and css emitted by the bundler. All methods are static, no need to call
-`new AssetLoader()`.
+`new \WPBundler\AssetLoader()`.
 
 ```php
 // Enqueue the script as parth of the `wp_enqueue_scripts` action hook
@@ -291,9 +295,9 @@ in a rather large production environment. But there are still things that can be
 Below are a few things that migth come in the future.
 
 - [ ] Support for other config files (e.g. `.wpbundlerrc` or `wp-bundler.config.json`).
-- [ ] Built in browser refresh on successfull rebuilds.
 - [ ] Automatically detect and enqueue all externals specified in configuration.
 - [ ] Show warnings for missing translations.
+- [x] Built in browser refresh on successfull rebuilds. (released 2.0.0)
 
 ## LICENSE
 
