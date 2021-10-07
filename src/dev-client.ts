@@ -2,11 +2,6 @@ import { WebSocketEvent } from './types';
 
 const socket = new WebSocket('ws://localhost:3000');
 
-let timeoutId = setTimeout(() => {
-  log.error(new Error('Could not establish connection to socket'));
-  socket.close(1, 'no-connection');
-}, 5000);
-
 socket.addEventListener('error', handleError);
 socket.addEventListener('close', handleClose);
 socket.addEventListener('open', handleOpen);
@@ -28,7 +23,6 @@ function handleClose(event: CloseEvent) {
 }
 
 function handleOpen() {
-  clearTimeout(timeoutId);
   log.info('Dev server connection established');
 }
 

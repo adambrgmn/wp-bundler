@@ -1,5 +1,6 @@
 import { Bundler } from './bundler';
 import { Runner } from './runner';
+import { Server } from './server';
 import { CliArgsSchema } from './schema';
 import { parseArgv } from './utils/parse-argv';
 import pkg from '../package.json';
@@ -24,8 +25,12 @@ export async function cli(argv: typeof process.argv) {
   const cwd = args.cwd ?? process.cwd();
   const watch = args.watch ?? false;
   const mode = args.mode ?? watch ? 'dev' : 'prod';
-  let bundler = new Bundler({ mode, cwd });
-  let runner = new Runner(bundler, cwd);
+  const port = args.port ?? 3000;
+  const host = args.host ?? 'localhost';
+
+  let bundler = new Bundler({ mode, cwd, port, host });
+  let server = new Server({ port, host });
+  let runner = new Runner({ bundler, server, cwd });
 
   if (watch) {
     await runner.watch();

@@ -17,38 +17,41 @@ interface BundlerEvents {
 export class Bundler extends EventEmitter {
   private mode: Mode;
   private cwd: string;
+  private port: number;
+  private host: string;
   private project: ProjectInfo = {} as unknown as any;
   private bundler: ProjectInfo = {} as unknown as any;
   private config: BundlerConfig = {} as unknown as any;
   private prepared = false;
 
-  constructor({ mode, cwd }: CliOptions) {
+  constructor({ mode, cwd, port, host }: CliOptions) {
     super();
     this.mode = mode;
     this.cwd = cwd;
+    this.port = port;
+    this.host = host;
   }
 
   async build() {
+    let pluginOptions = this.pluginOptions();
+    let tasks: Promise<esbuild.BuildResult>[] = [];
+
     let options = this.createBundlerOptions();
-    options.plugins!.push(plugin.translations(this.pluginOptions()), plugin.postcss(this.pluginOptions()));
+    options.plugins!.push(plugin.translations(pluginOptions), plugin.postcss(pluginOptions));
+    tasks.push(esbuild.build(options));
 
     let nomoduleOptions = this.createBundlerOptions();
     nomoduleOptions.format = 'iife';
     nomoduleOptions.entryNames = `${nomoduleOptions.entryNames}.nomodule`;
     nomoduleOptions.target = 'es5';
-    nomoduleOptions.plugins!.push(plugin.swc(this.pluginOptions()));
+    nomoduleOptions.plugins!.push(plugin.swc(pluginOptions));
 
-    let results = await Promise.all([esbuild.build(options), esbuild.build(nomoduleOptions)]);
-    let result = merge(...results);
+    tasks.push(esbuild.build(nomoduleOptions));
+
+    let results = await Promise.all(tasks);
+    let result = results.slice(1).reduce<esbuild.BuildResult>((acc, result) => merge(acc, result), results[0]);
 
     ensureMetafile(result);
-
-    let pluginOptions: BundlerPluginOptions = {
-      mode: this.mode,
-      config: this.config,
-      project: this.project,
-      bundler: this.bundler,
-    };
 
     let writeTemplate = createAssetLoaderTemplate(pluginOptions);
     await writeTemplate({ metafile: result.metafile });
@@ -57,13 +60,16 @@ export class Bundler extends EventEmitter {
   }
 
   async watch() {
-    let buildOptions = this.createBundlerOptions();
-    buildOptions.watch = true;
-    buildOptions.plugins!.push(plugin.php(this.pluginOptions()), plugin.postcss(this.pluginOptions()));
+    let pluginOptions = this.pluginOptions();
+    let serveOptions = this.createBundlerOptions();
+    serveOptions.plugins!.push(plugin.php(pluginOptions), plugin.postcss(pluginOptions));
 
-    let result = await esbuild.build(buildOptions);
-    ensureMetafile(result);
-    return result;
+    let buildOptions = this.createBundlerOptions();
+    buildOptions.plugins!.push(plugin.php(pluginOptions), plugin.postcss(pluginOptions), plugin.php(pluginOptions));
+
+    // We need to run an initial build to output the proper asset loader
+    await esbuild.build(buildOptions);
+    return esbuild.serve({}, serveOptions);
   }
 
   async prepare() {
@@ -119,6 +125,8 @@ export class Bundler extends EventEmitter {
       config: this.config,
       project: this.project,
       bundler: this.bundler,
+      port: this.port,
+      host: this.host,
     };
   }
 

@@ -29,6 +29,8 @@ export const CliArgsSchema = z.object({
   watch: z.boolean().optional(),
   mode: z.union([z.literal('dev'), z.literal('prod')]).optional(),
   cwd: z.string().optional(),
+  port: z.number().optional(),
+  host: z.string().optional(),
 });
 
 export type CliArgs = z.infer<typeof CliArgsSchema>;

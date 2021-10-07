@@ -5,9 +5,10 @@ import { BuildResult, Metafile } from 'esbuild';
 import { Bundler } from '../bundler';
 import { useInput } from 'ink';
 import { assign, ContextFrom, EventFrom, StateFrom } from 'xstate';
+import { Server } from '../server';
 
-export function useWatchMode(bundler: Bundler) {
-  const [state, send] = useMachine(() => createWatchMachine({ bundler }));
+export function useWatchMode({ bundler, server }: { bundler: Bundler; server: Server }) {
+  const [state, send] = useMachine(() => createWatchMachine({ bundler, server }));
 
   useInput(
     (key) => {
@@ -57,6 +58,7 @@ export function useWatchMode(bundler: Bundler) {
 const watchModel = createModel(
   {
     bundler: null as unknown as Bundler,
+    server: null as unknown as Server,
     error: null as null | unknown,
     result: null as null | (BuildResult & { metafile: Metafile }),
     rejection: null as null | unknown,
@@ -76,7 +78,7 @@ const watchModel = createModel(
   },
 );
 
-function createWatchMachine(ctx: Pick<WatchContext, 'bundler'>) {
+function createWatchMachine(ctx: Pick<WatchContext, 'bundler' | 'server'>) {
   return watchModel.createMachine({
     context: { ...watchModel.initialContext, ...ctx },
     initial: 'preparing',
@@ -94,7 +96,9 @@ function createWatchMachine(ctx: Pick<WatchContext, 'bundler'>) {
           id: 'preparing',
           src: async (ctx) => {
             await ctx.bundler.prepare();
-            return ctx.bundler.watch();
+            let buildServer = await ctx.bundler.watch();
+            ctx.server.proxy(buildServer);
+            ctx.server.listen();
           },
           onDone: {
             target: 'idle',

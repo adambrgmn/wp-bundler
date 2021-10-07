@@ -1,6 +1,7 @@
 import EventEmitter from 'events';
-import express from 'express';
+import express, { Express } from 'express';
 import * as http from 'http';
+import { ServeResult } from 'esbuild';
 import { WebSocketServer, WebSocket } from 'ws';
 import { WebSocketEvent } from './types';
 
@@ -12,18 +13,20 @@ interface ServerEvents {
 
 export class Server extends EventEmitter {
   protected port: number;
-  protected app = express();
-  protected server = http.createServer(this.app);
-  protected wss = new WebSocketServer({ server: this.server });
+  protected host: string;
 
-  constructor(port: number) {
+  protected app: Express = undefined as any;
+  protected server: http.Server = undefined as any;
+  protected wss: WebSocketServer = undefined as any;
+
+  constructor({ port, host }: { port: number; host: string }) {
     super();
     this.port = port;
-    this.setupWebsockets();
+    this.host = host;
   }
 
   listen() {
-    this.server.listen(this.port, () => {
+    this.server.listen(this.port, this.host, () => {
       this.emit('listen', undefined);
     });
   }
@@ -37,6 +40,35 @@ export class Server extends EventEmitter {
     for (let client of this.wss.clients) {
       client.send(JSON.stringify(event));
     }
+  }
+
+  proxy({ host, port }: ServeResult) {
+    let server = http.createServer((req, res) => {
+      const options = {
+        hostname: host,
+        port,
+        path: req.url,
+        method: req.method,
+        headers: req.headers,
+      };
+
+      const proxyReq = http.request(options, (proxyRes) => {
+        if (proxyRes.statusCode === 404) {
+          res.writeHead(303, { 'Content-Type': 'text/html' });
+          res.end('<h1>Asset not found</h1>');
+          return;
+        }
+
+        res.writeHead(proxyRes.statusCode ?? 200, proxyRes.headers);
+        proxyRes.pipe(res, { end: true });
+      });
+
+      req.pipe(proxyReq, { end: true });
+    });
+
+    this.server = server;
+    this.wss = new WebSocketServer({ server });
+    this.setupWebsockets();
   }
 
   protected setupWebsockets() {
