@@ -37,6 +37,9 @@ function setup() {
           } else {
             log.info('Source code updated, reloading.');
             window.requestIdleCallback(reloadWindow);
+            socket.removeEventListener('close', handleClose);
+            socket.removeEventListener('open', handleOpen);
+            socket.removeEventListener('message', handleMessage);
           }
           break;
 
@@ -58,8 +61,8 @@ function setup() {
       link.id.startsWith('wp-bundler.'),
     );
     for (let link of linkElements) {
-      let clone = link.cloneNode();
-      link.replaceWith(clone);
+      let queryString = `?reload=${new Date().getTime()}`;
+      link.href = link.href.replace(/\?.*|$/, queryString);
     }
   }
 }
