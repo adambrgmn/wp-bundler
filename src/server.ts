@@ -1,38 +1,61 @@
 import EventEmitter from 'events';
-import express, { Express } from 'express';
 import * as http from 'http';
-import { ServeResult } from 'esbuild';
 import { WebSocketServer, WebSocket } from 'ws';
+import chokidar from 'chokidar';
+import debounce from 'lodash.debounce';
 import { WebSocketEvent } from './types';
 
 interface ServerEvents {
-  listen: void;
-  connection: WebSocket;
-  disconnect: { code: number; reason: string };
+  'server.listen': void;
+  'server.connection': WebSocket;
+  'server.disconnect': { code: number; reason: string };
+  'watcher.change': { path: string };
+}
+
+interface ServerOptions {
+  port: number;
+  host: string;
+  cwd: string;
 }
 
 export class Server extends EventEmitter {
   protected port: number;
   protected host: string;
+  protected cwd: string;
 
-  protected app: Express = undefined as any;
   protected server: http.Server = undefined as any;
   protected wss: WebSocketServer = undefined as any;
+  protected watcher: chokidar.FSWatcher | undefined = undefined;
 
-  constructor({ port, host }: { port: number; host: string }) {
+  constructor({ port, host, cwd }: ServerOptions) {
     super();
     this.port = port;
     this.host = host;
+    this.cwd = cwd;
   }
 
   listen() {
     this.server.listen(this.port, this.host, () => {
-      this.emit('listen', undefined);
+      this.emit('server.listen', undefined);
     });
   }
 
+  async prepare() {
+    let server = http.createServer();
+
+    this.server = server;
+    this.wss = new WebSocketServer({ server });
+
+    this.setupWebsockets();
+    this.setupFileWatcher();
+  }
+
   close() {
+    this.watcher?.close();
+
     for (let client of this.wss.clients) client.close();
+    this.wss.close();
+
     this.server.close();
   }
 
@@ -42,41 +65,30 @@ export class Server extends EventEmitter {
     }
   }
 
-  proxy({ host, port }: ServeResult) {
-    let server = http.createServer((req, res) => {
-      const options = {
-        hostname: host,
-        port,
-        path: req.url,
-        method: req.method,
-        headers: req.headers,
-      };
-
-      const proxyReq = http.request(options, (proxyRes) => {
-        if (proxyRes.statusCode === 404) {
-          res.writeHead(303, { 'Content-Type': 'text/html' });
-          res.end('<h1>Asset not found</h1>');
-          return;
-        }
-
-        res.writeHead(proxyRes.statusCode ?? 200, proxyRes.headers);
-        proxyRes.pipe(res, { end: true });
-      });
-
-      req.pipe(proxyReq, { end: true });
-    });
-
-    this.server = server;
-    this.wss = new WebSocketServer({ server });
-    this.setupWebsockets();
-  }
-
   protected setupWebsockets() {
     this.wss.on('connection', (ws) => {
+      this.emit('server.connection', ws);
       ws.on('close', (code, reason) => {
-        this.emit('disconnect', { code, reason: reason.toString('utf-8') });
+        this.emit('server.disconnect', { code, reason: reason.toString('utf-8') });
       });
-      this.emit('connection', ws);
+    });
+  }
+
+  protected setupFileWatcher() {
+    let watcher = chokidar.watch('.', {
+      cwd: this.cwd,
+      persistent: true,
+      ignored: /(vendor|node_modules|dist|\.mo$|\.pot?$)/,
+    });
+
+    const onFileChange = debounce((path: string) => {
+      this.emit('watcher.change', { path });
+    }, 500);
+
+    watcher.on('ready', () => {
+      watcher.on('change', onFileChange);
+      watcher.on('add', onFileChange);
+      watcher.on('unlink', onFileChange);
     });
   }
 

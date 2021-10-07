@@ -17,19 +17,15 @@ interface BundlerEvents {
 export class Bundler extends EventEmitter {
   private mode: Mode;
   private cwd: string;
-  private port: number;
-  private host: string;
   private project: ProjectInfo = {} as unknown as any;
   private bundler: ProjectInfo = {} as unknown as any;
   private config: BundlerConfig = {} as unknown as any;
   private prepared = false;
 
-  constructor({ mode, cwd, port, host }: CliOptions) {
+  constructor({ mode, cwd }: CliOptions) {
     super();
     this.mode = mode;
     this.cwd = cwd;
-    this.port = port;
-    this.host = host;
   }
 
   async build() {
@@ -40,13 +36,15 @@ export class Bundler extends EventEmitter {
     options.plugins!.push(plugin.translations(pluginOptions), plugin.postcss(pluginOptions));
     tasks.push(esbuild.build(options));
 
-    let nomoduleOptions = this.createBundlerOptions();
-    nomoduleOptions.format = 'iife';
-    nomoduleOptions.entryNames = `${nomoduleOptions.entryNames}.nomodule`;
-    nomoduleOptions.target = 'es5';
-    nomoduleOptions.plugins!.push(plugin.swc(pluginOptions));
+    if (this.mode === 'prod') {
+      let nomoduleOptions = this.createBundlerOptions();
+      nomoduleOptions.format = 'iife';
+      nomoduleOptions.entryNames = `${nomoduleOptions.entryNames}.nomodule`;
+      nomoduleOptions.target = 'es5';
+      nomoduleOptions.plugins!.push(plugin.swc(pluginOptions));
 
-    tasks.push(esbuild.build(nomoduleOptions));
+      tasks.push(esbuild.build(nomoduleOptions));
+    }
 
     let results = await Promise.all(tasks);
     let result = results.slice(1).reduce<esbuild.BuildResult>((acc, result) => merge(acc, result), results[0]);
@@ -57,19 +55,6 @@ export class Bundler extends EventEmitter {
     await writeTemplate({ metafile: result.metafile });
 
     return result;
-  }
-
-  async watch() {
-    let pluginOptions = this.pluginOptions();
-    let serveOptions = this.createBundlerOptions();
-    serveOptions.plugins!.push(plugin.php(pluginOptions), plugin.postcss(pluginOptions));
-
-    let buildOptions = this.createBundlerOptions();
-    buildOptions.plugins!.push(plugin.php(pluginOptions), plugin.postcss(pluginOptions), plugin.php(pluginOptions));
-
-    // We need to run an initial build to output the proper asset loader
-    await esbuild.build(buildOptions);
-    return esbuild.serve({}, serveOptions);
   }
 
   async prepare() {
@@ -125,8 +110,6 @@ export class Bundler extends EventEmitter {
       config: this.config,
       project: this.project,
       bundler: this.bundler,
-      port: this.port,
-      host: this.host,
     };
   }
 

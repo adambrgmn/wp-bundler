@@ -35,30 +35,6 @@ class AssetLoader
     private static $prepared = false;
 
     /**
-     * Mode that wp-bundler is currently running in
-     *
-     * @since 2.0.0
-     * @var string
-     */
-    private static $mode = 'prod';
-
-    /**
-     * Port used for dev server
-     *
-     * @since 2.0.0
-     * @var int
-     */
-    private static $port = 3000;
-
-    /**
-     * Host used for dev server
-     *
-     * @since 2.0.0
-     * @var string
-     */
-    private static $host = 'localhost';
-
-    /**
      * Domain used for translations.
      *
      * @since 1.0.0
@@ -310,10 +286,6 @@ class AssetLoader
      */
     private static function outDirUri(string $path): string
     {
-        if (self::$mode === 'dev') {
-            return 'http://' . self::$host . ':' . (string) self::$port . '/' . $path;
-        }
-
         return \get_template_directory_uri() . self::$outdir . $path;
     }
 

@@ -28,8 +28,8 @@ export async function cli(argv: typeof process.argv) {
   const port = args.port ?? 3000;
   const host = args.host ?? 'localhost';
 
-  let bundler = new Bundler({ mode, cwd, port, host });
-  let server = new Server({ port, host });
+  let bundler = new Bundler({ mode, cwd });
+  let server = new Server({ port, host, cwd });
   let runner = new Runner({ bundler, server, cwd });
 
   if (watch) {

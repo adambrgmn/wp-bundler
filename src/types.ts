@@ -7,8 +7,6 @@ export type Mode = 'dev' | 'prod';
 export interface CliOptions {
   mode: Mode;
   cwd: string;
-  port: number;
-  host: string;
 }
 
 export interface ProjectPaths {
@@ -24,10 +22,8 @@ export interface BundlerPluginOptions {
   config: BundlerConfig;
   project: ProjectInfo;
   bundler: ProjectInfo;
-  port: number;
-  host: string;
 }
 
 export type BundlerPlugin = (options: BundlerPluginOptions) => Plugin;
 
-export type WebSocketEvent = { type: 'reload' };
+export type WebSocketEvent = { type: 'reload'; path: string };

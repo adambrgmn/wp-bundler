@@ -18,29 +18,6 @@ export function useWatchMode({ bundler, server }: { bundler: Bundler; server: Se
   );
 
   useEffect(() => {
-    let onRebuildStart = () => {
-      send(watchModel.events.rebuild());
-    };
-    bundler.on('rebuild.init', onRebuildStart);
-
-    let onRebuildEnd = (result: BuildResult & { metafile: Metafile }) => {
-      send(watchModel.events.rebuildSuccess(result));
-    };
-    bundler.on('rebuild.end', onRebuildEnd);
-
-    let onRebuildError = (error: unknown) => {
-      send(watchModel.events.rebuildError(error));
-    };
-    bundler.on('rebuild.error', onRebuildError);
-
-    return () => {
-      bundler.off('rebuild.init', onRebuildStart);
-      bundler.off('rebuild.end', onRebuildEnd);
-      bundler.off('rebuild.error', onRebuildError);
-    };
-  }, [bundler, send]);
-
-  useEffect(() => {
     const handleRejection: NodeJS.UnhandledRejectionListener = (error) => {
       if (error != null && 'errors' in error) return;
       send(watchModel.events.unhandled(error));
@@ -62,12 +39,13 @@ const watchModel = createModel(
     error: null as null | unknown,
     result: null as null | (BuildResult & { metafile: Metafile }),
     rejection: null as null | unknown,
+    file: null as null | string,
   },
   {
     events: {
       error: (error: unknown) => ({ value: error }),
       prepared: () => ({}),
-      rebuild: () => ({}),
+      rebuild: (file: string) => ({ value: file }),
       rebuildError: (error: unknown) => ({ value: error }),
       rebuildSuccess: (value: BuildResult & { metafile: Metafile }) => ({
         value,
@@ -79,72 +57,99 @@ const watchModel = createModel(
 );
 
 function createWatchMachine(ctx: Pick<WatchContext, 'bundler' | 'server'>) {
-  return watchModel.createMachine({
-    context: { ...watchModel.initialContext, ...ctx },
-    initial: 'preparing',
-    on: {
-      unhandled: {
-        target: 'unhandled',
-        actions: watchModel.assign({
-          error: (_: any, event: any) => event.value,
-        }),
-      },
-    },
-    states: {
-      preparing: {
-        invoke: {
-          id: 'preparing',
-          src: async (ctx) => {
-            await ctx.bundler.prepare();
-            let buildServer = await ctx.bundler.watch();
-            ctx.server.proxy(buildServer);
-            ctx.server.listen();
-          },
-          onDone: {
-            target: 'idle',
-            actions: assign({
-              result: (_, event: any) => event.data,
-              error: () => null,
-            }) as any,
-          },
-          onError: {
-            target: 'unhandled',
-            actions: assign({
-              result: () => null,
-              error: (_, event: any) => event.data,
-            }) as any,
-          },
+  return watchModel.createMachine(
+    {
+      context: { ...watchModel.initialContext, ...ctx },
+      initial: 'preparing',
+      on: {
+        unhandled: {
+          target: 'unhandled',
+          actions: watchModel.assign({
+            error: (_: any, event: any) => event.value,
+          }),
         },
       },
-      idle: {
-        on: { rebuild: 'rebuilding' },
-      },
-      rebuilding: {
-        on: {
-          rebuildError: {
-            target: 'error',
-            actions: watchModel.assign({
-              result: () => null,
-              error: (_: any, event: any) => event.value,
-            }),
-          },
-          rebuildSuccess: {
-            target: 'idle',
-            actions: watchModel.assign({
-              result: (_, event) => event.value,
-              error: () => null,
-            }),
+      states: {
+        preparing: {
+          invoke: {
+            id: 'preparing',
+            src: 'setup',
+            onDone: {
+              target: 'idle',
+              actions: assign({
+                result: (_, event: any) => event.data,
+                error: () => null,
+              }) as any,
+            },
+            onError: {
+              target: 'unhandled',
+              actions: assign({
+                result: () => null,
+                error: (_, event: any) => event.data,
+              }) as any,
+            },
           },
         },
-      },
-      error: {
-        on: { rebuild: 'rebuilding' },
-      },
-      unhandled: {
-        on: { restart: 'preparing' },
+        idle: {
+          on: {
+            rebuild: {
+              target: 'rebuilding',
+              actions: watchModel.assign({ file: (_, evt) => evt.value }),
+            },
+          },
+        },
+        rebuilding: {
+          on: {
+            rebuildError: {
+              target: 'error',
+              actions: watchModel.assign({
+                result: () => null,
+                error: (_: any, event: any) => event.value,
+                file: () => null,
+              }),
+            },
+            rebuildSuccess: {
+              target: 'idle',
+              actions: watchModel.assign({
+                result: (_, event) => event.value,
+                error: () => null,
+                file: () => null,
+              }),
+            },
+          },
+        },
+        error: {
+          on: { rebuild: 'rebuilding' },
+        },
+        unhandled: {
+          on: { restart: 'preparing' },
+        },
       },
     },
-  });
+    {
+      services: {
+        setup: (ctx) => async (send) => {
+          await ctx.bundler.prepare();
+          ctx.server.prepare();
+          ctx.server.listen();
+
+          async function onFileChange({ path }: { path: string }) {
+            try {
+              send(watchModel.events.rebuild(path));
+              let result = await ctx.bundler.build();
+              ctx.server.broadcast({ type: 'reload', path });
+              send(watchModel.events.rebuildSuccess(result));
+            } catch (error) {
+              send(watchModel.events.rebuildError(error));
+            }
+          }
+
+          ctx.server.on('watcher.change', onFileChange);
+          return ctx.bundler.build();
+        },
+      },
+    },
+  );
 }
 
 export type WatchState = StateFrom<ReturnType<typeof watchModel.createMachine>>;

@@ -19,33 +19,26 @@ interface TemplateCompileOptions {
   metafile: Pick<Metafile, 'outputs'>;
   config: BundlerConfig;
   bundler: ProjectInfo;
-  mode: Mode;
-  port: number;
-  host: string;
 }
 
-export function createAssetLoaderTemplate({ config, bundler, project, mode, port, host }: BundlerPluginOptions) {
+export function createAssetLoaderTemplate({ config, bundler, project }: BundlerPluginOptions) {
   let templatePath = bundler.paths.absolute('./assets/AssetLoader.php');
   let templateOutPath = project.paths.absolute(config.assetLoader.path);
   let compile = createTemplate(readFileSync(templatePath, 'utf-8'));
 
   return async ({ metafile }: Pick<TemplateCompileOptions, 'metafile'>) => {
     await fs.mkdir(path.dirname(templateOutPath), { recursive: true });
-    await fs.writeFile(templateOutPath, compile({ metafile, config, bundler, mode, port, host }));
+    await fs.writeFile(templateOutPath, compile({ metafile, config, bundler }));
   };
 }
 
 function createTemplate(content: string) {
-  return function compile({ metafile, config, bundler, mode, port, host }: TemplateCompileOptions) {
+  return function compile({ metafile, config, bundler }: TemplateCompileOptions) {
     let assetsArray = toPhpArray(metafileToAssets(metafile, config.entryPoints));
 
     content = content.replace('* @version v0.0.0', `* @version v${bundler.packageJson.version}`);
 
     content = content.replace('namespace WPBundler;', `namespace ${config.assetLoader.namespace};`);
-
-    content = content.replace("private static $mode = 'prod'", `private static $mode = '${mode}'`);
-    content = content.replace('private static $port = 3000', `private static $port = ${port}`);
-    content = content.replace("private static $host = 'localhost'", `private static $host = '${host}'`);
 
     content = content.replace(
       "private static $domain = 'domain';",
