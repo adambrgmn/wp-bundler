@@ -73,8 +73,8 @@ function extractTranslationFromCall(call: TwingNodeExpressionFunction): Translat
     case 'esc_html__':
     case 'esc_html_e':
       return {
-        text: getArgumentStringValue(args.getNode(0)) ?? '',
-        domain: getArgumentStringValue(args.getNode(1)) ?? undefined,
+        text: getArgumentStringValue(args, 0) ?? '',
+        domain: getArgumentStringValue(args, 1) ?? undefined,
         location,
       };
 
@@ -83,28 +83,28 @@ function extractTranslationFromCall(call: TwingNodeExpressionFunction): Translat
     case 'esc_attr_x':
     case 'esc_html_x':
       return {
-        text: getArgumentStringValue(args.getNode(0)) ?? '',
-        context: getArgumentStringValue(args.getNode(1)) ?? '',
-        domain: getArgumentStringValue(args.getNode(2)) ?? undefined,
+        text: getArgumentStringValue(args, 0) ?? '',
+        context: getArgumentStringValue(args, 1) ?? '',
+        domain: getArgumentStringValue(args, 2) ?? undefined,
         location,
       };
 
     case '_n':
     case '_n_noop':
       return {
-        single: getArgumentStringValue(args.getNode(0)) ?? '',
-        plural: getArgumentStringValue(args.getNode(1)) ?? '',
-        domain: getArgumentStringValue(args.getNode(3)) ?? undefined,
+        single: getArgumentStringValue(args, 0) ?? '',
+        plural: getArgumentStringValue(args, 1) ?? '',
+        domain: getArgumentStringValue(args, 3) ?? undefined,
         location,
       };
 
     case '_nx':
     case '_nx_noop':
       return {
-        single: getArgumentStringValue(args.getNode(0)) ?? '',
-        plural: getArgumentStringValue(args.getNode(1)) ?? '',
-        context: getArgumentStringValue(args.getNode(3)) ?? '',
-        domain: getArgumentStringValue(args.getNode(4)) ?? undefined,
+        single: getArgumentStringValue(args, 0) ?? '',
+        plural: getArgumentStringValue(args, 1) ?? '',
+        context: getArgumentStringValue(args, 3) ?? '',
+        domain: getArgumentStringValue(args, 4) ?? undefined,
         location,
       };
 
@@ -113,13 +113,18 @@ function extractTranslationFromCall(call: TwingNodeExpressionFunction): Translat
   }
 }
 
-function getArgumentStringValue(argument: TwingNode): string | null {
-  if (argument instanceof TwingNodeExpressionConstant) {
-    let attr = argument.getAttribute('value');
-    return typeof attr === 'string' ? attr : null;
-  }
+function getArgumentStringValue(args: TwingNode, index: number): string | null {
+  try {
+    let argument = args.getNode(index);
+    if (argument instanceof TwingNodeExpressionConstant) {
+      let attr = argument.getAttribute('value');
+      return typeof attr === 'string' ? attr : null;
+    }
 
-  return null;
+    return null;
+  } catch (error) {
+    return null;
+  }
 }
 
 function getTranslatorComment(node: TwingNodeComment) {
