@@ -37,7 +37,7 @@ const args = process.argv.slice(2);
       format: 'esm',
       outdir: './dist',
       platform: 'browser',
-      sourcemap: true,
+      sourcemap: false,
       watch: watch
         ? {
             onRebuild(error) {

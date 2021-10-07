@@ -1,12 +1,19 @@
 import EventEmitter from 'events';
 import esbuild, { BuildOptions, BuildResult, Metafile, Message } from 'esbuild';
 import merge from 'lodash.merge';
-import { BundlerPluginOptions, CliOptions, Mode, ProjectInfo } from './types';
+import { BundlerPluginOptions, Mode, ProjectInfo } from './types';
 import * as plugin from './plugins';
 import { readPkg } from './utils/read-pkg';
 import { BundlerConfigSchema, BundlerConfig } from './schema';
 import { createAssetLoaderTemplate } from './utils/asset-loader';
 import { rimraf } from './utils/rimraf';
+
+interface BundlerOptions {
+  mode: Mode;
+  cwd: string;
+  host: string;
+  port: number;
+}
 
 interface BundlerEvents {
   'rebuild.init': void;
@@ -17,15 +24,19 @@ interface BundlerEvents {
 export class Bundler extends EventEmitter {
   private mode: Mode;
   private cwd: string;
+  private host: string;
+  private port: number;
   private project: ProjectInfo = {} as unknown as any;
   private bundler: ProjectInfo = {} as unknown as any;
   private config: BundlerConfig = {} as unknown as any;
   private prepared = false;
 
-  constructor({ mode, cwd }: CliOptions) {
+  constructor({ mode, cwd, host, port }: BundlerOptions) {
     super();
     this.mode = mode;
     this.cwd = cwd;
+    this.host = host;
+    this.port = port;
   }
 
   async build() {
@@ -110,6 +121,8 @@ export class Bundler extends EventEmitter {
       config: this.config,
       project: this.project,
       bundler: this.bundler,
+      host: this.host,
+      port: this.port,
     };
   }
 

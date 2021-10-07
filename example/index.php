@@ -26,13 +26,15 @@ $tags = get_tags();
   <?php foreach ($tags['styles'] as $style) {
       echo sprintf('<link href="%s" rel="stylesheet">', $style['src']);
   } ?>
+
+  <?php foreach ($tags['inline'] as $inline) {
+      echo '<script type="application/javascript">';
+      echo $inline;
+      echo '</script>';
+  } ?>
 </head>
 <body>
   <div id="root"></div>
-
-  <script type="module">
-    <?php readfile('../dist/dev-client.js'); ?>
-  </script>
 
   <script type="application/javascript">
     window.wp = {};

@@ -1,6 +1,7 @@
 import { WebSocketEvent } from './types';
 
-const socket = new WebSocket('ws://localhost:3000');
+let url = new URL(`ws://${window.WP_BUNDLER_HOST}:${window.WP_BUNDLER_PORT}`);
+const socket = new WebSocket(url);
 
 socket.addEventListener('error', handleError);
 socket.addEventListener('close', handleClose);
@@ -67,3 +68,10 @@ const log = {
     console.error(error);
   },
 };
+
+declare global {
+  interface Window {
+    WP_BUNDLER_HOST: string;
+    WP_BUNDLER_PORT: number;
+  }
+}

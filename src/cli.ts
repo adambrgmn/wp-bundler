@@ -28,7 +28,7 @@ export async function cli(argv: typeof process.argv) {
   const port = args.port ?? 3000;
   const host = args.host ?? 'localhost';
 
-  let bundler = new Bundler({ mode, cwd });
+  let bundler = new Bundler({ mode, cwd, host, port });
   let server = new Server({ port, host, cwd });
   let runner = new Runner({ bundler, server, cwd });
 
