@@ -1,7 +1,4 @@
 export async function add(...nums: number[]) {
-  let spread = { wtf: 'foo', bar: 'baz' };
-  let { wtf, bar } = spread;
-
   return nums.reduce((a, b) => a + b, 0);
 }
 
