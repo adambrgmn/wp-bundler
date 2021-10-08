@@ -90,7 +90,6 @@ function extractTranslationFromCall(call: TwingNodeExpressionFunction): Translat
       };
 
     case '_n':
-    case '_n_noop':
       return {
         single: getArgumentStringValue(args, 0) ?? '',
         plural: getArgumentStringValue(args, 1) ?? '',
@@ -98,13 +97,29 @@ function extractTranslationFromCall(call: TwingNodeExpressionFunction): Translat
         location,
       };
 
+    case '_n_noop':
+      return {
+        single: getArgumentStringValue(args, 0) ?? '',
+        plural: getArgumentStringValue(args, 1) ?? '',
+        domain: getArgumentStringValue(args, 2) ?? undefined,
+        location,
+      };
+
     case '_nx':
-    case '_nx_noop':
       return {
         single: getArgumentStringValue(args, 0) ?? '',
         plural: getArgumentStringValue(args, 1) ?? '',
         context: getArgumentStringValue(args, 3) ?? '',
         domain: getArgumentStringValue(args, 4) ?? undefined,
+        location,
+      };
+
+    case '_nx_noop':
+      return {
+        single: getArgumentStringValue(args, 0) ?? '',
+        plural: getArgumentStringValue(args, 1) ?? '',
+        context: getArgumentStringValue(args, 2) ?? '',
+        domain: getArgumentStringValue(args, 3) ?? undefined,
         location,
       };
 

@@ -16,9 +16,9 @@ it('extracts translations from php files', () => {
     {{ esc_html_x('Translation 9', 'context', 'wp-bundler') }}
 
     {{ _n('Translation 10', 'Translations 10', 1, 'wp-bundler') }}
-    {{ _n_noop('Translation 11', 'Translations 11', 1, 'wp-bundler') }}
+    {{ _n_noop('Translation 11', 'Translations 11', 'wp-bundler') }}
     {{ _nx('Translation 12', 'Translations 12', 1, 'context', 'wp-bundler') }}
-    {{ _nx_noop('Translation 13', 'Translations 13', 1, 'context', 'wp-bundler') }}
+    {{ _nx_noop('Translation 13', 'Translations 13', 'context', 'wp-bundler') }}
   `;
 
   let result = removeLocation(extractTranslations(source, 'test.twig'));
