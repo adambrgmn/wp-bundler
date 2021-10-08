@@ -3,7 +3,7 @@ import * as path from 'path';
 import { Message, Plugin } from 'esbuild';
 import globby from 'globby';
 import md5 from 'md5';
-import { BundlerPlugin } from '../types';
+import { BundlerPlugin, ProjectInfo } from '../types';
 import { js, php, twig, theme, TranslationMessage } from '../utils/extract-translations';
 import { Po } from '../utils/po';
 
@@ -57,7 +57,8 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
       }
 
       pos.forEach((po) => po.updateFromTemplate(pot));
-      await Promise.all([pot.write(), ...pos.map((po) => po.write())]);
+      let foldLength = getFoldLength(project.packageJson);
+      await Promise.all([pot.write(undefined, foldLength), ...pos.map((po) => po.write(undefined, foldLength))]);
 
       let langDir = project.paths.absolute(config.outdir, 'languages');
       await fs.mkdir(langDir, { recursive: true });
@@ -171,4 +172,11 @@ async function findThemeTranslations(cwd: string, domain: string) {
 function generateTranslationFilename(domain: string, language: string, file: string): string {
   let md5Path = md5(file);
   return `${domain}-${language}-${md5Path}.json`;
+}
+
+function getFoldLength(pkgJson: any): number | undefined {
+  let prettier = pkgJson.prettier;
+  if (typeof prettier === 'object' && prettier != null && 'printWidth' in prettier) {
+    return prettier.printWidth;
+  }
 }

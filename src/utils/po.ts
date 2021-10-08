@@ -77,8 +77,8 @@ export class Po {
     }
   }
 
-  async write(filename = this.filename) {
-    await fs.writeFile(filename, this.toString() + '\n');
+  async write(filename = this.filename, foldLength?: number) {
+    await fs.writeFile(filename, this.toString(foldLength) + '\n');
   }
 
   has(id: string, context: string = '') {
@@ -174,8 +174,8 @@ export class Po {
     }
   }
 
-  toString() {
-    let buffer = po.compile(this.parsedTranslations, { sort: compareTranslations });
+  toString(foldLength: number = 120 - 9) {
+    let buffer = po.compile(this.parsedTranslations, { sort: compareTranslations, foldLength });
     return buffer.toString('utf-8');
   }
 

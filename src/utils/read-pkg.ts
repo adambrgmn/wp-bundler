@@ -35,7 +35,7 @@ export async function readPkg(cwd: string): Promise<ProjectInfo> {
 
 interface ReadResult {
   path: string;
-  packageJson: PackageJson;
+  packageJson: PackageJson & Record<string, unknown>;
 }
 
 export async function readPkgUp(cwd: string = process.cwd()): Promise<ReadResult | null> {

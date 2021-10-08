@@ -10,7 +10,11 @@ export interface ProjectPaths {
   relative: (to: string) => string;
 }
 
-export type ProjectInfo = { packageJson: PackageJson & { 'wp-bundler'?: unknown }; path: string; paths: ProjectPaths };
+export type ProjectInfo = {
+  packageJson: PackageJson & { 'wp-bundler'?: unknown } & Record<string, unknown>;
+  path: string;
+  paths: ProjectPaths;
+};
 
 export interface BundlerPluginOptions {
   mode: Mode;
