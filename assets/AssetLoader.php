@@ -35,6 +35,30 @@ class AssetLoader
     private static $prepared = false;
 
     /**
+     * Current mode of wp-bundler, dev or prod
+     *
+     * @since 2.0.0
+     * @var bool
+     */
+    private static $mode = 'prod';
+
+    /**
+     * Current mode of wp-bundler, dev or prod
+     *
+     * @since 2.0.0
+     * @var bool
+     */
+    private static $host = 'localhost';
+
+    /**
+     * Current mode of wp-bundler, dev or prod
+     *
+     * @since 2.0.0
+     * @var bool
+     */
+    private static $port = 3000;
+
+    /**
      * Domain used for translations.
      *
      * @since 1.0.0
@@ -69,6 +93,20 @@ class AssetLoader
     {
         if (self::$prepared) {
             return;
+        }
+
+        if (self::$mode === 'dev') {
+            \add_action('wp_enqueue_scripts', function () {
+                \wp_register_script('wp-bundler-dev-client', '', [], false, false);
+
+                \wp_add_inline_script(
+                    'wp-bundler-dev-client',
+                    'window.WP_BUNDLER_HOST = "' . self::$host . '"; window.WP_BUNDLER_PORT = ' . self::$port . ';'
+                );
+                \wp_add_inline_script('wp-bundler-dev-client', self::$dev_client);
+
+                \wp_enqueue_script('wp-bundler-dev-client');
+            });
         }
 
         \add_filter(
@@ -299,4 +337,12 @@ class AssetLoader
     {
         return \get_template_directory() . self::$outdir . $path;
     }
+
+    /**
+     * Script inlined during development.
+     *
+     * @since 2.0.0
+     * @var string
+     */
+    private static $dev_client = '';
 }

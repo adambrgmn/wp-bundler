@@ -5,9 +5,10 @@ import { BuildResult, Metafile } from 'esbuild';
 import { Bundler } from '../bundler';
 import { useInput } from 'ink';
 import { assign, ContextFrom, EventFrom, StateFrom } from 'xstate';
+import { Server } from '../server';
 
-export function useWatchMode(bundler: Bundler) {
-  const [state, send] = useMachine(() => createWatchMachine({ bundler }));
+export function useWatchMode({ bundler, server }: { bundler: Bundler; server: Server }) {
+  const [state, send] = useMachine(() => createWatchMachine({ bundler, server }));
 
   useInput(
     (key) => {
@@ -15,29 +16,6 @@ export function useWatchMode(bundler: Bundler) {
     },
     { isActive: state.matches('unhandled') },
   );
-
-  useEffect(() => {
-    let onRebuildStart = () => {
-      send(watchModel.events.rebuild());
-    };
-    bundler.on('rebuild.init', onRebuildStart);
-
-    let onRebuildEnd = (result: BuildResult & { metafile: Metafile }) => {
-      send(watchModel.events.rebuildSuccess(result));
-    };
-    bundler.on('rebuild.end', onRebuildEnd);
-
-    let onRebuildError = (error: unknown) => {
-      send(watchModel.events.rebuildError(error));
-    };
-    bundler.on('rebuild.error', onRebuildError);
-
-    return () => {
-      bundler.off('rebuild.init', onRebuildStart);
-      bundler.off('rebuild.end', onRebuildEnd);
-      bundler.off('rebuild.error', onRebuildError);
-    };
-  }, [bundler, send]);
 
   useEffect(() => {
     const handleRejection: NodeJS.UnhandledRejectionListener = (error) => {
@@ -57,15 +35,17 @@ export function useWatchMode(bundler: Bundler) {
 const watchModel = createModel(
   {
     bundler: null as unknown as Bundler,
+    server: null as unknown as Server,
     error: null as null | unknown,
     result: null as null | (BuildResult & { metafile: Metafile }),
     rejection: null as null | unknown,
+    files: null as null | string[],
   },
   {
     events: {
       error: (error: unknown) => ({ value: error }),
       prepared: () => ({}),
-      rebuild: () => ({}),
+      rebuild: (files: string[]) => ({ value: files }),
       rebuildError: (error: unknown) => ({ value: error }),
       rebuildSuccess: (value: BuildResult & { metafile: Metafile }) => ({
         value,
@@ -76,71 +56,100 @@ const watchModel = createModel(
   },
 );
 
-function createWatchMachine(ctx: Pick<WatchContext, 'bundler'>) {
-  return watchModel.createMachine({
-    context: { ...watchModel.initialContext, ...ctx },
-    initial: 'preparing',
-    on: {
-      unhandled: {
-        target: 'unhandled',
-        actions: watchModel.assign({
-          error: (_: any, event: any) => event.value,
-        }),
-      },
-    },
-    states: {
-      preparing: {
-        invoke: {
-          id: 'preparing',
-          src: async (ctx) => {
-            await ctx.bundler.prepare();
-            return ctx.bundler.watch();
-          },
-          onDone: {
-            target: 'idle',
-            actions: assign({
-              result: (_, event: any) => event.data,
-              error: () => null,
-            }) as any,
-          },
-          onError: {
-            target: 'unhandled',
-            actions: assign({
-              result: () => null,
-              error: (_, event: any) => event.data,
-            }) as any,
-          },
+function createWatchMachine(ctx: Pick<WatchContext, 'bundler' | 'server'>) {
+  return watchModel.createMachine(
+    {
+      context: { ...watchModel.initialContext, ...ctx },
+      initial: 'preparing',
+      on: {
+        unhandled: {
+          target: 'unhandled',
+          actions: watchModel.assign({
+            error: (_: any, event: any) => event.value,
+          }),
         },
       },
-      idle: {
-        on: { rebuild: 'rebuilding' },
-      },
-      rebuilding: {
-        on: {
-          rebuildError: {
-            target: 'error',
-            actions: watchModel.assign({
-              result: () => null,
-              error: (_: any, event: any) => event.value,
-            }),
-          },
-          rebuildSuccess: {
-            target: 'idle',
-            actions: watchModel.assign({
-              result: (_, event) => event.value,
-              error: () => null,
-            }),
+      states: {
+        preparing: {
+          invoke: {
+            id: 'preparing',
+            src: 'setup',
+            onDone: {
+              target: 'idle',
+              actions: assign({
+                result: (_, event: any) => event.data,
+                error: () => null,
+              }) as any,
+            },
+            onError: {
+              target: 'unhandled',
+              actions: assign({
+                result: () => null,
+                error: (_, event: any) => event.data,
+              }) as any,
+            },
           },
         },
-      },
-      error: {
-        on: { rebuild: 'rebuilding' },
-      },
-      unhandled: {
-        on: { restart: 'preparing' },
+        idle: {
+          on: {
+            rebuild: {
+              target: 'rebuilding',
+              actions: watchModel.assign({ files: (_, evt) => evt.value }),
+            },
+          },
+        },
+        rebuilding: {
+          on: {
+            rebuildError: {
+              target: 'error',
+              actions: watchModel.assign({
+                result: () => null,
+                error: (_: any, event: any) => event.value,
+                files: () => null,
+              }),
+            },
+            rebuildSuccess: {
+              target: 'idle',
+              actions: watchModel.assign({
+                result: (_, event) => event.value,
+                error: () => null,
+                files: () => null,
+              }),
+            },
+          },
+        },
+        error: {
+          on: { rebuild: 'rebuilding' },
+        },
+        unhandled: {
+          on: { restart: 'preparing' },
+        },
       },
     },
-  });
+    {
+      services: {
+        setup: (ctx) => async (send) => {
+          await ctx.bundler.prepare();
+          await ctx.server.prepare();
+          ctx.server.listen();
+
+          async function onFileChange({ files }: { files: string[] }) {
+            try {
+              send(watchModel.events.rebuild(files));
+              let result = await ctx.bundler.build();
+              ctx.server.broadcast({ type: 'reload', files });
+              send(watchModel.events.rebuildSuccess(result));
+            } catch (error) {
+              send(watchModel.events.rebuildError(error));
+            }
+          }
+
+          ctx.server.on('watcher.change', onFileChange);
+          return ctx.bundler.build();
+        },
+      },
+    },
+  );
 }
 
 export type WatchState = StateFrom<ReturnType<typeof watchModel.createMachine>>;

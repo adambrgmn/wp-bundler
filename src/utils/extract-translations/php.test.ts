@@ -9,12 +9,16 @@ it('extracts translations from php files', () => {
     _x('Translation', 'context', 'wp-bundler');
     _n('Single', 'Plural', 2, 'wp-bundler');
     _nx('Single', 'Plural', 2, 'context', 'wp-bundler');
+    _n_noop('Single', 'Plural', 'wp-bundler');
+    _nx_noop('Single', 'Plural', 'context', 'wp-bundler');
   `.trim();
 
   let result = extractTranslations(source, 'test.php');
   expect(removeLocation(result)).toEqual([
     { text: 'Translation', domain: 'wp-bundler' },
     { text: 'Translation', context: 'context', domain: 'wp-bundler' },
+    { single: 'Single', plural: 'Plural', domain: 'wp-bundler' },
+    { single: 'Single', plural: 'Plural', context: 'context', domain: 'wp-bundler' },
     { single: 'Single', plural: 'Plural', domain: 'wp-bundler' },
     { single: 'Single', plural: 'Plural', context: 'context', domain: 'wp-bundler' },
   ]);

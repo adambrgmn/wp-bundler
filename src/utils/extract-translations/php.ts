@@ -132,7 +132,6 @@ function extractTranslationFromCall(call: Call, filename: string): TranslationMe
       };
 
     case '_n':
-    case '_n_noop':
       return {
         single: getStringVal(call.arguments[0]) ?? '',
         plural: getStringVal(call.arguments[1]) ?? '',
@@ -140,13 +139,29 @@ function extractTranslationFromCall(call: Call, filename: string): TranslationMe
         location,
       };
 
+    case '_n_noop':
+      return {
+        single: getStringVal(call.arguments[0]) ?? '',
+        plural: getStringVal(call.arguments[1]) ?? '',
+        domain: getStringVal(call.arguments[2]) ?? undefined,
+        location,
+      };
+
     case '_nx':
-    case '_nx_noop':
       return {
         single: getStringVal(call.arguments[0]) ?? '',
         plural: getStringVal(call.arguments[1]) ?? '',
         context: getStringVal(call.arguments[3]) ?? '',
         domain: getStringVal(call.arguments[4]) ?? undefined,
+        location,
+      };
+
+    case '_nx_noop':
+      return {
+        single: getStringVal(call.arguments[0]) ?? '',
+        plural: getStringVal(call.arguments[1]) ?? '',
+        context: getStringVal(call.arguments[2]) ?? '',
+        domain: getStringVal(call.arguments[3]) ?? undefined,
         location,
       };
 

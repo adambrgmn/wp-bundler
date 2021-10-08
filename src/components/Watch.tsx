@@ -7,14 +7,16 @@ import { CwdProvider } from '../hooks/useCwd';
 import { SpinnerWithMessage } from './SpinnerWithMessage';
 import { BundleOutput } from './BundleOutput';
 import { BuildFailureOutput, FailureOutput } from './FailureOutput';
+import { Server } from '../server';
 
 export interface WatchProps {
   bundler: Bundler;
+  server: Server;
   cwd: string;
 }
 
-export const Watch: React.FC<WatchProps> = ({ bundler, cwd }) => {
-  const [state] = useWatchMode(bundler);
+export const Watch: React.FC<WatchProps> = ({ bundler, server, cwd }) => {
+  const [state] = useWatchMode({ bundler, server });
 
   return (
     <CwdProvider cwd={cwd}>

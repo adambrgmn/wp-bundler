@@ -3,7 +3,7 @@ import * as fs from 'fs/promises';
 import { readFileSync } from 'fs';
 import { Metafile } from 'esbuild';
 import { BundlerConfig } from '../schema';
-import { BundlerPluginOptions, ProjectInfo } from '../types';
+import { BundlerPluginOptions, Mode, ProjectInfo } from '../types';
 import { findBuiltinDependencies } from './externals';
 
 interface Asset {
@@ -19,26 +19,36 @@ interface TemplateCompileOptions {
   metafile: Pick<Metafile, 'outputs'>;
   config: BundlerConfig;
   bundler: ProjectInfo;
+  mode: Mode;
+  client: string;
+  host: string;
+  port: number;
 }
 
-export function createAssetLoaderTemplate({ config, bundler, project }: BundlerPluginOptions) {
+export function createAssetLoaderTemplate({ config, bundler, project, mode, host, port }: BundlerPluginOptions) {
   let templatePath = bundler.paths.absolute('./assets/AssetLoader.php');
   let templateOutPath = project.paths.absolute(config.assetLoader.path);
   let compile = createTemplate(readFileSync(templatePath, 'utf-8'));
 
   return async ({ metafile }: Pick<TemplateCompileOptions, 'metafile'>) => {
+    let client = await fs.readFile(path.join(__dirname, './dev-client.js'), 'utf-8');
     await fs.mkdir(path.dirname(templateOutPath), { recursive: true });
-    await fs.writeFile(templateOutPath, compile({ metafile, config, bundler }));
+    await fs.writeFile(templateOutPath, compile({ metafile, config, bundler, mode, client, host, port }));
   };
 }
 
 function createTemplate(content: string) {
-  return function compile({ metafile, config, bundler }: TemplateCompileOptions) {
+  return function compile({ metafile, config, bundler, mode, client, host, port }: TemplateCompileOptions) {
     let assetsArray = toPhpArray(metafileToAssets(metafile, config.entryPoints));
 
     content = content.replace('* @version v0.0.0', `* @version v${bundler.packageJson.version}`);
 
     content = content.replace('namespace WPBundler;', `namespace ${config.assetLoader.namespace};`);
+
+    content = content.replace("private static $mode = 'prod'", `protected static $mode = '${mode}'`);
+    content = content.replace("private static $host = 'localhost'", `protected static $host = '${host}'`);
+    content = content.replace('private static $port = 3000', `protected static $port = ${port}`);
+    content = content.replace("private static $dev_client = ''", `private static $dev_client = '${client}'`);
 
     content = content.replace(
       "private static $domain = 'domain';",

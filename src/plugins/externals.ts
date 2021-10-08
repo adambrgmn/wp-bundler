@@ -3,7 +3,7 @@ import { toCamelCase } from 'strman';
 import { BundlerPlugin } from '../types';
 import { DEfAULT_EXTERNALS } from '../utils/externals';
 
-export const externals: BundlerPlugin = ({ config, project }) => ({
+export const externals: BundlerPlugin = ({ config }) => ({
   name: 'wp-bundler-externals',
   setup(build) {
     setupProjectExternals(build, config.externals);

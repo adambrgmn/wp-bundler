@@ -1,7 +1,28 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { PackageJson } from 'type-fest';
+import { BundlerConfig, BundlerConfigSchema } from '../schema';
 import { ProjectPaths, ProjectInfo } from '../types';
+
+interface Metadata {
+  bundler: ProjectInfo;
+  project: ProjectInfo;
+  config: BundlerConfig;
+}
+
+const metadataCache = new Map<string, Metadata>();
+
+export async function getMetadata(projectPath: string, bundlerPath: string): Promise<Metadata> {
+  let cached = metadataCache.get(projectPath);
+  if (cached != null) return cached;
+
+  let [project, bundler] = await Promise.all([readPkg(projectPath), readPkg(bundlerPath)]);
+  let config = await BundlerConfigSchema.parseAsync(project.packageJson['wp-bundler']);
+
+  let metadata = { bundler, project, config };
+  metadataCache.set(projectPath, metadata);
+  return metadata;
+}
 
 export async function readPkg(cwd: string): Promise<ProjectInfo> {
   let pkg = await readPkgUp(cwd);
@@ -14,7 +35,7 @@ export async function readPkg(cwd: string): Promise<ProjectInfo> {
 
 interface ReadResult {
   path: string;
-  packageJson: PackageJson;
+  packageJson: PackageJson & Record<string, unknown>;
 }
 
 export async function readPkgUp(cwd: string = process.cwd()): Promise<ReadResult | null> {
