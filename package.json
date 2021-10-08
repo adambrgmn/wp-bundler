@@ -112,7 +112,7 @@
   "prettier": {
     "singleQuote": true,
     "trailingComma": "all",
-    "proseWrap": "always",
+    "proseWrap": "never",
     "printWidth": 120
   },
   "lint-staged": {
