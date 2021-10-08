@@ -1,5 +1,49 @@
 # @fransvilhelm/wp-bundler
 
+## 2.0.0
+
+### Major Changes
+
+- Drop tailwind support (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#18](https://github.com/adambrgmn/wp-bundler/pull/18))
+
+  Running tailwind as part of the dev flow took to long. Tailwind needs to run outside of the wp-bundler context.
+
+- Add proper dev server with reload on change (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#21](https://github.com/adambrgmn/wp-bundler/pull/21))
+
+  This version includes a new dev server. The server is automatically started when running `wp-bundler --watch`.
+
+  The server will listen for changes to your source files, including `.php` and `.twig` files. If a change is detected
+  the page will be reloaded and the changes applied.
+
+  If a change only affects `.css`-files the page will not be reloaded. Instead all your css will be "hot-reladed" on the
+  page without requiring a refresh.
+
+### Minor Changes
+
+- Add env variable support similar to CRA (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#22](https://github.com/adambrgmn/wp-bundler/pull/22))
+- Rewrite postcss plugin (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#17](https://github.com/adambrgmn/wp-bundler/pull/17))
+
+### Patch Changes
+
+- Fix broken translations (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#17](https://github.com/adambrgmn/wp-bundler/pull/17))
+- Improve twig message extraction (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#20](https://github.com/adambrgmn/wp-bundler/pull/20))
+- Fix translations extraction inconsistencies (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#15](https://github.com/adambrgmn/wp-bundler/pull/15))
+- Remove metafile plugin (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#17](https://github.com/adambrgmn/wp-bundler/pull/17))
+- Only run translations plugin on build (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#15](https://github.com/adambrgmn/wp-bundler/pull/15))
+- Fix issue with extracting domains from \_n_noop (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#21](https://github.com/adambrgmn/wp-bundler/pull/21))
+- Fix issues in error output (by [@adambrgmn](https://github.com/adambrgmn) in
+  [#17](https://github.com/adambrgmn/wp-bundler/pull/17))
+
 ## 1.2.0
 
 ### Minor Changes
