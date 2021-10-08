@@ -26,6 +26,9 @@ browsers as well.
 - [External dependencies](#external-dependencies)
 - [Translations](#translations)
   - [PHP and Twig translations](#php-and-twig-translations)
+- [Environment variables](#environment-variables)
+  - [Other injected variables](#other-injected-variables)
+  - [Other `.env` files](#other-env-files)
 - [Other WordPress focused bundlers](#other-wordpress-focused-bundlers)
 - [Roadmap](#roadmap)
 - [LICENSE](#license)
@@ -279,6 +282,40 @@ of these files in you project, but ignoring the `vendor` and `node_modules` fold
 means you are no longer need to use `wp-cli i18n make-pot/make-json` to extract and generate translations.
 
 `.mo` files will also me compiled from all your `.po` files.
+
+## Environment variables
+
+You can define environment variables in a `.env` file located in the root of you project, right by you `package.json`
+file. `wp-bundler` will inject any env variable defined in those that starts with `WP_`.
+
+- `WP_API_KEY` => injected
+- `API_KEY` => not injected
+
+Then in your application code you can access those by reading `process.env.WP_API_KEY` (or whatever the variable was
+called).
+
+The variables defined in `.env` will not override any environment variables already set.
+
+### Other injected variables
+
+Except environment variable prefixed with `WP_` `wp-bundler` will also inject the following variables:
+
+- `process.env.NODE_ENV`: `'production'` during build, `'development'` in watch mode
+- `__DEV__`: `false` during build, `true` in watch mode
+- `__PROD__`: `true` during build, `false` in watch mode
+
+### Other `.env` files
+
+Except the `.env` file you can use a few other `.env` files to inject variables from. The list below defines which files
+are read during which script. Files to the left have more priority than files to the right. Meaning that variables
+coming from a file to the left will override a variable coming from a file to the right.
+
+- `wp-bundler` (or `--mode prod`): `.env.production.local` > `.env.local` > `.env.production` > `.env`
+- `wp-bundler --watch` (or `--mode dev`): `.env.development.local` > `.env.local` > `.env.development` > `.env`
+
+With this structure you could have a `.env` file tracked by `git` and then allow developers to override these defaults
+with their own `.env.local` files, which should not be checked into `git`. This is the same mechanism as
+[`create-react-app` uses](https://create-react-app.dev/docs/adding-custom-environment-variables/#adding-development-environment-variables-in-env).
 
 ## Other WordPress focused bundlers
 

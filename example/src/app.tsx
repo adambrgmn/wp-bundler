@@ -19,3 +19,5 @@ ReactDOM.render(
   </React.Suspense>,
   document.getElementById('root'),
 );
+
+console.log(process.env.WP_TEST);
