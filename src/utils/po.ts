@@ -8,7 +8,7 @@ const GetTextTranslationSchema = z.object({
   msgctxt: z.string().optional(),
   msgid: z.string().nonempty(),
   msgid_plural: z.string().nonempty().optional(),
-  msgstr: z.array(z.string()),
+  msgstr: z.array(z.string()).default([]),
   comments: z
     .object({
       translator: z.string().default(''),
@@ -29,7 +29,8 @@ function parse(source: string | Buffer) {
         if (key === '') {
           acc[key] = translation;
         } else {
-          acc[key] = GetTextTranslationSchema.parse(translation);
+          let parsed = GetTextTranslationSchema.safeParse(translation);
+          if (parsed.success) acc[key] = parsed.data;
         }
 
         return acc;
@@ -111,6 +112,7 @@ export class Po {
         let lines = [...objValue.trim().split('\n'), ...srcValue.trim().split('\n')];
         return lines
           .filter((line, i, self) => !!line && self.indexOf(line) === i)
+          .sort()
           .join('\n')
           .replace(/translators:/gi, 'translators:');
       }

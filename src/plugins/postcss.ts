@@ -13,10 +13,6 @@ const postcssPlugin: BundlerPlugin = () => ({
     let plugins: AcceptedPlugin[] = [postcssPresetEnv()];
     let processor = postcss(plugins);
 
-    build.onResolve({ filter: /\.css$/ }, (args) => {
-      return { path: path.join(args.resolveDir, args.path), namespace: 'file', pluginName };
-    });
-
     build.onLoad({ filter: /\.css$/, namespace: 'file' }, async (args) => {
       let contents = await fs.readFile(args.path, 'utf-8');
       let result = await processor.process(contents, { from: args.path, to: args.path });
