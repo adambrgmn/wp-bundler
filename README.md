@@ -1,6 +1,6 @@
 # WP Bundler
 
-WP Bundler is a minimal and fast bundler for your WordPress front end assets. It is a "thin" wrapper around [`esbuild`](https://esbuild.github.io/) with built-in support for translations. It handles all of your front end assets including Javascript (with Typescript and React support), CSS (with Tailwind support) and other static assets imported in these, e.g. images and fonts.
+WP Bundler is a minimal and fast bundler for your WordPress front end assets. It is a "thin" wrapper around [`esbuild`](https://esbuild.github.io/) with built-in support for translations. It handles all of your front end assets including Javascript (with Typescript and React support), CSS and other static assets imported in these, e.g. images and fonts.
 
 It will output modern Javascript for modern browsers as well as a "legacy" version of your scripts for older browsers meaning that you will not send unneccessary content to modern browsers, while keeping the same functionality for older browsers as well.
 
@@ -273,8 +273,8 @@ Development of this module is still in a very early stage. It covers most of the
 Below are a few things that migth come in the future.
 
 - [ ] Support for other config files (e.g. `.wpbundlerrc` or `wp-bundler.config.json`).
-- [ ] Automatically detect and enqueue all externals specified in configuration.
 - [ ] Show warnings for missing translations.
+- [x] Automatically detect and enqueue all externals specified in configuration.
 - [x] Built in browser refresh on successfull rebuilds. (released 2.0.0)
 
 ## LICENSE
