@@ -1,8 +1,10 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { PackageJson } from 'type-fest';
-import { BundlerConfig, BundlerConfigSchema } from '../schema';
+import { BundlerConfig } from '../schema';
 import { ProjectPaths, ProjectInfo } from '../types';
+import { readJson } from './read-json';
+import { resolveConfig } from './resolve-config';
 
 interface Metadata {
   bundler: ProjectInfo;
@@ -17,7 +19,7 @@ export async function getMetadata(projectPath: string, bundlerPath: string): Pro
   if (cached != null) return cached;
 
   let [project, bundler] = await Promise.all([readPkg(projectPath), readPkg(bundlerPath)]);
-  let config = await BundlerConfigSchema.parseAsync(project.packageJson['wp-bundler']);
+  let config = await resolveConfig(project);
 
   let metadata = { bundler, project, config };
   metadataCache.set(projectPath, metadata);
@@ -45,8 +47,7 @@ export async function readPkgUp(cwd: string = process.cwd()): Promise<ReadResult
   for (let item of items) {
     if (item === 'package.json') {
       let pkgPath = path.join(cwd, item);
-      let raw = await fs.readFile(pkgPath, 'utf-8');
-      let packageJson = JSON.parse(raw);
+      let packageJson = await readJson<ProjectInfo['packageJson']>(pkgPath);
 
       return { path: pkgPath, packageJson };
     }
@@ -55,7 +56,7 @@ export async function readPkgUp(cwd: string = process.cwd()): Promise<ReadResult
   return readPkgUp(path.dirname(cwd));
 }
 
-function createPaths(pkgPath: string): ProjectPaths {
+export function createPaths(pkgPath: string): ProjectPaths {
   let root = path.dirname(pkgPath);
   return {
     root,

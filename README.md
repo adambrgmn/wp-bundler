@@ -50,27 +50,27 @@ Then configure the scripts in your `package.json`.
 
 ## Configuration
 
-All configuration related to `wp-bundler` resides in your projects `package.json`, under the key `wp-bundler`. Below is an example configuration with all available configuration options used:
+There are _three_ places in which you can configure `wp-bundler`. Either in your projects `package.json` under the property `"wp-bundler"`, or in any of the files `.wp-bundlerrc` and `wp-bundler.config.json`.
+
+Below is an example configuration with all available configuration options used:
 
 ```json
 {
-  "wp-bundler": {
-    "entryPoints": {
-      "app": "src/app.ts",
-      "admin": "src/admin.ts"
-    },
-    "outdir": "dist",
-    "sourcemap": true,
-    "externals": { "lodash": "_" },
-    "assetLoader": {
-      "path": "inc/AssetLoader.php",
-      "namespace": "MyNamespace"
-    },
-    "translations": {
-      "domain": "theme-domain",
-      "pot": "languages/theme.pot",
-      "pos": ["languages/sv_SE.po", "languages/en_US.po"]
-    }
+  "entryPoints": {
+    "app": "src/app.ts",
+    "admin": "src/admin.ts"
+  },
+  "outdir": "dist",
+  "sourcemap": true,
+  "externals": { "lodash": "_" },
+  "assetLoader": {
+    "path": "inc/AssetLoader.php",
+    "namespace": "MyNamespace"
+  },
+  "translations": {
+    "domain": "theme-domain",
+    "pot": "languages/theme.pot",
+    "pos": ["languages/sv_SE.po", "languages/en_US.po"]
   }
 }
 ```
@@ -227,7 +227,7 @@ The `.po` files, configured in `translations.pos`, will then be used to emit `je
 
 ### PHP and Twig translations
 
-The bundler will also look for, and extract, translations from your projects `.php` and `.twig` files. It will find all of these files in you project, but ignoring the `vendor` and `node_modules` folders. This means that using this package means you are no longer need to use `wp-cli i18n make-pot/make-json` to extract and generate translations.
+The bundler will also look for, and extract, translations from your projects `.php` and `.twig` files. It will find all of these files in you project, but ignoring the `vendor` and `node_modules` folders. This means that using this package means you no longer need to use `wp-cli i18n make-pot/make-json` to extract and generate translations.
 
 `.mo` files will also me compiled from all your `.po` files.
 
