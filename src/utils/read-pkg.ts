@@ -47,7 +47,7 @@ export async function readPkgUp(cwd: string = process.cwd()): Promise<ReadResult
   for (let item of items) {
     if (item === 'package.json') {
       let pkgPath = path.join(cwd, item);
-      let packageJson = await readJson(pkgPath);
+      let packageJson = await readJson<ProjectInfo['packageJson']>(pkgPath);
 
       return { path: pkgPath, packageJson };
     }
@@ -56,7 +56,7 @@ export async function readPkgUp(cwd: string = process.cwd()): Promise<ReadResult
   return readPkgUp(path.dirname(cwd));
 }
 
-function createPaths(pkgPath: string): ProjectPaths {
+export function createPaths(pkgPath: string): ProjectPaths {
   let root = path.dirname(pkgPath);
   return {
     root,
