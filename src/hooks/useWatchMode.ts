@@ -19,7 +19,7 @@ export function useWatchMode({ bundler, server }: { bundler: Bundler; server: Se
 
   useEffect(() => {
     const handleRejection: NodeJS.UnhandledRejectionListener = (error) => {
-      if (error != null && 'errors' in error) return;
+      if (typeof error === 'object' && error != null && 'errors' in error) return;
       send(watchModel.events.unhandled(error));
     };
 
