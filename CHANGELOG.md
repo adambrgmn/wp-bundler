@@ -1,5 +1,12 @@
 # @fransvilhelm/wp-bundler
 
+## 2.1.0
+
+### Minor Changes
+
+- Load dev script in admin area (by [@adambrgmn](https://github.com/adambrgmn) in [#27](https://github.com/adambrgmn/wp-bundler/pull/27))
+- Add ability to configure wp-bundler with .wp-bundlerrc or wp-bundler.config.json (by [@adambrgmn](https://github.com/adambrgmn) in [#24](https://github.com/adambrgmn/wp-bundler/pull/24))
+
 ## 2.0.0
 
 ### Major Changes
