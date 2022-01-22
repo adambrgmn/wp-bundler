@@ -96,17 +96,8 @@ class AssetLoader
         }
 
         if (self::$mode === 'dev') {
-            \add_action('wp_enqueue_scripts', function () {
-                \wp_register_script('wp-bundler-dev-client', '', [], false, false);
-
-                \wp_add_inline_script(
-                    'wp-bundler-dev-client',
-                    'window.WP_BUNDLER_HOST = "' . self::$host . '"; window.WP_BUNDLER_PORT = ' . self::$port . ';'
-                );
-                \wp_add_inline_script('wp-bundler-dev-client', self::$dev_client);
-
-                \wp_enqueue_script('wp-bundler-dev-client');
-            });
+            \add_action('wp_enqueue_scripts', [get_called_class(), 'enqueueDevScript']);
+            \add_action('admin_enqueue_scripts', [get_called_class(), 'enqueueDevScript']);
         }
 
         \add_filter(
@@ -316,6 +307,22 @@ class AssetLoader
         return \register_block_type($blockName, $blockConfig);
     }
 
+    /**
+     * Enqueue the dev script which enables automatic reload on changes
+     * during development.
+     */
+    public static function enqueueDevScript()
+    {
+        \wp_register_script('wp-bundler-dev-client', '', [], false, false);
+
+        \wp_add_inline_script(
+            'wp-bundler-dev-client',
+            'window.WP_BUNDLER_HOST = "' . self::$host . '"; window.WP_BUNDLER_PORT = ' . self::$port . ';'
+        );
+        \wp_add_inline_script('wp-bundler-dev-client', self::$dev_client);
+
+        \wp_enqueue_script('wp-bundler-dev-client');
+    }
     /**
      * Get full uri path to theme directory.
      *
