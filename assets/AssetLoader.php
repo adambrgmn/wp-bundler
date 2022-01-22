@@ -100,32 +100,7 @@ class AssetLoader
             \add_action('admin_enqueue_scripts', [get_called_class(), 'enqueueDevScript']);
         }
 
-        \add_filter(
-            'script_loader_tag',
-            function (string $tag, string $handle): string {
-                if (!str_contains($handle, 'wp-bundler.')) {
-                    return $tag;
-                }
-
-                if (str_contains($handle, '.nomodule')) {
-                    return str_replace(' src', ' nomodule src', $tag);
-                }
-
-                $tag = str_replace('text/javascript', 'module', $tag);
-                if (!str_contains('module', $tag)) {
-                    /**
-                     * When loaded as part of the block editor the script tag,
-                     * for some reason doesn't include `type="text/javascript"`.
-                     * In that case we need to do one more str_replace.
-                     */
-                    $tag = str_replace('<script', '<script type="module"', $tag);
-                }
-
-                return $tag;
-            },
-            10,
-            2
-        );
+        \add_filter('script_loader_tag', [get_called_class(), 'filterModuleScripts'], 10, 2);
 
         self::$prepared = true;
     }
@@ -308,22 +283,6 @@ class AssetLoader
     }
 
     /**
-     * Enqueue the dev script which enables automatic reload on changes
-     * during development.
-     */
-    public static function enqueueDevScript()
-    {
-        \wp_register_script('wp-bundler-dev-client', '', [], false, false);
-
-        \wp_add_inline_script(
-            'wp-bundler-dev-client',
-            'window.WP_BUNDLER_HOST = "' . self::$host . '"; window.WP_BUNDLER_PORT = ' . self::$port . ';'
-        );
-        \wp_add_inline_script('wp-bundler-dev-client', self::$dev_client);
-
-        \wp_enqueue_script('wp-bundler-dev-client');
-    }
-    /**
      * Get full uri path to theme directory.
      *
      * @param string $path Path to append to theme directory uri
@@ -343,6 +302,55 @@ class AssetLoader
     private static function outDirPath(string $path): string
     {
         return \get_template_directory() . self::$outdir . $path;
+    }
+
+    /**
+     * Enqueue the dev script which enables automatic reload on changes
+     * during development.
+     */
+    public static function enqueueDevScript()
+    {
+        \wp_register_script('wp-bundler-dev-client', '', [], false, false);
+
+        \wp_add_inline_script(
+            'wp-bundler-dev-client',
+            'window.WP_BUNDLER_HOST = "' . self::$host . '"; window.WP_BUNDLER_PORT = ' . self::$port . ';'
+        );
+        \wp_add_inline_script('wp-bundler-dev-client', self::$dev_client);
+
+        \wp_enqueue_script('wp-bundler-dev-client');
+    }
+
+    /**
+     * Filter the script tags enqueued by WordPress and properly set type
+     * module on the scripts that should be. And nomodule on the scripts that
+     * should have it.
+     *
+     * @param string $tag The full tag
+     * @param string $handle The handle used to enqueue the tag
+     * @return string
+     */
+    public static function filterModuleScripts(string $tag, string $handle): string
+    {
+        if (!str_contains($handle, 'wp-bundler.')) {
+            return $tag;
+        }
+
+        if (str_contains($handle, '.nomodule')) {
+            return str_replace(' src', ' nomodule src', $tag);
+        }
+
+        $tag = str_replace('text/javascript', 'module', $tag);
+        if (!str_contains('module', $tag)) {
+            /**
+             * When loaded as part of the block editor the script tag,
+             * for some reason doesn't include `type="text/javascript"`.
+             * In that case we need to do one more str_replace.
+             */
+            $tag = str_replace('<script', '<script type="module"', $tag);
+        }
+
+        return $tag;
     }
 
     /**
