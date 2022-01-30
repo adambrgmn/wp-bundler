@@ -1,5 +1,12 @@
 # @fransvilhelm/wp-bundler
 
+## 2.1.1
+
+### Patch Changes
+
+- Remove unused comment when translation is used again (by [@adambrgmn](https://github.com/adambrgmn) in [#34](https://github.com/adambrgmn/wp-bundler/pull/34))
+- Fix default empty string for plural translations (by [@adambrgmn](https://github.com/adambrgmn) in [#32](https://github.com/adambrgmn/wp-bundler/pull/32))
+
 ## 2.1.0
 
 ### Minor Changes
