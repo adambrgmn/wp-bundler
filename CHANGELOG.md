@@ -5,7 +5,7 @@
 ### Patch Changes
 
 - Remove unused comment when translation is used again (by [@adambrgmn](https://github.com/adambrgmn) in [#34](https://github.com/adambrgmn/wp-bundler/pull/34))
-- Fix default empty string for plural translations (by [@adambrgmn](https://github.com/adambrgmn) in [#32](https://github.com/adambrgmn/wp-bundler/pull/32))
+- Fix default empty string for plural translations (by [@adambrgmn](https://github.com/adambrgmn) in [#31](https://github.com/adambrgmn/wp-bundler/pull/31))
 
 ## 2.1.0
 
