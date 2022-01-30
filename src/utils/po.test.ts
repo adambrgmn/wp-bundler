@@ -279,6 +279,44 @@ it('handles translations that exists as single but get appended as plural', asyn
   `);
 });
 
+it('removes removed comment if translation is brought back', async () => {
+  let po = new Po(
+    `
+  msgid ""
+  msgstr ""
+  "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+  "Content-Type: text/plain; charset=UTF-8\n"
+  "Content-Transfer-Encoding: 8bit\n"
+  "MIME-Version: 1.0\n"
+  "Language: en_US\n"
+
+  # THIS TRANSLATION IS NO LONGER REFERENCED INSIDE YOUR PROJECT
+  msgid "test"
+  msgstr "test"
+  `,
+    'test.po',
+  );
+
+  let pot = await Po.load('test.pot');
+
+  pot.set({ text: 'test', location: createLocation() });
+  po.updateFromTemplate(pot);
+
+  expect(po.toString()).toMatchInlineSnapshot(`
+    "msgid \\"\\"
+    msgstr \\"\\"
+    \\"Plural-Forms: nplurals=2; plural=(n != 1);\\\\n\\"
+    \\"Content-Type: text/plain; charset=utf-8\\\\n\\"
+    \\"Content-Transfer-Encoding: 8bit\\\\n\\"
+    \\"MIME-Version: 1.0\\\\n\\"
+    \\"Language: en_US\\\\n\\"
+
+    #: test.ts:1
+    msgid \\"test\\"
+    msgstr \\"test\\""
+  `);
+});
+
 function createLocation(replace: Partial<Location> = {}): Location {
   return {
     file: 'test.ts',
