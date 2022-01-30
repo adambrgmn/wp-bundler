@@ -224,6 +224,61 @@ it('should not overwrite headers in po file when updating from pot', async () =>
   `);
 });
 
+it('creates correct plural templates translations', async () => {
+  let po = await Po.load('test.po');
+
+  po.set({ single: 'test', plural: 'tester', domain: 'wp', location: createLocation() });
+  expect(po.toString()).toMatchInlineSnapshot(`
+    "msgid \\"\\"
+    msgstr \\"\\"
+    \\"Plural-Forms: nplurals=2; plural=(n != 1);\\\\n\\"
+    \\"Content-Type: text/plain; charset=utf-8\\\\n\\"
+    \\"Content-Transfer-Encoding: 8bit\\\\n\\"
+    \\"MIME-Version: 1.0\\\\n\\"
+
+    #: test.ts:1
+    msgid \\"test\\"
+    msgid_plural \\"tester\\"
+    msgstr[0] \\"\\"
+    msgstr[1] \\"\\""
+  `);
+});
+
+it('handles translations that exists as single but get appended as plural', async () => {
+  let po = new Po(
+    `
+  msgid ""
+  msgstr ""
+  "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+  "Content-Type: text/plain; charset=UTF-8\n"
+  "Content-Transfer-Encoding: 8bit\n"
+  "MIME-Version: 1.0\n"
+  "Language: en_US\n"
+
+  msgid "test"
+  msgstr "test"
+  `,
+    'test.po',
+  );
+
+  po.set({ single: 'test', plural: 'tester', location: createLocation() });
+  expect(po.toString()).toMatchInlineSnapshot(`
+    "msgid \\"\\"
+    msgstr \\"\\"
+    \\"Plural-Forms: nplurals=2; plural=(n != 1);\\\\n\\"
+    \\"Content-Type: text/plain; charset=utf-8\\\\n\\"
+    \\"Content-Transfer-Encoding: 8bit\\\\n\\"
+    \\"MIME-Version: 1.0\\\\n\\"
+    \\"Language: en_US\\\\n\\"
+
+    #: test.ts:1
+    msgid \\"test\\"
+    msgid_plural \\"tester\\"
+    msgstr[0] \\"test\\"
+    msgstr[1] \\"\\""
+  `);
+});
+
 function createLocation(replace: Partial<Location> = {}): Location {
   return {
     file: 'test.ts',
