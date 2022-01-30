@@ -114,11 +114,20 @@ export class Po {
 
         if (keysToMerge.includes(key) && typeof value === 'string' && typeof srcValue === 'string') {
           let lines = [...value.trim().split('\n'), ...srcValue.trim().split('\n')];
-          return lines
+
+          let out = lines
+            // Keep only lines with content, and uniq
             .filter((line, i, self) => !!line && self.indexOf(line) === i)
+            // Remove unused comment if translation is back in the game
+            .filter((line) => {
+              if (srcValue.includes(Po.UNUSED_COMMENT)) return true;
+              return !line.includes(Po.UNUSED_COMMENT);
+            })
             .sort()
             .join('\n')
             .replace(/translators:/gi, 'translators:');
+
+          return out;
         }
 
         if (key === 'msgstr' && Array.isArray(value) && Array.isArray(srcValue)) {
