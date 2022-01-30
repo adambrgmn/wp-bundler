@@ -99,24 +99,38 @@ export class Po {
   }
 
   set(message: TranslationMessage | GetTextTranslation, mergeComments: boolean = true) {
-    let next = isTranslationMessage(message)
+    let next: GetTextTranslation = isTranslationMessage(message)
       ? messageToTranslationItem(message)
       : GetTextTranslationSchema.parse(message);
 
     let context = this.createContext(next.msgctxt ?? '');
-    let current = this.get(next.msgid, next.msgctxt) ?? next;
+    let current: GetTextTranslation = this.get(next.msgid, next.msgctxt) ?? next;
 
-    context[next.msgid] = mergeWith(current, next, (objValue: unknown, srcValue: unknown, key: string) => {
-      let keysToMerge = mergeComments ? ['reference', 'extracted', 'translator', 'flag', 'previous'] : ['translator'];
-      if (keysToMerge.includes(key) && typeof objValue === 'string' && typeof srcValue === 'string') {
-        let lines = [...objValue.trim().split('\n'), ...srcValue.trim().split('\n')];
-        return lines
-          .filter((line, i, self) => !!line && self.indexOf(line) === i)
-          .sort()
-          .join('\n')
-          .replace(/translators:/gi, 'translators:');
-      }
-    });
+    let final = mergeWith(
+      current,
+      next,
+      (value: unknown, srcValue: unknown, key: string, obj: GetTextTranslation, source: GetTextTranslation) => {
+        let keysToMerge = mergeComments ? ['reference', 'extracted', 'translator', 'flag', 'previous'] : ['translator'];
+
+        if (keysToMerge.includes(key) && typeof value === 'string' && typeof srcValue === 'string') {
+          let lines = [...value.trim().split('\n'), ...srcValue.trim().split('\n')];
+          return lines
+            .filter((line, i, self) => !!line && self.indexOf(line) === i)
+            .sort()
+            .join('\n')
+            .replace(/translators:/gi, 'translators:');
+        }
+
+        if (key === 'msgstr' && Array.isArray(value) && Array.isArray(srcValue)) {
+          return minLengthMsgstr(
+            value.map((prev, i) => srcValue[i] || prev || ''),
+            obj.msgid_plural != null || source.msgid_plural != null,
+          );
+        }
+      },
+    );
+
+    context[next.msgid] = final;
   }
 
   createContext(context: string): GetTextTranslations['translations'][string] {
@@ -267,7 +281,7 @@ function messageToTranslationItem(message: TranslationMessage) {
     msgctxt: isContextMessage(message) ? message.context : undefined,
     msgid: isPluralMessage(message) ? message.single : message.text,
     msgid_plural: isPluralMessage(message) ? message.plural : undefined,
-    msgstr: [],
+    msgstr: isPluralMessage(message) ? ['', ''] : [''],
     comments: {
       reference: `${message.location.file}:${message.location.line}`,
       extracted: message.translators ?? '',
@@ -283,4 +297,8 @@ function compareTranslations(a: GetTextTranslation, b: GetTextTranslation) {
   if (sort === 0) sort = (a.msgctxt ?? '').localeCompare(b.msgctxt ?? '');
 
   return sort;
+}
+
+function minLengthMsgstr(msgstr: string[], plural: boolean) {
+  return Array.from({ length: plural ? 2 : 1 }, (_, i) => msgstr[i] ?? '');
 }
