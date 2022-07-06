@@ -74,7 +74,7 @@ type Args = {
 function run(argv: Args, defaultMode: Mode, watch = false) {
   let cwd = typeof argv.cwd === 'string' ? argv.cwd : process.cwd();
   let mode = ensureMode(argv.mode, defaultMode);
-  let port = Number(argv.port) ?? 3000;
+  let port = Number.isNaN(Number(argv.port)) ? 3000 : Number(argv.port);
   let host = typeof argv.host === 'string' ? argv.host : 'localhost';
 
   let bundler = new Bundler({ mode, cwd, host, port });
