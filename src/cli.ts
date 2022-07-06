@@ -14,27 +14,15 @@ export async function cli() {
         mode: {
           alias: 'm',
           default: 'prod',
-          choices: ['dev', 'prod'],
+          choices: ['dev', 'prod'] as const,
           description: 'Version of your source to output',
         },
         cwd: {
-          required: false,
           description: 'Optional path to your project',
           type: 'string',
         },
       },
-      (argv) => {
-        let cwd = argv.cwd ?? process.cwd();
-        let mode = ensureMode(argv.mode, 'prod');
-        let port = 3000;
-        let host = 'localhost';
-
-        let bundler = new Bundler({ mode, cwd, host, port });
-        let server = new Server({ port, host, cwd });
-        let runner = new Runner({ bundler, server, cwd });
-
-        runner.build();
-      },
+      (argv) => run(argv, 'prod'),
     )
     .command(
       'dev',
@@ -53,27 +41,15 @@ export async function cli() {
         mode: {
           alias: 'm',
           default: 'dev',
-          choices: ['dev', 'prod'],
+          choices: ['dev', 'prod'] as const,
           description: 'Version of your source to output',
         },
         cwd: {
-          required: false,
           description: 'Optional path to your project',
           type: 'string',
         },
       },
-      (argv) => {
-        let cwd = argv.cwd ?? process.cwd();
-        let mode = ensureMode(argv.mode, 'dev');
-        let port = argv.port;
-        let host = argv.host;
-
-        let bundler = new Bundler({ mode, cwd, host, port });
-        let server = new Server({ port, host, cwd });
-        let runner = new Runner({ bundler, server, cwd });
-
-        runner.watch();
-      },
+      (argv) => run(argv, 'dev', true),
     )
     .parse();
 
@@ -84,20 +60,31 @@ export async function cli() {
         'See wp-bundler --help for more information.',
     );
 
-    let cwd = typeof argv.cwd === 'string' ? argv.cwd : process.cwd();
-    let mode = ensureMode(argv.mode, argv.watch ? 'dev' : 'prod');
-    let port = Number(argv.port) ?? 3000;
-    let host = typeof argv.host === 'string' ? argv.host : 'localhost';
+    run(argv as any, argv.watch ? 'dev' : 'prod', false);
+  }
+}
 
-    let bundler = new Bundler({ mode, cwd, host, port });
-    let server = new Server({ port, host, cwd });
-    let runner = new Runner({ bundler, server, cwd });
+type Args = {
+  cwd?: string;
+  mode?: string;
+  port?: number;
+  host?: string;
+};
 
-    if (argv.watch) {
-      runner.watch();
-    } else {
-      runner.build();
-    }
+function run(argv: Args, defaultMode: Mode, watch = false) {
+  let cwd = typeof argv.cwd === 'string' ? argv.cwd : process.cwd();
+  let mode = ensureMode(argv.mode, defaultMode);
+  let port = Number(argv.port) ?? 3000;
+  let host = typeof argv.host === 'string' ? argv.host : 'localhost';
+
+  let bundler = new Bundler({ mode, cwd, host, port });
+  let server = new Server({ port, host, cwd });
+  let runner = new Runner({ bundler, server, cwd });
+
+  if (watch) {
+    runner.watch();
+  } else {
+    runner.build();
   }
 }
 
