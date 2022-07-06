@@ -45,6 +45,7 @@
     "@changesets/cli": "^2.18.1",
     "@fransvilhelm/changeset-changelog": "^1.0.1",
     "@prettier/plugin-php": "^0.17.6",
+    "@trivago/prettier-plugin-sort-imports": "^3.2.0",
     "@types/babel__code-frame": "^7.0.3",
     "@types/gettext-parser": "^4.0.1",
     "@types/jest": "^27.0.3",
@@ -118,6 +119,13 @@
     "singleQuote": true,
     "trailingComma": "all",
     "proseWrap": "never",
-    "printWidth": 120
+    "printWidth": 120,
+    "importOrder": [
+      "^node:(.*)$",
+      "<THIRD_PARTY_MODULES>",
+      "^[./]"
+    ],
+    "importOrderSeparation": true,
+    "importOrderSortSpecifiers": true
   }
 }
