@@ -14,7 +14,8 @@ export async function cli() {
         mode: {
           alias: 'm',
           default: 'prod',
-          description: 'Version of your source to output (prod or dev)',
+          choices: ['dev', 'prod'],
+          description: 'Version of your source to output',
         },
         cwd: {
           required: false,
@@ -52,7 +53,8 @@ export async function cli() {
         mode: {
           alias: 'm',
           default: 'dev',
-          description: 'Version of your source to output (prod or dev)',
+          choices: ['dev', 'prod'],
+          description: 'Version of your source to output',
         },
         cwd: {
           required: false,
