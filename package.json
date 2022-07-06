@@ -38,7 +38,8 @@
   "dependencies": {
     "@swc/core": "^1.2.118",
     "chokidar": "^3.5.2",
-    "esbuild": "^0.14.2"
+    "esbuild": "^0.14.2",
+    "yargs": "^17.5.1"
   },
   "devDependencies": {
     "@babel/code-frame": "^7.16.0",
@@ -56,6 +57,7 @@
     "@types/react": "^17.0.37",
     "@types/strman": "^2.0.0",
     "@types/ws": "^8.2.2",
+    "@types/yargs": "^17.0.10",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
     "@xstate/react": "^1.6.3",

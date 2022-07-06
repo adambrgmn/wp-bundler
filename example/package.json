@@ -3,8 +3,8 @@
   "private": true,
   "scripts": {
     "serve": "php -S localhost:8000",
-    "build": "../cli.js",
-    "dev": "../cli.js --watch"
+    "build": "../cli.js build",
+    "dev": "../cli.js dev"
   },
   "dependencies": {
     "react": "^17.0.2",
