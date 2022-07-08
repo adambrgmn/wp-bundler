@@ -1,5 +1,5 @@
-import { ZodSchema } from 'zod';
 import parse from 'yargs-parser';
+import { ZodSchema } from 'zod';
 
 type BaseArg = string | number | boolean | undefined;
 

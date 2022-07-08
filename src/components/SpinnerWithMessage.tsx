@@ -1,5 +1,6 @@
-import React from 'react';
 import { Box, Text } from 'ink';
+import React from 'react';
+
 import { Spinner } from './Spinner';
 
 export const SpinnerWithMessage: React.FC<{ message: string }> = ({ message }) => {

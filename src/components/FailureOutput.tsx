@@ -1,9 +1,10 @@
-import React, { Fragment } from 'react';
+import { BuildFailure, BuildResult } from 'esbuild';
 import { Box, Text } from 'ink';
+import React, { Fragment } from 'react';
+import { ZodError } from 'zod';
+
 import { figures } from '../utils/figures';
 import { ErrorCodeFrame } from './ErrorCodeFrame';
-import { BuildFailure, BuildResult } from 'esbuild';
-import { ZodError } from 'zod';
 
 export const FailureOutput: React.FC<{
   message: string;

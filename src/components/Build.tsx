@@ -1,12 +1,13 @@
-import React from 'react';
 import { Box, Text } from 'ink';
-import { figures } from '../utils/figures';
+import React from 'react';
+
 import { Bundler } from '../bundler';
 import { BuildContext, useBuildMode } from '../hooks/useBuildMode';
 import { CwdProvider } from '../hooks/useCwd';
-import { SpinnerWithMessage } from './SpinnerWithMessage';
+import { figures } from '../utils/figures';
 import { BundleOutput } from './BundleOutput';
 import { BuildFailureOutput, FailureOutput } from './FailureOutput';
+import { SpinnerWithMessage } from './SpinnerWithMessage';
 
 export const Build: React.FC<{ bundler: Bundler; cwd: string }> = ({ bundler, cwd }) => {
   const [state] = useBuildMode(bundler);

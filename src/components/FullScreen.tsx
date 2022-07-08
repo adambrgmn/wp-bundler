@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
 import { Box, useStdout } from 'ink';
+import React, { useEffect, useState } from 'react';
 
 type Props = Omit<React.ComponentProps<typeof Box>, 'width' | 'height'>;
 

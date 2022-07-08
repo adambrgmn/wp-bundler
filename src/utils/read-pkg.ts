@@ -1,8 +1,9 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { PackageJson } from 'type-fest';
+
 import { BundlerConfig } from '../schema';
-import { ProjectPaths, ProjectInfo } from '../types';
+import { ProjectInfo, ProjectPaths } from '../types';
 import { readJson } from './read-json';
 import { resolveConfig } from './resolve-config';
 

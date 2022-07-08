@@ -1,8 +1,9 @@
-import { Bundler } from './bundler';
 import { render } from 'ink';
 import { createElement } from 'react';
-import { Watch } from './components/Watch';
+
+import { Bundler } from './bundler';
 import { Build } from './components/Build';
+import { Watch } from './components/Watch';
 import { Server } from './server';
 
 interface RunnerOptions {

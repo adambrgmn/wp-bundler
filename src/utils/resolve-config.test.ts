@@ -1,7 +1,8 @@
+import merge from 'lodash.merge';
+
 import { ProjectInfo } from '../types';
 import { createPaths } from './read-pkg';
 import { _resolveConfig } from './resolve-config';
-import merge from 'lodash.merge';
 
 const readJson = jest.fn<Promise<unknown>, [string]>();
 const resolveConfig = (project: ProjectInfo) => _resolveConfig(project, readJson);

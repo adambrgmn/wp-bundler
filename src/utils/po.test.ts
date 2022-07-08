@@ -1,4 +1,5 @@
 import { Location } from 'esbuild';
+
 import { Po } from './po';
 
 it('appends a new translation if a similar one does not exist', async () => {

@@ -3,6 +3,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import postcss, { AcceptedPlugin, Warning } from 'postcss';
 import postcssPresetEnv from 'postcss-preset-env';
+
 import { BundlerPlugin } from '../types';
 
 const pluginName = 'wp-bundler-postcss';

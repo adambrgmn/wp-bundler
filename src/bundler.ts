@@ -1,11 +1,12 @@
+import esbuild, { BuildOptions, BuildResult, Message, Metafile } from 'esbuild';
 import EventEmitter from 'events';
-import esbuild, { BuildOptions, BuildResult, Metafile, Message } from 'esbuild';
 import merge from 'lodash.merge';
-import { BundlerPluginOptions, Mode, ProjectInfo } from './types';
+
 import * as plugin from './plugins';
-import { getMetadata } from './utils/read-pkg';
 import { BundlerConfig } from './schema';
+import { BundlerPluginOptions, Mode, ProjectInfo } from './types';
 import { createAssetLoaderTemplate } from './utils/asset-loader';
+import { getMetadata } from './utils/read-pkg';
 import { rimraf } from './utils/rimraf';
 
 interface BundlerOptions {

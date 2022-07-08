@@ -1,14 +1,15 @@
+import { Location } from 'esbuild';
 import {
   TwingEnvironment,
   TwingLoaderNull,
-  TwingNodeModule,
   TwingNode,
-  TwingSource,
-  TwingNodeExpressionFunction,
-  TwingNodeExpressionConstant,
   TwingNodeComment,
+  TwingNodeExpressionConstant,
+  TwingNodeExpressionFunction,
+  TwingNodeModule,
+  TwingSource,
 } from 'twing';
-import { Location } from 'esbuild';
+
 import { TranslationMessage } from './types';
 import { isTranslatorsComment } from './utils';
 

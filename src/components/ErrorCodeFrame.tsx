@@ -1,12 +1,13 @@
-import React from 'react';
-import * as path from 'path';
-import * as fs from 'fs';
-import { Location, Message } from 'esbuild';
 import { codeFrameColumns } from '@babel/code-frame';
+import { Location, Message } from 'esbuild';
+import * as fs from 'fs';
 import { Box, Text } from 'ink';
-import { Link } from './Link';
-import { figures } from '../utils/figures';
+import * as path from 'path';
+import React from 'react';
+
 import { useCwd } from '../hooks/useCwd';
+import { figures } from '../utils/figures';
+import { Link } from './Link';
 
 export const ErrorCodeFrame: React.FC<{
   error: Message;

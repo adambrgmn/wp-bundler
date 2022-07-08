@@ -1,4 +1,5 @@
 import { Location } from 'esbuild';
+
 import { TranslationMessage } from '.';
 
 let find = [

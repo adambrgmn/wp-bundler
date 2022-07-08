@@ -1,10 +1,11 @@
-import * as fs from 'fs/promises';
-import * as path from 'path';
 import { Message, Plugin } from 'esbuild';
+import * as fs from 'fs/promises';
 import globby from 'globby';
 import md5 from 'md5';
+import * as path from 'path';
+
 import { BundlerPlugin } from '../types';
-import { js, php, twig, theme, TranslationMessage } from '../utils/extract-translations';
+import { TranslationMessage, js, php, theme, twig } from '../utils/extract-translations';
 import { Po } from '../utils/po';
 
 let name = 'wp-bundler-translations';

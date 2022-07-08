@@ -1,5 +1,6 @@
-import prettier from 'prettier';
 import pluginPhp from '@prettier/plugin-php';
+import prettier from 'prettier';
+
 import { toPhpArray } from './asset-loader';
 
 describe('toPhpArray', () => {
