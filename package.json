@@ -87,7 +87,7 @@
     "php-parser": "^3.0.3",
     "postcss": "^8.4.4",
     "postcss-preset-env": "^7.0.1",
-    "prettier": "^2.5.1",
+    "prettier": "^2.7.1",
     "react": "^17.0.2",
     "strman": "^2.0.1",
     "ts-node": "^10.4.0",
