@@ -61,7 +61,7 @@ export async function cli() {
         'See wp-bundler --help for more information.',
     );
 
-    run(argv as any, argv.watch ? 'dev' : 'prod', false);
+    run(argv as any, argv.watch ? 'dev' : 'prod', typeof argv.watch === 'boolean' ? argv.watch : false);
   }
 }
 
