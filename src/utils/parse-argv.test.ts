@@ -1,4 +1,5 @@
 import * as z from 'zod';
+
 import { parseArgv } from './parse-argv';
 
 it('parses process.argv and gives back validated arguments', () => {

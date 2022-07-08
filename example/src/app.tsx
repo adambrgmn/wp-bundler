@@ -1,8 +1,9 @@
+import { __ } from '@wordpress/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { __ } from '@wordpress/i18n';
-import { Button } from './components/Button';
+
 import './app.css';
+import { Button } from './components/Button';
 
 const App: React.FC = () => {
   return (

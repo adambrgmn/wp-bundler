@@ -1,4 +1,5 @@
 import ts from 'typescript';
+
 import { TranslationMessage } from './types';
 import { isTranslatorsComment, trimComment, tsNodeToLocation } from './utils';
 

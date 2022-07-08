@@ -1,13 +1,14 @@
-import React from 'react';
 import { Box, Text } from 'ink';
-import { figures } from '../utils/figures';
+import React from 'react';
+
 import { Bundler } from '../bundler';
-import { useWatchMode, WatchContext } from '../hooks/useWatchMode';
 import { CwdProvider } from '../hooks/useCwd';
-import { SpinnerWithMessage } from './SpinnerWithMessage';
+import { WatchContext, useWatchMode } from '../hooks/useWatchMode';
+import { Server } from '../server';
+import { figures } from '../utils/figures';
 import { BundleOutput } from './BundleOutput';
 import { BuildFailureOutput, FailureOutput } from './FailureOutput';
-import { Server } from '../server';
+import { SpinnerWithMessage } from './SpinnerWithMessage';
 
 export interface WatchProps {
   bundler: Bundler;

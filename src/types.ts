@@ -1,5 +1,6 @@
 import { Plugin } from 'esbuild';
 import { PackageJson } from 'type-fest';
+
 import { BundlerConfig } from './schema';
 
 export type Mode = 'dev' | 'prod';

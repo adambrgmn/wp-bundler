@@ -1,10 +1,11 @@
-import { createModel } from 'xstate/lib/model.js';
 import { useMachine } from '@xstate/react';
 import { BuildResult, Metafile } from 'esbuild';
-import { Bundler } from '../bundler';
-import { useEffect } from 'react';
-import { assign, ContextFrom } from 'xstate';
 import { useApp } from 'ink';
+import { useEffect } from 'react';
+import { ContextFrom, assign } from 'xstate';
+import { createModel } from 'xstate/lib/model.js';
+
+import { Bundler } from '../bundler';
 
 export function useBuildMode(bundler: Bundler) {
   const app = useApp();

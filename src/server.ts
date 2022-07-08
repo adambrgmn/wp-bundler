@@ -1,12 +1,13 @@
+import chokidar from 'chokidar';
 import EventEmitter from 'events';
 import * as http from 'http';
-import { WebSocketServer, WebSocket } from 'ws';
-import chokidar from 'chokidar';
 import debounce from 'lodash.debounce';
-import { WebSocketEvent } from './types';
-import { getMetadata } from './utils/read-pkg';
+import { WebSocket, WebSocketServer } from 'ws';
+
 import { BundlerConfig } from './schema';
+import { WebSocketEvent } from './types';
 import { isNotNullable } from './utils/assert';
+import { getMetadata } from './utils/read-pkg';
 
 interface ServerEvents {
   'server.listen': void;

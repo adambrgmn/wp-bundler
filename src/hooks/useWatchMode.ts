@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
-import { createModel } from 'xstate/lib/model.js';
 import { useMachine } from '@xstate/react';
 import { BuildResult, Metafile } from 'esbuild';
-import { Bundler } from '../bundler';
 import { useInput } from 'ink';
-import { assign, ContextFrom, EventFrom, StateFrom } from 'xstate';
+import { useEffect } from 'react';
+import { ContextFrom, EventFrom, StateFrom, assign } from 'xstate';
+import { createModel } from 'xstate/lib/model.js';
+
+import { Bundler } from '../bundler';
 import { Server } from '../server';
 
 export function useWatchMode({ bundler, server }: { bundler: Bundler; server: Server }) {

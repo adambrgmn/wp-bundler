@@ -1,7 +1,8 @@
-import * as path from 'path';
-import * as fs from 'fs/promises';
-import { readFileSync } from 'fs';
 import { Metafile } from 'esbuild';
+import { readFileSync } from 'fs';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+
 import { BundlerConfig } from '../schema';
 import { BundlerPluginOptions, Mode, ProjectInfo } from '../types';
 import { findBuiltinDependencies } from './externals';

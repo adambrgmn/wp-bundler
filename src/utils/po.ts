@@ -1,8 +1,9 @@
 import * as fs from 'fs/promises';
-import { po, mo, GetTextTranslations, GetTextTranslation } from 'gettext-parser';
+import { GetTextTranslation, GetTextTranslations, mo, po } from 'gettext-parser';
 import mergeWith from 'lodash.mergewith';
 import * as z from 'zod';
-import { TranslationMessage, isTranslationMessage, isContextMessage, isPluralMessage } from './extract-translations';
+
+import { TranslationMessage, isContextMessage, isPluralMessage, isTranslationMessage } from './extract-translations';
 
 const GetTextTranslationSchema = z.object({
   msgctxt: z.string().optional(),

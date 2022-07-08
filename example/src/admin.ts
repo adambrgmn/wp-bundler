@@ -1,10 +1,11 @@
 // import { add } from './utils/math';
 // @ts-ignore
-import { __, _x, _n } from '@wordpress/i18n';
+import { __, _n, _x } from '@wordpress/i18n';
 // @ts-ignore
 import * as i18n from '@wordpress/i18n';
 // @ts-ignore
 import i18n2 from '@wordpress/i18n';
+
 import { add } from './utils/math';
 
 console.log(add(1, 2, 3));

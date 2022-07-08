@@ -1,5 +1,6 @@
-import yargs from 'yargs/yargs';
 import { hideBin } from 'yargs/helpers';
+import yargs from 'yargs/yargs';
+
 import { Bundler } from './bundler';
 import { Runner } from './runner';
 import { Server } from './server';

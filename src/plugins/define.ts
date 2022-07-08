@@ -1,5 +1,6 @@
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
+
 import { BundlerPlugin } from '../types';
 
 export const define: BundlerPlugin = ({ mode, project }) => ({

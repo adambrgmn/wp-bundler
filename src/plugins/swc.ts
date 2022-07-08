@@ -1,5 +1,6 @@
-import * as fs from 'fs/promises';
 import swcCore from '@swc/core';
+import * as fs from 'fs/promises';
+
 import { BundlerPlugin } from '../types';
 
 export const swc: BundlerPlugin = () => ({

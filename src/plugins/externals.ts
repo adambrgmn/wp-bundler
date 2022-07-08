@@ -1,5 +1,6 @@
 import { PluginBuild } from 'esbuild';
 import { toCamelCase } from 'strman';
+
 import { BundlerPlugin } from '../types';
 import { DEfAULT_EXTERNALS } from '../utils/externals';
 

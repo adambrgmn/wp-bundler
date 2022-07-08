@@ -1,10 +1,11 @@
-import React, { useMemo } from 'react';
-import * as fs from 'fs';
-import * as path from 'path';
-import { Box, Text } from 'ink';
-import filesize from 'filesize';
-import { useCwd } from '../hooks/useCwd';
 import { Metafile } from 'esbuild';
+import filesize from 'filesize';
+import * as fs from 'fs';
+import { Box, Text } from 'ink';
+import * as path from 'path';
+import React, { useMemo } from 'react';
+
+import { useCwd } from '../hooks/useCwd';
 
 type BundlerOutput = Record<string, { file: string; size: number | null }[]>;
 

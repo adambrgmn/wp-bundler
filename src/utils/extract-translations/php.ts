@@ -1,4 +1,5 @@
 import { Call, Comment, CommentBlock, Engine, Node, String } from 'php-parser';
+
 import { TranslationMessage } from './types';
 import { isTranslatorsComment, phpNodeToLocation, trimComment } from './utils';
 

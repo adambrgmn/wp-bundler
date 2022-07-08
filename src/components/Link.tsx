@@ -1,5 +1,5 @@
+import { Text, Transform } from 'ink';
 import React from 'react';
-import { Transform, Text } from 'ink';
 
 export const Link: React.FC<{ url: string }> = ({ url, children }) => {
   let supportsHyperlinks = process.stdout.isTTY && !('CI' in process.env);
