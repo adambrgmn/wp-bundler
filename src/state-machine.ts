@@ -1,4 +1,5 @@
 import { BuildFailure, BuildResult, Metafile } from 'esbuild';
+import { performance } from 'perf_hooks';
 import { assign, createMachine } from 'xstate';
 
 import { Bundler } from './bundler';
@@ -23,6 +24,7 @@ type MachineContextInternal = {
   metafile: Metafile | null;
   error: unknown | null;
   changedFiles: string[];
+  startTime: number;
 };
 
 type Context = MachineContext & MachineContextInternal;
@@ -47,6 +49,7 @@ const defaultContext: Context = {
   metafile: null,
   error: null,
   changedFiles: [],
+  startTime: performance.now(),
 };
 
 export const createStateMachine = (context: Partial<MachineContext>) =>
@@ -85,7 +88,7 @@ export const machine =
           },
         },
         building: {
-          entry: ['logBuildStart'],
+          entry: ['logBuildStart', 'setStartTime'],
           invoke: {
             src: 'build',
             id: 'wp-bundler-build',
@@ -209,7 +212,8 @@ export const machine =
             context.logger.buildResult(context.result);
             context.logger.warn(`Build succeeded, but with ${errors} error(s) and ${warnings} warning(s).`);
           } else {
-            context.logger.success('Build succeeded.');
+            let diff = Math.round(performance.now() - context.startTime);
+            context.logger.success(`Build succeeded in ${diff} ms.`);
           }
         },
         logWatchError: (context, event) => {
@@ -231,7 +235,8 @@ export const machine =
             context.logger.buildResult(context.result);
             context.logger.warn(`Build succeeded, but with ${errors} error(s) and ${warnings} warning(s).`);
           } else {
-            context.logger.success('Build succeeded.');
+            let diff = Math.round(performance.now() - context.startTime);
+            context.logger.success(`Build succeeded in ${diff} ms.`);
           }
 
           context.logger.info('Watching files...');
@@ -257,6 +262,9 @@ export const machine =
         setErrorResult: assign({
           result: (_, event) => (isEsbuildBuildFailure(event.data) ? event.data : null),
           error: (_, event) => event.data,
+        }),
+        setStartTime: assign({
+          startTime: (context, event) => performance.now(),
         }),
       },
     },
