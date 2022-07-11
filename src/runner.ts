@@ -178,8 +178,9 @@ export const machine =
               send({ type: 'BUILD' });
 
               return () => {
-                if (context.watch && context.server != null) {
+                if (context.watch) {
                   context.watcher.off('watcher.change', handleFileChange);
+                  context.watcher.close();
                   context.server.close();
                 }
               };
