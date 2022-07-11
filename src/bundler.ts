@@ -1,11 +1,10 @@
-import esbuild, { BuildOptions, BuildResult, Message, Metafile } from 'esbuild';
+import esbuild, { BuildOptions, BuildResult, Metafile, Plugin } from 'esbuild';
 import merge from 'lodash.merge';
 
 import * as plugin from './plugins';
 import { BundlerConfig } from './schema';
 import { BundlerPluginOptions, Mode, ProjectInfo } from './types';
 import { createAssetLoaderTemplate } from './utils/asset-loader';
-import { TypedEventEmitter } from './utils/event-emitter';
 import { getMetadata } from './utils/read-pkg';
 import { rimraf } from './utils/rimraf';
 
@@ -16,13 +15,7 @@ interface BundlerOptions {
   port: number;
 }
 
-interface BundlerEvents {
-  'rebuild.init': void;
-  'rebuild.end': BuildResult & { metafile: Metafile };
-  'rebuild.error': { errors: Message[] };
-}
-
-export class Bundler extends TypedEventEmitter<BundlerEvents> {
+export class Bundler {
   #mode: Mode;
   #cwd: string;
   #host: string;
@@ -32,7 +25,6 @@ export class Bundler extends TypedEventEmitter<BundlerEvents> {
   #config: BundlerConfig = {} as unknown as any;
 
   constructor({ mode, cwd, host, port }: BundlerOptions) {
-    super();
     this.#mode = mode;
     this.#cwd = cwd;
     this.#host = host;
@@ -44,7 +36,7 @@ export class Bundler extends TypedEventEmitter<BundlerEvents> {
     let tasks: Promise<esbuild.BuildResult>[] = [];
 
     let options = this.#createBundlerOptions();
-    options.plugins!.push(plugin.translations(pluginOptions), plugin.postcss(pluginOptions));
+    options.plugins.push(plugin.translations(pluginOptions), plugin.postcss(pluginOptions));
     tasks.push(esbuild.build(options));
 
     if (this.#mode === 'prod') {
@@ -52,13 +44,13 @@ export class Bundler extends TypedEventEmitter<BundlerEvents> {
       nomoduleOptions.format = 'iife';
       nomoduleOptions.entryNames = `${nomoduleOptions.entryNames}.nomodule`;
       nomoduleOptions.target = 'es5';
-      nomoduleOptions.plugins!.push(plugin.swc(pluginOptions));
+      nomoduleOptions.plugins.push(plugin.swc(pluginOptions));
 
       tasks.push(esbuild.build(nomoduleOptions));
     }
 
     let results = await Promise.all(tasks);
-    let result = results.slice(1).reduce<esbuild.BuildResult>((acc, result) => merge(acc, result), results[0]);
+    let result = results.slice(1).reduce<BuildResult>((acc, result) => merge(acc, result), results[0]);
 
     ensureMetafile(result);
 
@@ -80,10 +72,10 @@ export class Bundler extends TypedEventEmitter<BundlerEvents> {
     rimraf(this.#project.paths.absolute(this.#config.outdir));
   }
 
-  #createBundlerOptions(): BuildOptions {
+  #createBundlerOptions(): BuildOptions & { plugins: Plugin[] } {
     let pluginOptions = this.#pluginOptions();
 
-    let options: BuildOptions = {
+    let options: BuildOptions & { plugins: Plugin[] } = {
       entryPoints: this.#config.entryPoints,
       outdir: this.#project.paths.absolute(this.#config.outdir),
       entryNames: this.#mode === 'prod' ? '[dir]/[name].[hash]' : '[dir]/[name]',
@@ -107,7 +99,7 @@ export class Bundler extends TypedEventEmitter<BundlerEvents> {
       logLevel: 'silent',
       // publicPath: 'https://www.example.com/v1',
 
-      plugins: [this.#timingPlugin(), plugin.define(pluginOptions), plugin.externals(pluginOptions)],
+      plugins: [plugin.define(pluginOptions), plugin.externals(pluginOptions)],
     };
 
     return options;
@@ -121,26 +113,6 @@ export class Bundler extends TypedEventEmitter<BundlerEvents> {
       bundler: this.#bundler,
       host: this.#host,
       port: this.#port,
-    };
-  }
-
-  #timingPlugin(): esbuild.Plugin {
-    return {
-      name: 'wp-bundler-timing',
-      setup: (build) => {
-        build.onStart(() => {
-          this.emit('rebuild.init', undefined);
-        });
-
-        build.onEnd((result) => {
-          if (result.errors.length > 0) {
-            this.emit('rebuild.error', result);
-          } else {
-            ensureMetafile(result);
-            this.emit('rebuild.end', result);
-          }
-        });
-      },
     };
   }
 }
