@@ -13,7 +13,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "Last-Translator: \n"
 
-#: src/app.tsx:11
+#: src/app.tsx:12
 msgid "Click me"
 msgstr "Klicka"
 
@@ -21,7 +21,7 @@ msgstr "Klicka"
 msgid "Hello world"
 msgstr "Hej världen"
 
-#: src/app.tsx:10
+#: src/app.tsx:11
 msgid "Hello world!"
 msgstr "Hej världen!"
 
@@ -35,37 +35,37 @@ msgctxt "context"
 msgid "My string"
 msgstr "Min sträng"
 
-#: src/admin.ts:12
+#: src/admin.ts:13
 msgctxt "any"
 msgid "wtf 1"
 msgstr "vad 1"
 
-#: src/admin.ts:13
+#: src/admin.ts:14
 msgid "wtf 2"
 msgid_plural "wtf's 2"
 msgstr[0] "vad 2"
 msgstr[1] "vads 2"
 
-#: src/admin.ts:14
-#: src/admin.ts:16
+#: src/admin.ts:15
+#: src/admin.ts:17
 #. translators: No wtf's given
 msgid "wtf 3"
 msgstr "vad 3"
 
-#: src/admin.ts:17
+#: src/admin.ts:18
 #: theme.php:6
 #. translators: Hello world
 msgid "wtf 4"
 msgstr "vad 4"
 
-#: src/admin.ts:18
+#: src/admin.ts:19
 msgid "wtf 5"
 msgstr "vad 5"
 
-#: src/admin.ts:20
+#: src/admin.ts:21
 msgid "wtf 6"
 msgstr "vad 6"
 
-#: src/admin.ts:22
+#: src/admin.ts:23
 msgid "wtf 7"
 msgstr "vad 7"

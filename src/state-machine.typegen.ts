@@ -6,8 +6,8 @@ export interface Typegen0 {
     setResult: 'done.invoke.wp-bundler-build';
     setErrorResult: 'error.platform.wp-bundler-build';
     setChangedFiles: 'REBUILD';
-    logSetup: 'xstate.init';
     createDependencies: 'xstate.init';
+    logSetup: 'xstate.init';
     logBuildStart: 'BUILD' | 'REBUILD';
     logWatchError: 'error.platform.wp-bundler-build';
     reloadDevServer: 'done.invoke.wp-bundler-build';

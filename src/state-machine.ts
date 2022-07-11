@@ -2,6 +2,7 @@ import { BuildFailure, BuildResult, Metafile } from 'esbuild';
 import { assign, createMachine } from 'xstate';
 
 import { Bundler } from './bundler';
+import { Logger } from './logger';
 import { Server } from './server';
 import { Mode } from './types';
 
@@ -17,6 +18,7 @@ export type MachineContext = {
 type MachineContextInternal = {
   bundler: Bundler;
   server: Server;
+  logger: Logger;
   result: Pick<BuildResult, 'errors' | 'warnings'> | null;
   metafile: Metafile | null;
   error: unknown | null;
@@ -40,6 +42,7 @@ const defaultContext: Context = {
 
   bundler: null as any as Bundler,
   server: null as any as Server,
+  logger: null as any as Logger,
   result: null,
   metafile: null,
   error: null,
@@ -63,7 +66,7 @@ export const machine =
         events: {} as Events,
         services: {} as { build: { data: BuildResult | BuildFailure } },
       },
-      entry: ['logSetup', 'createDependencies'],
+      entry: ['createDependencies', 'logSetup'],
       invoke: {
         src: 'setupServices',
         id: 'wp-bundler-watchers',
@@ -82,29 +85,29 @@ export const machine =
           },
         },
         building: {
-          entry: 'logBuildStart',
+          entry: ['logBuildStart'],
           invoke: {
             src: 'build',
             id: 'wp-bundler-build',
             onDone: [
               {
-                actions: 'setResult',
+                actions: ['setResult'],
                 cond: 'isWatchMode',
                 target: '#wp-bundler.watching.success',
               },
               {
-                actions: 'setResult',
+                actions: ['setResult'],
                 target: 'success',
               },
             ],
             onError: [
               {
-                actions: 'setErrorResult',
+                actions: ['setErrorResult'],
                 cond: 'isWatchMode',
                 target: '#wp-bundler.watching.error',
               },
               {
-                actions: 'setErrorResult',
+                actions: ['setErrorResult'],
                 target: 'error',
               },
             ],
@@ -118,7 +121,7 @@ export const machine =
         watching: {
           states: {
             error: {
-              entry: 'logWatchError',
+              entry: ['logWatchError'],
             },
             success: {
               entry: ['reloadDevServer', 'logWatchSuccess'],
@@ -129,17 +132,17 @@ export const machine =
               target: 'success',
             },
             REBUILD: {
-              actions: 'setChangedFiles',
+              actions: ['setChangedFiles'],
               target: 'building',
             },
           },
         },
         error: {
-          entry: 'logBuildError',
+          entry: ['logBuildError'],
           type: 'final',
         },
         success: {
-          entry: 'logBuildSuccess',
+          entry: ['logBuildSuccess'],
           type: 'final',
         },
       },
@@ -182,28 +185,61 @@ export const machine =
         },
       },
       actions: {
-        logSetup: () => {
-          console.error('Running bundler.');
+        logSetup: (context, event) => {
+          context.logger.info(`Running bundler in ${context.logger.chalk.blue(context.mode)} mode.`);
         },
-        logBuildStart: () => {
-          console.error('Building...');
+        logBuildStart: (context, event) => {
+          context.logger.info('Building...');
         },
-        logBuildError: () => {
-          console.error('Build failed.');
+        logBuildError: (context, event) => {
+          let errors = context.result?.errors.length ?? 0;
+          let warnings = context.result?.warnings.length ?? 0;
+
+          if (context.result != null) context.logger.buildResult(context.result);
+          context.logger.error(`Build failed with ${errors} error(s) and ${warnings} warning(s).`);
         },
-        logBuildSuccess: () => {
-          console.log('Build succeeded.');
+        logBuildSuccess: (context, event) => {
+          if (context.result) {
+            context.result.warnings.push({
+              pluginName: 'wp-bundler',
+              text: 'Hey what are you doing?!',
+            } as any);
+          }
+
+          let errors = context.result?.errors.length ?? 0;
+          let warnings = context.result?.warnings.length ?? 0;
+          if (errors + warnings > 0 && context.result != null) {
+            context.logger.buildResult(context.result);
+            context.logger.warn(`Build succeeded, but with ${errors} error(s) and ${warnings} warning(s).`);
+          } else {
+            context.logger.success('Build succeeded.');
+          }
         },
-        logWatchError: () => {
-          console.error('Build failed. Still watching files');
+        logWatchError: (context, event) => {
+          let errors = context.result?.errors.length ?? 0;
+          let warnings = context.result?.warnings.length ?? 0;
+
+          if (context.result != null) context.logger.buildResult(context.result);
+          context.logger.error(`Build failed with ${errors} error(s) and ${warnings} warning(s).`);
+          context.logger.info('Watching files...');
         },
-        logWatchSuccess: () => {
-          console.error('Build succeeded. Still watching files');
+        logWatchSuccess: (context, event) => {
+          let errors = context.result?.errors.length ?? 0;
+          let warnings = context.result?.warnings.length ?? 0;
+          if (errors + warnings > 0 && context.result != null) {
+            context.logger.buildResult(context.result);
+            context.logger.warn(`Build succeeded, but with ${errors} error(s) and ${warnings} warning(s).`);
+          } else {
+            context.logger.success('Build succeeded.');
+          }
+
+          context.logger.info('Watching files...');
         },
 
         createDependencies: assign({
           bundler: (context, _) => new Bundler(context),
           server: (context, _) => new Server(context),
+          logger: (_, __) => new Logger('WP-BUNDLER', process.stderr),
         }),
 
         reloadDevServer: (context, _) => {
