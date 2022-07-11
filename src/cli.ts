@@ -2,9 +2,6 @@ import { interpret } from 'xstate';
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 
-import { Bundler } from './bundler';
-import { Runner } from './runner';
-import { Server } from './server';
 import { createStateMachine } from './state-machine';
 import { Mode } from './types';
 
@@ -83,34 +80,18 @@ export async function cli() {
         'See wp-bundler --help for more information.',
     );
 
-    run(argv as any, argv.watch ? 'dev' : 'prod', typeof argv.watch === 'boolean' ? argv.watch : false);
+    let machine = createStateMachine({
+      ...argv,
+      mode: argv.watch ? 'dev' : 'prod',
+      watch: typeof argv.watch === 'boolean' ? argv.watch : false,
+    });
+    let service = interpret(machine);
+
+    service.subscribe((state) => {
+      if (state.matches('success')) process.exit(0);
+      if (state.matches('error')) process.exit(1);
+    });
+
+    service.start();
   }
-}
-
-type Args = {
-  cwd?: string;
-  mode?: string;
-  port?: number;
-  host?: string;
-};
-
-function run(argv: Args, defaultMode: Mode, watch = false) {
-  let cwd = typeof argv.cwd === 'string' ? argv.cwd : process.cwd();
-  let mode = ensureMode(argv.mode, defaultMode);
-  let port = Number.isNaN(Number(argv.port)) ? 3000 : Number(argv.port);
-  let host = typeof argv.host === 'string' ? argv.host : 'localhost';
-
-  let bundler = new Bundler({ mode, cwd, host, port });
-  let server = new Server({ port, host, cwd });
-  let runner = new Runner({ bundler, server, cwd });
-
-  if (watch) {
-    runner.watch();
-  } else {
-    runner.build();
-  }
-}
-
-function ensureMode(value: unknown, fallback: Mode): Mode {
-  return typeof value === 'string' && ['dev', 'prod'].includes(value) ? (value as Mode) : fallback;
 }
