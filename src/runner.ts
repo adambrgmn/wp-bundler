@@ -6,6 +6,7 @@ import { Bundler } from './bundler';
 import { Logger } from './logger';
 import { Server } from './server';
 import { Mode } from './types';
+import { Watcher } from './watcher';
 
 export type MachineContext = {
   mode: Mode;
@@ -18,6 +19,7 @@ export type MachineContext = {
 type MachineContextInternal = {
   bundler: Bundler;
   server: Server;
+  watcher: Watcher;
   logger: Logger;
   result: Pick<BuildResult, 'errors' | 'warnings'> | null;
   metafile: Metafile | null;
@@ -43,7 +45,9 @@ const defaultContext: Context = {
 
   bundler: null as any as Bundler,
   server: null as any as Server,
+  watcher: null as any as Watcher,
   logger: null as any as Logger,
+
   result: null,
   metafile: null,
   error: null,
@@ -164,19 +168,18 @@ export const machine =
             context.bundler.prepare();
 
             if (context.watch) {
-              context.server.prepare();
               context.server.listen();
 
               const handleFileChange = ({ files }: { files: string[] }) => {
                 send({ type: 'REBUILD', changedFiles: files });
               };
-              context.server.on('watcher.change', handleFileChange);
+              context.watcher.on('watcher.change', handleFileChange);
 
               send({ type: 'BUILD' });
 
               return () => {
                 if (context.watch && context.server != null) {
-                  context.server.off('watcher.change', handleFileChange);
+                  context.watcher.off('watcher.change', handleFileChange);
                   context.server.close();
                 }
               };
@@ -189,20 +192,20 @@ export const machine =
         },
       },
       actions: {
-        logSetup: (context, event) => {
+        logSetup: (context, _) => {
           context.logger.info(`Running bundler in ${context.logger.chalk.blue(context.mode)} mode.`);
         },
-        logBuildStart: (context, event) => {
+        logBuildStart: (context, _) => {
           context.logger.info('Building...');
         },
-        logBuildError: (context, event) => {
+        logBuildError: (context, _) => {
           let errors = context.result?.errors.length ?? 0;
           let warnings = context.result?.warnings.length ?? 0;
 
           if (context.result != null) context.logger.buildResult(context.result);
           context.logger.error(`Build failed with ${errors} error(s) and ${warnings} warning(s).`);
         },
-        logBuildSuccess: (context, event) => {
+        logBuildSuccess: (context, _) => {
           if (context.metafile != null) {
             context.logger.buildOutput(context.metafile, context.cwd);
           }
@@ -217,7 +220,7 @@ export const machine =
             context.logger.success(`Build succeeded in ${diff} ms.`);
           }
         },
-        logWatchError: (context, event) => {
+        logWatchError: (context, _) => {
           let errors = context.result?.errors.length ?? 0;
           let warnings = context.result?.warnings.length ?? 0;
 
@@ -225,7 +228,7 @@ export const machine =
           context.logger.error(`Build failed with ${errors} error(s) and ${warnings} warning(s).`);
           context.logger.info('Watching files...');
         },
-        logWatchSuccess: (context, event) => {
+        logWatchSuccess: (context, _) => {
           if (context.metafile != null) {
             context.logger.buildOutput(context.metafile, context.cwd);
           }
@@ -246,6 +249,7 @@ export const machine =
         createDependencies: assign({
           bundler: (context, _) => new Bundler(context),
           server: (context, _) => new Server(context),
+          watcher: (context, __) => new Watcher(context.cwd),
           logger: (_, __) => new Logger('WP-BUNDLER', process.stderr),
         }),
 
@@ -265,7 +269,7 @@ export const machine =
           error: (_, event) => event.data,
         }),
         setStartTime: assign({
-          startTime: (context, event) => performance.now(),
+          startTime: (_, __) => performance.now(),
         }),
       },
     },
