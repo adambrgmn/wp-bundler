@@ -185,32 +185,32 @@ export const machine =
           return context.bundler.build();
         },
         setupServices: (context) => (send) => {
-          const handleFileChange = ({ files }: { files: string[] }) => {
-            send({ type: 'REBUILD', changedFiles: files });
-          };
+          try {
+            context.bundler.prepare();
 
-          (async () => {
-            try {
-              await context.bundler.prepare();
+            if (context.watch) {
+              context.server.prepare();
+              context.server.listen();
 
-              if (context.watch) {
-                await context.server.prepare();
-                context.server.listen();
-                context.server.on('watcher.change', handleFileChange);
-              }
+              const handleFileChange = ({ files }: { files: string[] }) => {
+                return send({ type: 'REBUILD', changedFiles: files });
+              };
+              context.server.on('watcher.change', handleFileChange);
 
               send({ type: 'BUILD' });
-            } catch (error) {
-              send({ type: 'SETUP_FAILURE', error });
-            }
-          })();
 
-          return () => {
-            if (context.watch && context.server != null) {
-              context.server.off('watcher.change', handleFileChange);
-              context.server.close();
+              return () => {
+                if (context.watch && context.server != null) {
+                  context.server.off('watcher.change', handleFileChange);
+                  context.server.close();
+                }
+              };
+            } else {
+              send({ type: 'BUILD' });
             }
-          };
+          } catch (error) {
+            send({ type: 'SETUP_FAILURE', error });
+          }
         },
       },
       guards: {

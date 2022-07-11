@@ -1,7 +1,7 @@
-import * as fs from 'fs/promises';
+import * as fs from 'fs';
 
-export async function readJson<T = unknown>(path: string): Promise<T> {
-  let raw = await fs.readFile(path, 'utf-8');
+export function readJson<T = unknown>(path: string): T {
+  let raw = fs.readFileSync(path, 'utf-8');
   let json = JSON.parse(raw);
   return json;
 }

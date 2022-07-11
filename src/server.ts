@@ -46,8 +46,8 @@ export class Server extends EventEmitter {
     });
   }
 
-  async prepare() {
-    let { config } = await getMetadata(this.cwd, __dirname);
+  prepare() {
+    let { config } = getMetadata(this.cwd, __dirname);
     this.config = config;
 
     let server = http.createServer();
@@ -56,7 +56,7 @@ export class Server extends EventEmitter {
     this.wss = new WebSocketServer({ server });
 
     this.setupWebsockets();
-    await this.setupFileWatcher();
+    this.setupFileWatcher();
   }
 
   close() {
@@ -83,7 +83,7 @@ export class Server extends EventEmitter {
     });
   }
 
-  private async setupFileWatcher() {
+  private setupFileWatcher() {
     let ignored = [
       'vendor',
       'node_modules',

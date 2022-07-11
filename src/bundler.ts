@@ -68,16 +68,16 @@ export class Bundler extends EventEmitter {
     return result;
   }
 
-  async prepare() {
+  prepare() {
     process.env.NODE_ENV = process.env.NODE_ENV || this.mode === 'dev' ? 'development' : 'production';
 
-    let { bundler, project, config } = await getMetadata(this.cwd, __dirname);
+    let { bundler, project, config } = getMetadata(this.cwd, __dirname);
 
     this.bundler = bundler;
     this.project = project;
     this.config = config;
 
-    await rimraf(this.project.paths.absolute(this.config.outdir));
+    rimraf(this.project.paths.absolute(this.config.outdir));
   }
 
   private createBundlerOptions(): BuildOptions {
