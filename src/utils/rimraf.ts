@@ -1,9 +1,9 @@
-import * as fs from 'fs/promises';
+import * as fs from 'fs';
 
-import { exists } from './exists';
+import { existsSync } from './exists';
 
-export async function rimraf(path: string) {
-  if (await exists(path)) {
-    await fs.rm(path, { recursive: true });
+export function rimraf(path: string) {
+  if (existsSync(path)) {
+    fs.rmSync(path, { recursive: true });
   }
 }

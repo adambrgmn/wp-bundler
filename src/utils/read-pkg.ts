@@ -1,4 +1,4 @@
-import * as fs from 'fs/promises';
+import * as fs from 'fs';
 import * as path from 'path';
 import { PackageJson } from 'type-fest';
 
@@ -15,20 +15,20 @@ interface Metadata {
 
 const metadataCache = new Map<string, Metadata>();
 
-export async function getMetadata(projectPath: string, bundlerPath: string): Promise<Metadata> {
+export function getMetadata(projectPath: string, bundlerPath: string): Metadata {
   let cached = metadataCache.get(projectPath);
   if (cached != null) return cached;
 
-  let [project, bundler] = await Promise.all([readPkg(projectPath), readPkg(bundlerPath)]);
-  let config = await resolveConfig(project);
+  let [project, bundler] = [readPkg(projectPath), readPkg(bundlerPath)];
+  let config = resolveConfig(project);
 
   let metadata = { bundler, project, config };
   metadataCache.set(projectPath, metadata);
   return metadata;
 }
 
-export async function readPkg(cwd: string): Promise<ProjectInfo> {
-  let pkg = await readPkgUp(cwd);
+export function readPkg(cwd: string): ProjectInfo {
+  let pkg = readPkgUp(cwd);
   if (pkg == null) {
     throw new Error(`Could not read package.json related to ${cwd}.`);
   }
@@ -41,14 +41,14 @@ interface ReadResult {
   packageJson: PackageJson & Record<string, unknown>;
 }
 
-export async function readPkgUp(cwd: string = process.cwd()): Promise<ReadResult | null> {
+export function readPkgUp(cwd: string = process.cwd()): ReadResult | null {
   if (cwd === '/') return null;
-  let items = await fs.readdir(cwd);
+  let items = fs.readdirSync(cwd);
 
   for (let item of items) {
     if (item === 'package.json') {
       let pkgPath = path.join(cwd, item);
-      let packageJson = await readJson<ProjectInfo['packageJson']>(pkgPath);
+      let packageJson = readJson<ProjectInfo['packageJson']>(pkgPath);
 
       return { path: pkgPath, packageJson };
     }

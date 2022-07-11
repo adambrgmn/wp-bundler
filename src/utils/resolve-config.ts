@@ -4,16 +4,16 @@ import { readJson } from './read-json';
 
 type ConfigKey = 'package.json' | '.wp-bundlerrc' | 'wp-bundler.config.json';
 
-export async function resolveConfig(project: ProjectInfo): Promise<BundlerConfig> {
-  let config = await _resolveConfig(project, readJson);
+export function resolveConfig(project: ProjectInfo): BundlerConfig {
+  let config = _resolveConfig(project, readJson);
   return config;
 }
 
-export async function _resolveConfig(project: ProjectInfo, read: (path: string) => Promise<unknown>) {
+export function _resolveConfig(project: ProjectInfo, read: (path: string) => unknown) {
   let configs: Record<ConfigKey, unknown> = {
     'package.json': project.packageJson['wp-bundler'],
-    '.wp-bundlerrc': await readConfigFile(project.paths.absolute('.wp-bundlerrc'), read),
-    'wp-bundler.config.json': await readConfigFile(project.paths.absolute('wp-bundler.config.json'), read),
+    '.wp-bundlerrc': readConfigFile(project.paths.absolute('.wp-bundlerrc'), read),
+    'wp-bundler.config.json': readConfigFile(project.paths.absolute('wp-bundler.config.json'), read),
   };
 
   let foundKeys = Object.keys(configs).filter((key) => configs[key as ConfigKey] != null);
@@ -43,9 +43,9 @@ export async function _resolveConfig(project: ProjectInfo, read: (path: string) 
   throw new Error('Something is wrong in your configuration file.');
 }
 
-async function readConfigFile(path: string, read: (path: string) => Promise<unknown>): Promise<unknown> {
+function readConfigFile(path: string, read: (path: string) => unknown): unknown {
   try {
-    let json = await read(path);
+    let json = read(path);
     return json;
   } catch (error) {
     return undefined;
