@@ -5,15 +5,16 @@ import { Bundler } from './bundler';
 import { Server } from './server';
 import { Mode } from './types';
 
-type Context = {
+export type MachineContext = {
   // User configuration
   mode: Mode;
   watch: boolean;
   cwd: string;
   host: string;
   port: number;
+};
 
-  // Internal
+type MachineContextInternal = {
   bundler: Bundler;
   server: Server;
   result: Pick<BuildResult, 'errors' | 'warnings'> | null;
@@ -21,6 +22,8 @@ type Context = {
   error: unknown | null;
   changedFiles: string[];
 };
+
+type Context = MachineContext & MachineContextInternal;
 
 type Events =
   | { type: 'BUILD' }
@@ -43,7 +46,7 @@ const defaultContext: Context = {
   changedFiles: [],
 };
 
-export const createStateMachine = (context: Partial<Pick<Context, 'mode' | 'watch'>>) =>
+export const createStateMachine = (context: Partial<MachineContext>) =>
   machine.withContext({
     ...defaultContext,
     ...context,
@@ -60,7 +63,7 @@ export const machine =
         events: {} as Events,
         services: {} as { build: { data: BuildResult | BuildFailure } },
       },
-      entry: 'createDependencies',
+      entry: ['logSetup', 'createDependencies'],
       invoke: {
         src: 'setupServices',
         id: 'wp-bundler-watchers',
@@ -142,7 +145,46 @@ export const machine =
       },
     },
     {
+      guards: {
+        isWatchMode: (context) => context.watch,
+      },
+      services: {
+        build: async (context) => {
+          return context.bundler.build();
+        },
+        setupServices: (context) => (send) => {
+          try {
+            context.bundler.prepare();
+
+            if (context.watch) {
+              context.server.prepare();
+              context.server.listen();
+
+              const handleFileChange = ({ files }: { files: string[] }) => {
+                return send({ type: 'REBUILD', changedFiles: files });
+              };
+              context.server.on('watcher.change', handleFileChange);
+
+              send({ type: 'BUILD' });
+
+              return () => {
+                if (context.watch && context.server != null) {
+                  context.server.off('watcher.change', handleFileChange);
+                  context.server.close();
+                }
+              };
+            } else {
+              send({ type: 'BUILD' });
+            }
+          } catch (error) {
+            send({ type: 'SETUP_FAILURE', error });
+          }
+        },
+      },
       actions: {
+        logSetup: () => {
+          console.error('Running bundler.');
+        },
         logBuildStart: () => {
           console.error('Building...');
         },
@@ -179,42 +221,6 @@ export const machine =
           result: (_, event) => (isEsbuildBuildFailure(event.data) ? event.data : null),
           error: (_, event) => event.data,
         }),
-      },
-      services: {
-        build: async (context) => {
-          return context.bundler.build();
-        },
-        setupServices: (context) => (send) => {
-          try {
-            context.bundler.prepare();
-
-            if (context.watch) {
-              context.server.prepare();
-              context.server.listen();
-
-              const handleFileChange = ({ files }: { files: string[] }) => {
-                return send({ type: 'REBUILD', changedFiles: files });
-              };
-              context.server.on('watcher.change', handleFileChange);
-
-              send({ type: 'BUILD' });
-
-              return () => {
-                if (context.watch && context.server != null) {
-                  context.server.off('watcher.change', handleFileChange);
-                  context.server.close();
-                }
-              };
-            } else {
-              send({ type: 'BUILD' });
-            }
-          } catch (error) {
-            send({ type: 'SETUP_FAILURE', error });
-          }
-        },
-      },
-      guards: {
-        isWatchMode: (context) => context.watch,
       },
     },
   );

@@ -1,9 +1,11 @@
+import { interpret } from 'xstate';
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 
 import { Bundler } from './bundler';
 import { Runner } from './runner';
 import { Server } from './server';
+import { createStateMachine } from './state-machine';
 import { Mode } from './types';
 
 export async function cli() {
@@ -14,8 +16,8 @@ export async function cli() {
       {
         mode: {
           alias: 'm',
-          default: 'prod',
-          choices: ['dev', 'prod'] as const,
+          default: 'prod' as Mode,
+          choices: ['dev', 'prod'],
           description: 'Version of your source to output',
         },
         cwd: {
@@ -23,7 +25,17 @@ export async function cli() {
           type: 'string',
         },
       },
-      (argv) => run(argv, 'prod'),
+      (argv) => {
+        let machine = createStateMachine(argv);
+        let service = interpret(machine);
+
+        service.subscribe((state) => {
+          if (state.matches('success')) process.exit(0);
+          if (state.matches('error')) process.exit(1);
+        });
+
+        service.start();
+      },
     )
     .command(
       'dev',
@@ -41,8 +53,8 @@ export async function cli() {
         },
         mode: {
           alias: 'm',
-          default: 'dev',
-          choices: ['dev', 'prod'] as const,
+          default: 'dev' as Mode,
+          choices: ['dev', 'prod'],
           description: 'Version of your source to output',
         },
         cwd: {
@@ -50,7 +62,17 @@ export async function cli() {
           type: 'string',
         },
       },
-      (argv) => run(argv, 'dev', true),
+      (argv) => {
+        let machine = createStateMachine({ ...argv, watch: true });
+        let service = interpret(machine);
+
+        service.subscribe((state) => {
+          if (state.matches('success')) process.exit(0);
+          if (state.matches('error')) process.exit(1);
+        });
+
+        service.start();
+      },
     )
     .parse();
 
