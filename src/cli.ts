@@ -1,8 +1,7 @@
-import { interpret } from 'xstate';
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 
-import { createStateMachine } from './state-machine';
+import { createRunner } from './runner';
 import { Mode } from './types';
 
 export async function cli() {
@@ -23,8 +22,7 @@ export async function cli() {
         },
       },
       (argv) => {
-        let machine = createStateMachine(argv);
-        let service = interpret(machine);
+        let service = createRunner(argv);
 
         service.subscribe((state) => {
           if (state.matches('success')) process.exit(0);
@@ -60,8 +58,7 @@ export async function cli() {
         },
       },
       (argv) => {
-        let machine = createStateMachine({ ...argv, watch: true });
-        let service = interpret(machine);
+        let service = createRunner({ ...argv, watch: true });
 
         service.subscribe((state) => {
           if (state.matches('success')) process.exit(0);
@@ -80,12 +77,11 @@ export async function cli() {
         'See wp-bundler --help for more information.',
     );
 
-    let machine = createStateMachine({
+    let service = createRunner({
       ...argv,
       mode: argv.watch ? 'dev' : 'prod',
       watch: typeof argv.watch === 'boolean' ? argv.watch : false,
     });
-    let service = interpret(machine);
 
     service.subscribe((state) => {
       if (state.matches('success')) process.exit(0);

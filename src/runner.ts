@@ -1,6 +1,6 @@
 import { BuildFailure, BuildResult, Metafile } from 'esbuild';
 import { performance } from 'perf_hooks';
-import { assign, createMachine } from 'xstate';
+import { assign, createMachine, interpret } from 'xstate';
 
 import { Bundler } from './bundler';
 import { Logger } from './logger';
@@ -8,7 +8,6 @@ import { Server } from './server';
 import { Mode } from './types';
 
 export type MachineContext = {
-  // User configuration
   mode: Mode;
   watch: boolean;
   cwd: string;
@@ -52,18 +51,20 @@ const defaultContext: Context = {
   startTime: performance.now(),
 };
 
-export const createStateMachine = (context: Partial<MachineContext>) =>
-  machine.withContext({
-    ...defaultContext,
-    ...context,
-  });
+export const createRunner = (context: Partial<MachineContext>) =>
+  interpret(
+    machine.withContext({
+      ...defaultContext,
+      ...context,
+    }),
+  );
 
 export const machine =
   /** @xstate-layout N4IgpgJg5mDOIC5QHcAOBaARgVwHYQBswAnAOgEtCwBiAIQFUBJAGQBFFRUB7WcgF3JdcHEAA9EARgBsABlIBORfIDsADgCsAZk0zV8qQBoQAT0nL5pGVZkAWAEx2ZUiXb0BfN0bRY8VMpSJqAGUAUQAVegAFAH0AMQBBFnoAJRCRbl4BIRFxBAdVUns9DXV5dWUZTRcjUwRFUnVrCXlXTVVNG2V1Dy8MHHwiMhxyAghyXChqCCEwClwANy4Aa1nvfr8fEYh0nn5BYSQxRHK5Rx1nTTspfRllGsQpDstrZxs9fU0pHpA130HSYajcaTEjELhkVAEACGfAAZuCALakX4DEibUY7TL7HLHVSnSpOCSXa6yO4mRBtKTPKwddRSLRSezfFF+AHYLbA6gAYXiADkuSFmJi9tlDrlSvjzkSrjcybUJG9qTI7Op2lLGcy+n8SMiYQBjAAWnJ5-MFwqyB1AuQkyoKlzxb1Kdk06lc9wQnQkDReeM08maMm6nh+WtRZGQ+qNE2oqQYLHYhwyIstRwQEgk6hshSKqhsNpc9k07rzym9Vn0ah0zVUHmDuC4EDgIhZ-wCYHN2LFiHs7okyk0Soq8hsilVEk1PjDbI5Ew7oqtiBVFgzUkcyhsOmV6gkvc6ZZkzVa7U6Qd6k9ZEb4huBpFB4LnKdyGgHCsDymuymdn2LeMHdhsgYdBINbBi2OqXteEykLA2B6nqcDwImuwWjiCDPqQr7lB+X6GOSCCZhY1jKp8I7yKoXygaGF6RsCD6oaodjLgBWEqDhxa3EqVaKHYLjyBO6z-HexB0V2CAVOopCyPIVTKAquZlLh8r2EqMjyKpry5hRZ4CTqMFwQhIkLmmCoDv2G62HmbSqKo7qNAURFVIxtyNFIWkhuegyGamwHuugsiFEoZGZjYzirhRHhAA */
   createMachine(
     {
       context: defaultContext,
-      tsTypes: {} as import('./state-machine.typegen').Typegen0,
+      tsTypes: {} as import('./runner.typegen').Typegen0,
       schema: {
         context: {} as Context,
         events: {} as Events,
@@ -167,7 +168,7 @@ export const machine =
               context.server.listen();
 
               const handleFileChange = ({ files }: { files: string[] }) => {
-                return send({ type: 'REBUILD', changedFiles: files });
+                send({ type: 'REBUILD', changedFiles: files });
               };
               context.server.on('watcher.change', handleFileChange);
 
