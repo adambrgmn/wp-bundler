@@ -1,6 +1,8 @@
 import chalk from 'chalk';
-import { BuildResult, PartialMessage } from 'esbuild';
+import { BuildResult, Metafile, PartialMessage } from 'esbuild';
+import fileSize from 'filesize';
 
+import { constructBundleOutput } from './utils/bundle-output';
 import { figures } from './utils/figures';
 
 export class Logger {
@@ -19,7 +21,7 @@ export class Logger {
   }
 
   success(message: unknown) {
-    this.#write(chalk.green(message));
+    this.#write(chalk.green(message), { state: 'success' });
   }
 
   warn(message: unknown) {
@@ -77,6 +79,18 @@ export class Logger {
     }
   }
 
+  buildOutput(metafile: Metafile, cwd: string) {
+    let output = constructBundleOutput(metafile, { withSize: true, cwd });
+    for (let [name, part] of Object.entries(output)) {
+      this.raw('\n' + this.chalk.blue(name));
+      for (let { file, size } of part) {
+        this.raw(`  ${file} (${fileSize(size ?? 0)})`);
+      }
+    }
+
+    this.raw('');
+  }
+
   raw(message: unknown) {
     this.#write(message, { withPrefix: false });
   }
@@ -85,9 +99,9 @@ export class Logger {
     this.#target.write(`${withPrefix ? this.#prefix(prefix) : ''}${message}\n`);
   }
 
-  #prefix({ prefix = this.#prefixValue }: PrefixOptions = {}) {
-    let [iconColor, prefixColor] = PREFIX_COLORS[prefix?.toLowerCase() ?? 'default'] ?? PREFIX_COLORS.default;
-    let icon = PREFIX_ICONS[prefix?.toLowerCase() ?? 'default'] ?? PREFIX_ICONS.default;
+  #prefix({ prefix = this.#prefixValue, state = prefix }: PrefixOptions = {}) {
+    let [iconColor, prefixColor] = PREFIX_COLORS[state?.toLowerCase() ?? 'default'] ?? PREFIX_COLORS.default;
+    let icon = PREFIX_ICONS[state?.toLowerCase() ?? 'default'] ?? PREFIX_ICONS.default;
 
     return `${iconColor(icon)} ${prefixColor(` ${prefix} `)} `;
   }
@@ -96,17 +110,20 @@ export class Logger {
 const PREFIX_COLORS: Record<string, [icon: typeof chalk, prefix: typeof chalk]> = {
   warning: [chalk.yellowBright, chalk.black.bgYellowBright],
   error: [chalk.redBright, chalk.white.bgRedBright],
-  default: [chalk.greenBright, chalk.black.bgGreenBright],
+  success: [chalk.greenBright, chalk.black.bgGreenBright],
+  default: [chalk.blue, chalk.black.bgBlue],
 };
 
 const PREFIX_ICONS: Record<string, string> = {
   warning: figures.triangleUp,
   error: figures.cross,
+  success: figures.tick,
   default: figures.triangleRight,
 };
 
 interface PrefixOptions {
   prefix?: string | null;
+  state?: string | null;
 }
 
 interface WriteOptions extends PrefixOptions {

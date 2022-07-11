@@ -199,11 +199,8 @@ export const machine =
           context.logger.error(`Build failed with ${errors} error(s) and ${warnings} warning(s).`);
         },
         logBuildSuccess: (context, event) => {
-          if (context.result) {
-            context.result.warnings.push({
-              pluginName: 'wp-bundler',
-              text: 'Hey what are you doing?!',
-            } as any);
+          if (context.metafile != null) {
+            context.logger.buildOutput(context.metafile, context.cwd);
           }
 
           let errors = context.result?.errors.length ?? 0;
@@ -224,6 +221,10 @@ export const machine =
           context.logger.info('Watching files...');
         },
         logWatchSuccess: (context, event) => {
+          if (context.metafile != null) {
+            context.logger.buildOutput(context.metafile, context.cwd);
+          }
+
           let errors = context.result?.errors.length ?? 0;
           let warnings = context.result?.warnings.length ?? 0;
           if (errors + warnings > 0 && context.result != null) {
