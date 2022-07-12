@@ -83,17 +83,48 @@ class AssetLoader
     private static $assets = [];
 
     /**
+     * Root directory of the theme or plugin. This is automatically handled for themes, but needs to
+     * be passed as an argument for plugins.
+     *
+     * @since 3.0.0
+     * @var string
+     */
+    private static $rootdir = '';
+
+    /**
+     * Root uri of the theme or plugin. This is automatically handled for themes, but needs to be
+     * passed as an argument for plugins.
+     *
+     * @since 3.0.0
+     * @var string
+     */
+    private static $rooturi = '';
+
+    /**
      * Prepare the asset loader by setting up required actions and filters. This
      * method should be called as early as possible.
      *
      * @since 1.0.0
+     * @param string $rootdir Root directory of the theme or plugin. This is automatically handled for themes, but needs to be passed as an argument for plugins.
+     * @param string $rooturi Root uri of the theme or plugin. This is automatically handled for themes, but needs to be passed as an argument for plugins.
      * @return void
      */
-    public static function prepare(): void
+    public static function prepare(string $rootdir = '', string $rooturi = ''): void
     {
         if (self::$prepared) {
             return;
         }
+
+        if ($rootdir === '') {
+            $rootdir = \get_stylesheet_directory();
+        }
+
+        if ($rooturi === '') {
+            $rooturi = \get_stylesheet_directory_uri();
+        }
+
+        self::$rootdir = $rootdir;
+        self::$rooturi = $rooturi;
 
         if (self::$mode === 'dev') {
             \add_action('wp_enqueue_scripts', [get_called_class(), 'enqueueDevScript']);
@@ -290,7 +321,7 @@ class AssetLoader
      */
     private static function outDirUri(string $path): string
     {
-        return \get_template_directory_uri() . self::$outdir . $path;
+        return self::$rooturi . self::$outdir . $path;
     }
 
     /**
@@ -301,7 +332,7 @@ class AssetLoader
      */
     private static function outDirPath(string $path): string
     {
-        return \get_template_directory() . self::$outdir . $path;
+        return self::$rootdir . self::$outdir . $path;
     }
 
     /**
