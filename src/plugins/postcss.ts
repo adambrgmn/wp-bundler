@@ -1,6 +1,7 @@
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
+
 import { PartialMessage } from 'esbuild';
-import * as fs from 'fs/promises';
-import * as path from 'path';
 import postcss, { AcceptedPlugin, Warning } from 'postcss';
 import postcssPresetEnv from 'postcss-preset-env';
 

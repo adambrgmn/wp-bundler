@@ -1,5 +1,7 @@
+import { performance } from 'node:perf_hooks';
+import * as process from 'node:process';
+
 import { BuildFailure, BuildResult, Metafile } from 'esbuild';
-import { performance } from 'perf_hooks';
 import { assign, createMachine, interpret } from 'xstate';
 
 import { Bundler } from './bundler';

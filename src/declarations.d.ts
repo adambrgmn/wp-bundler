@@ -4,12 +4,6 @@ declare module 'postcss-preset-env' {
   export = postcssPresetEnv;
 }
 
-declare module 'tailwindcss' {
-  import { AcceptedPlugin } from 'postcss';
-  function postcssTailwindcss(any): AcceptedPlugin;
-  export = postcssTailwindcss;
-}
-
 declare module 'po2json' {
   export interface ParseOptions<Domain extends string = 'messages'> {
     // Whether to include fuzzy translation in JSON or not. Should be either true or false. Defaults to false.

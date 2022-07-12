@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 
 export function readJson<T = unknown>(path: string): T {
   let raw = fs.readFileSync(path, 'utf-8');

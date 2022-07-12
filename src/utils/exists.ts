@@ -1,5 +1,5 @@
-import { accessSync } from 'fs';
-import * as fs from 'fs/promises';
+import { accessSync } from 'node:fs';
+import * as fs from 'node:fs/promises';
 
 export async function exists(p: string): Promise<boolean> {
   try {

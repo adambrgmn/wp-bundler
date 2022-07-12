@@ -74,7 +74,7 @@
 - Fix purging tailwind classes (by [@adambrgmn](https://github.com/adambrgmn) in [#6](https://github.com/adambrgmn/wp-bundler/pull/6))
 - Skip marking node globals as external (by [@adambrgmn](https://github.com/adambrgmn) in [#6](https://github.com/adambrgmn/wp-bundler/pull/6))
 
-  Doing this hides errors that should otherwise be surfaced. Because marking them as just "external" forces the browser to try and import these libraries (`import fs from 'fs'`) in the browser. Which of course blows up. Now we instead rely on esbuild to report errors when our scripts (or their dependencies) tries to import any built-in node modules.
+  Doing this hides errors that should otherwise be surfaced. Because marking them as just "external" forces the browser to try and import these libraries (`import fs from 'node:fs'`) in the browser. Which of course blows up. Now we instead rely on esbuild to report errors when our scripts (or their dependencies) tries to import any built-in node modules.
 
 ## 1.1.0
 

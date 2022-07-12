@@ -1,4 +1,5 @@
-import * as fs from 'fs/promises';
+import * as fs from 'node:fs/promises';
+
 import { GetTextTranslation, GetTextTranslations, mo, po } from 'gettext-parser';
 import mergeWith from 'lodash.mergewith';
 import * as z from 'zod';

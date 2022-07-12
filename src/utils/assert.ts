@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 const assertPrefix = 'Assertion failed';
 
 export function assert(value: boolean, message?: string): asserts value;

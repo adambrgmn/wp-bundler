@@ -1,6 +1,6 @@
-import { BuildOptions, Plugin } from 'esbuild';
+import { BuildOptions } from 'esbuild';
 
-import { BundlerPlugin, BundlerPluginOptions } from '../types';
+import { BundlerPlugin } from '../types';
 
 export const ignoreCss: BundlerPlugin = () => {
   return {
