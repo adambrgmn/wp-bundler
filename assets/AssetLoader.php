@@ -67,6 +67,14 @@ class AssetLoader
     private static $domain = 'domain';
 
     /**
+     * Prefix used to set a more unique namespace for the assets.
+     *
+     * @since 3.0.0
+     * @var string
+     */
+    private static $prefix = 'wp-bundler.';
+
+    /**
      * Build directory, relative to template root directory.
      *
      * @since 1.0.0
@@ -168,10 +176,25 @@ class AssetLoader
      * @param array  $deps Optional. Dependency array (e.g. jquery, wp-i18n etc.).
      * @return void
      */
-    public static function enqueueEditorAssets(string $name, array $deps): void
+    public static function enqueueEditorAssets(string $name, array $deps = []): void
     {
         self::prepare();
         self::enqueueAssets($name, $deps, true, 'enqueue_block_editor_assets');
+    }
+
+    /**
+     * Enqueue assets with the `'enqueue_block_editor_assets'` wp action.
+     *
+     * @since 1.0.0
+     *
+     * @param string $name Name of asset to enqueue.
+     * @param array  $deps Optional. Dependency array (e.g. jquery, wp-i18n etc.).
+     * @return void
+     */
+    public static function enqueueAdminAssets(string $name, array $deps = []): void
+    {
+        self::prepare();
+        self::enqueueAssets($name, $deps, true, 'admin_enqueue_scripts');
     }
 
     /**
@@ -227,7 +250,7 @@ class AssetLoader
         $asset = self::$assets[$name];
 
         if (key_exists('js', $asset)) {
-            $handle = 'wp-bundler.' . $name;
+            $handle = self::$prefix . $name;
             $handles['js'] = $handle;
 
             \wp_register_script(
@@ -242,7 +265,7 @@ class AssetLoader
         }
 
         if (key_exists('nomodule', $asset)) {
-            $handle = 'wp-bundler.' . $name . '.nomodule';
+            $handle = self::$prefix . $name . '.nomodule';
             $handles['nomodule'] = $handle;
 
             \wp_register_script(
@@ -255,7 +278,7 @@ class AssetLoader
         }
 
         if (key_exists('css', $asset)) {
-            $handle = 'wp-bundler.' . $name;
+            $handle = self::$prefix . $name;
             $handles['css'] = $handle;
 
             \wp_register_style($handle, self::outDirUri($asset['css']), $cssDeps, false, 'all');
@@ -363,7 +386,7 @@ class AssetLoader
      */
     public static function filterModuleScripts(string $tag, string $handle): string
     {
-        if (!str_contains($handle, 'wp-bundler.')) {
+        if (!str_contains($handle, self::$prefix)) {
             return $tag;
         }
 

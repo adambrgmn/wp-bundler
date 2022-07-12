@@ -2,6 +2,7 @@ import { Metafile } from 'esbuild';
 import { readFileSync } from 'fs';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { slugify } from 'strman';
 
 import { BundlerConfig } from '../schema';
 import { BundlerPluginOptions, Mode, ProjectInfo } from '../types';
@@ -20,6 +21,7 @@ interface TemplateCompileOptions {
   metafile: Pick<Metafile, 'outputs'>;
   config: BundlerConfig;
   bundler: ProjectInfo;
+  project: ProjectInfo;
   mode: Mode;
   client: string;
   host: string;
@@ -34,12 +36,12 @@ export function createAssetLoaderTemplate({ config, bundler, project, mode, host
   return async ({ metafile }: Pick<TemplateCompileOptions, 'metafile'>) => {
     let client = await fs.readFile(path.join(__dirname, './dev-client.js'), 'utf-8');
     await fs.mkdir(path.dirname(templateOutPath), { recursive: true });
-    await fs.writeFile(templateOutPath, compile({ metafile, config, bundler, mode, client, host, port }));
+    await fs.writeFile(templateOutPath, compile({ metafile, config, bundler, project, mode, client, host, port }));
   };
 }
 
 function createTemplate(content: string) {
-  return function compile({ metafile, config, bundler, mode, client, host, port }: TemplateCompileOptions) {
+  return function compile({ metafile, config, bundler, project, mode, client, host, port }: TemplateCompileOptions) {
     let assetsArray = toPhpArray(metafileToAssets(metafile, config.entryPoints));
 
     content = content.replace('* @version v0.0.0', `* @version v${bundler.packageJson.version}`);
@@ -59,6 +61,11 @@ function createTemplate(content: string) {
     content = content.replace(
       "private static $outdir = '/build/';",
       `private static $outdir = '/${trimSlashes(config.outdir)}/';`,
+    );
+
+    content = content.replace(
+      "private static $prefix = 'wp-bundler.';",
+      `private static $prefix = '${slugify(project.packageJson.name ?? 'wp-bundler')}.';`,
     );
 
     content = content.replace('private static $assets = [];', `private static $assets = ${assetsArray};`);
