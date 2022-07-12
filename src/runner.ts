@@ -93,7 +93,7 @@ export const machine =
           },
         },
         building: {
-          entry: ['logBuildStart', 'setStartTime'],
+          entry: ['resetResults', 'logBuildStart', 'setStartTime'],
           invoke: {
             src: 'build',
             id: 'wp-bundler-build',
@@ -200,10 +200,15 @@ export const machine =
           context.logger.info('Building...');
         },
         logBuildError: (context, _) => {
-          let errors = context.result?.errors.length ?? 0;
+          let unknownError = context.error;
+          let errors = (context.result?.errors.length ?? 0) + (unknownError != null ? 1 : 0);
           let warnings = context.result?.warnings.length ?? 0;
 
           if (context.result != null) context.logger.buildResult(context.result);
+
+          context.logger.error('An unknown error occurred while building.');
+          console.error(unknownError);
+
           context.logger.error(`Build failed with ${errors} error(s) and ${warnings} warning(s).`);
         },
         logBuildSuccess: (context, _) => {
@@ -222,10 +227,15 @@ export const machine =
           }
         },
         logWatchError: (context, _) => {
-          let errors = context.result?.errors.length ?? 0;
+          let unknownError = context.error;
+          let errors = (context.result?.errors.length ?? 0) + (unknownError != null ? 1 : 0);
           let warnings = context.result?.warnings.length ?? 0;
 
           if (context.result != null) context.logger.buildResult(context.result);
+
+          context.logger.error('An unknown error occurred while building.');
+          context.logger.raw(unknownError);
+
           context.logger.error(`Build failed with ${errors} error(s) and ${warnings} warning(s).`);
           context.logger.info('Watching files...');
         },
@@ -271,6 +281,11 @@ export const machine =
         }),
         setStartTime: assign({
           startTime: (_, __) => performance.now(),
+        }),
+        resetResults: assign({
+          result: (_, __) => null,
+          metafile: (_, __) => null,
+          error: (_, __) => null,
         }),
       },
     },
