@@ -1,7 +1,8 @@
+import { readFileSync } from 'node:fs';
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
+
 import { Metafile } from 'esbuild';
-import { readFileSync } from 'fs';
-import * as fs from 'fs/promises';
-import * as path from 'path';
 import { slugify } from 'strman';
 
 import { BundlerConfig } from '../schema';

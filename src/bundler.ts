@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import esbuild, { BuildOptions, BuildResult, Metafile, Plugin } from 'esbuild';
 import merge from 'lodash.merge';
 

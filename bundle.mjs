@@ -1,5 +1,7 @@
+import * as fs from 'node:fs/promises';
+import * as process from 'node:process';
+
 import { build } from 'esbuild';
-import * as fs from 'fs/promises';
 
 const args = process.argv.slice(2);
 

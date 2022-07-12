@@ -1,3 +1,5 @@
+import * as process from 'node:process';
+
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 

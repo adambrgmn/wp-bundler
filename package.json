@@ -27,7 +27,7 @@
     "bundler"
   ],
   "engines": {
-    "node": ">=16"
+    "node": ">=14.18.0"
   },
   "scripts": {
     "build": "node bundle.mjs",
