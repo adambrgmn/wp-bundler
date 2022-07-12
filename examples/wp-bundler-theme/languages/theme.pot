@@ -1,0 +1,42 @@
+# Copyright (C) 2020 Automattic
+# This file is distributed under the GNU General Public License v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: _s 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/theme/_s\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2020-04-17T21:03:15+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.4.0\n"
+"X-Domain: wp-bundler-theme\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: style.css:5
+#. translators: Author of the theme
+msgid "Adam Bergman"
+msgstr ""
+
+#: style.css:7
+#. translators: Description of the theme
+msgid "Example theme"
+msgstr ""
+
+#: src/main.ts:3
+msgid "Hello world! (theme)"
+msgstr ""
+
+#: style.css:4
+#: style.css:6
+#. translators: Author URI of the theme
+#. translators: Theme URI of the theme
+msgid "https://github.com/adambrgmn/wp-bundler"
+msgstr ""
+
+#: style.css:3
+#. translators: Theme Name of the theme
+msgid "WP Bundler Example theme"
+msgstr ""
