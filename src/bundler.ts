@@ -44,7 +44,7 @@ export class Bundler {
       nomoduleOptions.format = 'iife';
       nomoduleOptions.entryNames = `${nomoduleOptions.entryNames}.nomodule`;
       nomoduleOptions.target = 'es5';
-      nomoduleOptions.plugins.push(plugin.swc(pluginOptions));
+      nomoduleOptions.plugins.push(plugin.swc(pluginOptions), plugin.ignoreCss(pluginOptions));
 
       tasks.push(esbuild.build(nomoduleOptions));
     }
