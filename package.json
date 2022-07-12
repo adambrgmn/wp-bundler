@@ -26,6 +26,9 @@
     "esbuild",
     "bundler"
   ],
+  "engines": {
+    "node": ">=16"
+  },
   "scripts": {
     "build": "node bundle.mjs",
     "dev": "node bundle.mjs --watch",
