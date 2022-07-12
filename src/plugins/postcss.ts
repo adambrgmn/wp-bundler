@@ -19,7 +19,7 @@ const postcssPlugin: BundlerPlugin = () => ({
       let result = await processor.process(contents, { from: args.path, to: args.path });
       let warnings = transformPostcssWarnings(args.path, result.warnings());
 
-      return { contents, loader: 'css', pluginName, warnings, resolveDir: path.dirname(args.path) };
+      return { contents: result.content, loader: 'css', pluginName, warnings, resolveDir: path.dirname(args.path) };
     });
   },
 });
