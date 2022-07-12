@@ -8,6 +8,7 @@ export interface Typegen0 {
     setChangedFiles: 'REBUILD';
     createDependencies: 'xstate.init';
     logSetup: 'xstate.init';
+    resetResults: 'BUILD' | 'REBUILD';
     logBuildStart: 'BUILD' | 'REBUILD';
     setStartTime: 'BUILD' | 'REBUILD';
     logWatchError: 'error.platform.wp-bundler-build';

@@ -1,3 +1,5 @@
+import * as util from 'node:util';
+
 import chalk from 'chalk';
 import { BuildResult, Metafile, PartialMessage } from 'esbuild';
 import fileSize from 'filesize';
@@ -92,6 +94,10 @@ export class Logger {
   }
 
   raw(message: unknown) {
+    if (typeof message !== 'string') {
+      message = util.inspect(message, { depth: null, colors: true });
+    }
+
     this.#write(message, { withPrefix: false });
   }
 
