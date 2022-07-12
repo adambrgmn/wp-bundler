@@ -30,7 +30,7 @@ It will output modern Javascript for modern browsers as well as a "legacy" versi
 
 ## Installation
 
-Install the bundler locally as a dependency of you theme.
+Install the bundler locally as a dependency of you theme or plugin.
 
 ```shell
 $ npm i -d @fransvilhelm/wp-bundler
@@ -156,16 +156,19 @@ The file gets emitted with the most recent versions of you assets. These assets 
 
 ### Usage
 
-If you are not using some kind of autoloader for your project you need to require the file to make the `AutoLoader` class available in your environment. Your theme's `functions.php` is probably a suitable file for this.
+If you are not using some kind of autoloader for your project you need to require the file to make the `AutoLoader` class available in your environment. Your theme's `functions.php` or plugins main entry point is probably a suitable file for this.
 
 You also need to call the static `prepare` method on the class in order to setup some necessary action and filter hooks.
 
 ```php
 require_once __DIR__ . '/AssetLoader.php';
 \WPBundler\AssetLoader::prepare();
+
+// If you are developing a plugin you need to explicitly pass your plugin's root folder and url like so:
+\WPBundler\AssetLoader::prepare(\plugin_dir_path(__FILE__), \plugin_dir_url(__FILE__));
 ```
 
-After that you should be able to use the `AssetLoader` class anywhere in your application code. The loader will take care of loading both javascript and css emitted by the bundler. All methods are static, no need to call `new \WPBundler\AssetLoader()`.
+After that you should be able to use the `AssetLoader` class anywhere in your application code. The loader will take care of loading both javascript and css emitted by the bundler. All methods are static.
 
 ```php
 // Enqueue the script as parth of the `wp_enqueue_scripts` action hook

@@ -67,6 +67,14 @@ class AssetLoader
     private static $domain = 'domain';
 
     /**
+     * Prefix used to set a more unique namespace for the assets.
+     *
+     * @since 3.0.0
+     * @var string
+     */
+    private static $prefix = 'wp-bundler.';
+
+    /**
      * Build directory, relative to template root directory.
      *
      * @since 1.0.0
@@ -83,17 +91,48 @@ class AssetLoader
     private static $assets = [];
 
     /**
+     * Root directory of the theme or plugin. This is automatically handled for themes, but needs to
+     * be passed as an argument for plugins.
+     *
+     * @since 3.0.0
+     * @var string
+     */
+    private static $rootdir = '';
+
+    /**
+     * Root uri of the theme or plugin. This is automatically handled for themes, but needs to be
+     * passed as an argument for plugins.
+     *
+     * @since 3.0.0
+     * @var string
+     */
+    private static $rooturi = '';
+
+    /**
      * Prepare the asset loader by setting up required actions and filters. This
      * method should be called as early as possible.
      *
      * @since 1.0.0
+     * @param string $rootdir Root directory of the theme or plugin. This is automatically handled for themes, but needs to be passed as an argument for plugins.
+     * @param string $rooturi Root uri of the theme or plugin. This is automatically handled for themes, but needs to be passed as an argument for plugins.
      * @return void
      */
-    public static function prepare(): void
+    public static function prepare(string $rootdir = '', string $rooturi = ''): void
     {
         if (self::$prepared) {
             return;
         }
+
+        if ($rootdir === '') {
+            $rootdir = \get_stylesheet_directory();
+        }
+
+        if ($rooturi === '') {
+            $rooturi = \get_stylesheet_directory_uri();
+        }
+
+        self::$rootdir = $rootdir;
+        self::$rooturi = $rooturi;
 
         if (self::$mode === 'dev') {
             \add_action('wp_enqueue_scripts', [get_called_class(), 'enqueueDevScript']);
@@ -137,10 +176,25 @@ class AssetLoader
      * @param array  $deps Optional. Dependency array (e.g. jquery, wp-i18n etc.).
      * @return void
      */
-    public static function enqueueEditorAssets(string $name, array $deps): void
+    public static function enqueueEditorAssets(string $name, array $deps = []): void
     {
         self::prepare();
         self::enqueueAssets($name, $deps, true, 'enqueue_block_editor_assets');
+    }
+
+    /**
+     * Enqueue assets with the `'enqueue_block_editor_assets'` wp action.
+     *
+     * @since 1.0.0
+     *
+     * @param string $name Name of asset to enqueue.
+     * @param array  $deps Optional. Dependency array (e.g. jquery, wp-i18n etc.).
+     * @return void
+     */
+    public static function enqueueAdminAssets(string $name, array $deps = []): void
+    {
+        self::prepare();
+        self::enqueueAssets($name, $deps, true, 'admin_enqueue_scripts');
     }
 
     /**
@@ -196,7 +250,7 @@ class AssetLoader
         $asset = self::$assets[$name];
 
         if (key_exists('js', $asset)) {
-            $handle = 'wp-bundler.' . $name;
+            $handle = self::$prefix . $name;
             $handles['js'] = $handle;
 
             \wp_register_script(
@@ -211,7 +265,7 @@ class AssetLoader
         }
 
         if (key_exists('nomodule', $asset)) {
-            $handle = 'wp-bundler.' . $name . '.nomodule';
+            $handle = self::$prefix . $name . '.nomodule';
             $handles['nomodule'] = $handle;
 
             \wp_register_script(
@@ -224,7 +278,7 @@ class AssetLoader
         }
 
         if (key_exists('css', $asset)) {
-            $handle = 'wp-bundler.' . $name;
+            $handle = self::$prefix . $name;
             $handles['css'] = $handle;
 
             \wp_register_style($handle, self::outDirUri($asset['css']), $cssDeps, false, 'all');
@@ -290,7 +344,7 @@ class AssetLoader
      */
     private static function outDirUri(string $path): string
     {
-        return \get_template_directory_uri() . self::$outdir . $path;
+        return self::$rooturi . self::$outdir . $path;
     }
 
     /**
@@ -301,7 +355,7 @@ class AssetLoader
      */
     private static function outDirPath(string $path): string
     {
-        return \get_template_directory() . self::$outdir . $path;
+        return self::$rootdir . self::$outdir . $path;
     }
 
     /**
@@ -332,7 +386,7 @@ class AssetLoader
      */
     public static function filterModuleScripts(string $tag, string $handle): string
     {
-        if (!str_contains($handle, 'wp-bundler.')) {
+        if (!str_contains($handle, self::$prefix)) {
             return $tag;
         }
 
