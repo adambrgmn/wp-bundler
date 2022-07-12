@@ -1,8 +1,10 @@
+import * as crypto from 'node:crypto';
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
+
 import { Message, Plugin } from 'esbuild';
-import * as fs from 'fs/promises';
 import globby from 'globby';
 import md5 from 'md5';
-import * as path from 'path';
 
 import { BundlerPlugin } from '../types';
 import { TranslationMessage, js, php, theme, twig } from '../utils/extract-translations';
@@ -95,6 +97,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
         ...validateTranslations(translations),
         ...missingLangWarnings.map((po) => {
           return {
+            id: crypto.randomUUID(),
             pluginName: name,
             text: 'Missing language header in po file. No translations will be emitted.',
             location: {
@@ -121,6 +124,7 @@ function validateTranslations(translations: TranslationMessage[]): Message[] {
   for (let translation of translations) {
     if (translation.domain == null) {
       warnings.push({
+        id: crypto.randomUUID(),
         pluginName: name,
         text: 'Missing domain.',
         location: translation.location,
