@@ -36,7 +36,11 @@
     "test": "jest",
     "type-check": "tsc --noEmit",
     "release": "yarn build && yarn changeset publish",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "examples:start": "cd examples && npx -p @wordpress/env wp-env start",
+    "examples:destroy": "cd examples && npx -p @wordpress/env wp-env destroy",
+    "examples:stop": "cd examples && npx -p @wordpress/env wp-env stop",
+    "examples:build": "yarn --cwd ./examples/wp-bundler-theme build && yarn --cwd ./examples/wp-bundler-plugin build"
   },
   "dependencies": {
     "@swc/core": "^1.2.212",

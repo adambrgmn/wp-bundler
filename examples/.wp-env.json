@@ -1,0 +1,4 @@
+{
+  "plugins": ["./wp-bundler-plugin"],
+  "themes": ["./wp-bundler-theme"]
+}
