@@ -15,7 +15,7 @@ const args = process.argv.slice(2);
       format: 'cjs',
       outdir: './dist',
       platform: 'node',
-      target: 'node12',
+      target: 'node16',
       sourcemap: true,
       external,
       watch: watch

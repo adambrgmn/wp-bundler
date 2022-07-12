@@ -1,5 +1,6 @@
-import swcCore from '@swc/core';
-import * as fs from 'fs/promises';
+import * as fs from 'node:fs/promises';
+
+import { transform } from '@swc/core';
 
 import { BundlerPlugin } from '../types';
 
@@ -8,7 +9,7 @@ export const swc: BundlerPlugin = () => ({
   setup(build) {
     build.onLoad({ filter: /.(js|ts|tsx|jsx)$/, namespace: '' }, async (args) => {
       const contents = await fs.readFile(args.path, 'utf-8');
-      let { code } = await swcCore.transform(contents, {
+      let { code } = await transform(contents, {
         filename: args.path,
         sourceMaps: false,
         isModule: true,
