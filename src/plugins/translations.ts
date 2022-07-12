@@ -3,7 +3,7 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { Message, Plugin } from 'esbuild';
-import globby from 'globby';
+import { globby } from 'globby';
 import md5 from 'md5';
 
 import { BundlerPlugin } from '../types';
