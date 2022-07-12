@@ -1,0 +1,30 @@
+{
+  "name": "@fransvilhelm/wp-bundler-theme",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "build": "../../cli.js build",
+    "dev": "../../cli.js dev"
+  },
+  "devDependencies": {
+    "@fransvilhelm/wp-bundler": "file:../..",
+    "typescript": "^4.7.4"
+  },
+  "wp-bundler": {
+    "entryPoints": {
+      "main": "./src/main.ts",
+      "admin": "./src/admin.ts"
+    },
+    "assetLoader": {
+      "path": "dist/AssetLoader.php",
+      "namespace": "WPBundlerTheme"
+    },
+    "translations": {
+      "domain": "wp-bundler-theme",
+      "pot": "languages/theme.pot",
+      "pos": [
+        "languages/sv_SE.po"
+      ]
+    }
+  }
+}
