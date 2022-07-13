@@ -1,1 +1,4 @@
-console.log('Hello from admin (plugin)');
+import { log } from './log';
+
+let messages = ['Hello', 'World'];
+log(...messages);
