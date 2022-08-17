@@ -1,5 +1,5 @@
 ---
-'@fransvilhelm/wp-bundler': minor
+'@fransvilhelm/wp-bundler': major
 ---
 
 Introduce build & dev sub commands
