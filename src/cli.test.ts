@@ -33,8 +33,8 @@ describe('Theme', () => {
         "admin.BRZ25XL2.nomodule.js",
         "admin.KRT7TWFX.js",
         "languages",
-        "main.KQRJ3SPY.js",
-        "main.SHSAQRJ5.nomodule.js",
+        "main.337537ZJ.js",
+        "main.GSPWX7R3.nomodule.js",
         "main.TGLZWPB2.css",
       ]
     `);
