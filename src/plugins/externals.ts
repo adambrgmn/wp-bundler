@@ -35,7 +35,15 @@ function setupProjectExternals(build: PluginBuild, providedExternals: Record<str
 
 function setupWpExternals(build: PluginBuild) {
   let namespace = '_wp-bundler-wp-externals';
+
+  /**
+   * The following packages are treated as internal packages by Gutenberg. If used the content should
+   * be bundled with the projects source files instead of read from `window.wp`.
+   */
+  let internal = ['@wordpress/icons'];
+
   build.onResolve({ filter: /@wordpress\/.+/ }, (args) => {
+    if (internal.includes(args.path)) return undefined;
     return { path: args.path, namespace, sideEffects: false };
   });
 

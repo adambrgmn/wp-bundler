@@ -6,6 +6,9 @@
     "build": "../../cli.js build",
     "dev": "../../cli.js dev"
   },
+  "dependencies": {
+    "@wordpress/icons": "^9.6.0"
+  },
   "devDependencies": {
     "@fransvilhelm/wp-bundler": "file:../..",
     "typescript": "^4.7.4"
