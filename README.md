@@ -5,6 +5,7 @@ WP Bundler is a minimal and fast bundler for your WordPress front end assets. It
 It will output modern Javascript for modern browsers as well as a "legacy" version of your scripts for older browsers meaning that you will not send unneccessary content to modern browsers, while keeping the same functionality for older browsers as well.
 
 - [Installation](#installation)
+- [Cli](#cli)
 - [Configuration](#configuration)
   - [`BundlerConfig.entryPoints` (required)](#bundlerconfigentrypoints-required)
   - [`BundlerConfig.outdir` (optional)](#bundlerconfigoutdir-optional)
@@ -42,10 +43,55 @@ Then configure the scripts in your `package.json`.
 ```json
 {
   "scripts": {
-    "build": "wp-bundler",
-    "dev": "wp-bundler --watch"
+    "build": "wp-bundler build",
+    "dev": "wp-bundler dev"
   }
 }
+```
+
+## Cli
+
+```shell
+$ wp-bundler --help
+  wp-bundler [command]
+
+  Commands:
+    wp-bundler build  Create production ready version of your project
+    wp-bundler dev    Run a development server
+
+  Options:
+    --help     Show help                                                 [boolean]
+    --version  Show version number                                       [boolean]
+```
+
+```shell
+$ wp-bundler build --help
+  wp-bundler build
+
+  Create production ready version of your project
+
+  Options:
+        --help     Show help                                             [boolean]
+        --version  Show version number                                   [boolean]
+    -m, --mode     Version of your source to output
+                                        [choices: "dev", "prod"] [default: "prod"]
+        --cwd      Optional path to your project                          [string]
+```
+
+```shell
+$ wp-bundler dev --help
+  wp-bundler dev
+
+  Run a development server
+
+  Options:
+        --help     Show help                                             [boolean]
+        --version  Show version number                                   [boolean]
+    -h, --host     Host to bind the server to               [default: "localhost"]
+    -p, --port     Port to bind the server to                      [default: 3000]
+    -m, --mode     Version of your source to output
+                                        [choices: "dev", "prod"] [default: "dev"]
+        --cwd      Optional path to your project                          [string]
 ```
 
 ## Configuration
@@ -132,7 +178,7 @@ Configure if translations are enabled and if so where translations should live a
 
 During development a minimal web-socket server is initiated and a small dev client is injected on all your apps pages. This means that as soon as you make changes to any of you source files the page will automatically reload. If you only change a `.css` file the page will not be reloaded, instead the css will be replaced "in-flight".
 
-By default the web socket will be setup to listen on `localhost` and port `3000`. You can configure this by passing flags to the CLI; `wp-bundler --watch --host <host> --port <port>`.
+By default the web socket will be setup to listen on `localhost` and port `3000`. You can configure this by passing flags to the CLI; `wp-bundler dev --host <host> --port <port>`.
 
 ## Asset types
 
