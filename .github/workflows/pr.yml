@@ -17,10 +17,7 @@ jobs:
           cache: yarn
 
       - name: Install
-        run: |
-          yarn --frozen-lockfile
-          yarn --cwd examples/wp-bundler-plugin install --frozen-lockfile
-          yarn --cwd examples/wp-bundler-theme install --frozen-lockfile
+        run: yarn --frozen-lockfile
 
       - name: Lint
         run: yarn lint
