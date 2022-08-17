@@ -1,6 +1,6 @@
 {
   "name": "@fransvilhelm/wp-bundler",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "description": "A fast bundler tailored for WordPress based on esbuild",
   "main": "dist/index.js",
   "repository": {

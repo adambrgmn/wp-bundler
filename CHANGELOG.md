@@ -1,5 +1,62 @@
 # @fransvilhelm/wp-bundler
 
+## 3.0.0
+
+### Major Changes
+
+- Require minimum node version 14 (by [@adambrgmn](https://github.com/adambrgmn) in [#45](https://github.com/adambrgmn/wp-bundler/pull/45))
+
+  This was the requirement before as well, though it was not clearly stated. With this release it is more clearly stated that 14.8 is the least requirement.
+
+- Rework cli output (by [@adambrgmn](https://github.com/adambrgmn) in [#41](https://github.com/adambrgmn/wp-bundler/pull/41))
+
+  Previoulsy the cli output was rendered with `ink` and `react`. That was effective and made it easy to make an interactive cli. But I've realized that this is not an interactive cli. I want `wp-bundler` to stay out of your way.
+
+  This rework means that the cli is no longer rendered with ink. Instead the output is regular `console.log`'s. This also has the benefit of working in non interactive cli environments as well.
+
+- Introduce build & dev sub commands (by [@adambrgmn](https://github.com/adambrgmn) in [#35](https://github.com/adambrgmn/wp-bundler/pull/35))
+
+  Previously `wp-bundler` worked as a single command, without nothing but flags as the arguments.
+
+  But to cater for future improvements I've choosen to split the command into sub commands – for now `wp-bundler build` for production and `wp-bundler dev` for development.
+
+  The old behaviour is still around, but is marked as deprecated and is not recommended for new projects. It will be removed in the next major release.
+
+### Minor Changes
+
+- Improve handling of react (by [@adambrgmn](https://github.com/adambrgmn) in [#56](https://github.com/adambrgmn/wp-bundler/pull/56))
+
+  Previously we relied on React being imported every time you wanted to use jsx (`import React from 'react';`). But with this change the jsx factory is injected when needed and you no longer have to import react.
+
+  It also improves how the jsx factory is handled. Previously it used `React.createElement`. But now it instead using `createElement` from `'@wordpress/element'`.
+
+- Add support for plugins (by [@adambrgmn](https://github.com/adambrgmn) in [#48](https://github.com/adambrgmn/wp-bundler/pull/48))
+
+  This builder wasn't supported by plugins before since the generated `AssetLoader` included some functions tied to specific themes. But with this relase the bundler also supports plugins.
+
+  The only thing you need to do is pass root directory and url to the `AssetLoader::prepare` call in you main entry file:
+
+  ```php
+  require_once __DIR__ . '/dist/AssetLoader.php';
+
+  WPBundler\AssetLoader::prepare(\plugin_dir_path(__FILE__), \plugin_dir_url(__FILE__));
+  WPBundler\AssetLoader::enqueueAssets('main');
+  ```
+
+### Patch Changes
+
+- Fix bug where css transforms are not applied (by [@adambrgmn](https://github.com/adambrgmn) in [#45](https://github.com/adambrgmn/wp-bundler/pull/45))
+- Skip emitting confusing nomodule css (by [@adambrgmn](https://github.com/adambrgmn) in [#46](https://github.com/adambrgmn/wp-bundler/pull/46))
+- Add improved examples (by [@adambrgmn](https://github.com/adambrgmn) in [#49](https://github.com/adambrgmn/wp-bundler/pull/49))
+
+  This release also adds improved examples. The previous example ran in a custom environment without actually using WordPress. These new examples makes use of `@wordpress/env` to spin up a quick WordPress environment.
+
+- Bundle @wordpress/icons instead of adding it as dependency (by [@adambrgmn](https://github.com/adambrgmn) in [#55](https://github.com/adambrgmn/wp-bundler/pull/55))
+
+  @wordpress/icons is treated as an internal packages and is not exposed on `window.wp` as the others. Instead this package should be bundled with the projects source. See #54 for context.
+
+- Surface errors outside esbuild pipeline (by [@adambrgmn](https://github.com/adambrgmn) in [#47](https://github.com/adambrgmn/wp-bundler/pull/47))
+
 ## 2.1.1
 
 ### Patch Changes
