@@ -5,13 +5,13 @@ interface Dependencies {
 }
 
 export const DEPENDENCIES: Dependencies = {
-  react: { wpId: 'react', global: 'React' },
-  'react-dom': { wpId: 'react-dom', global: 'ReactDOM' },
+  react: { wpId: 'wp-element', global: 'wp.element' },
+  'react-dom': { wpId: 'wp-element', global: 'wp.element' },
   jquery: { wpId: 'jquery', global: '$' },
   lodash: { wpId: 'lodash', global: '_' },
 };
 
-export const DEfAULT_EXTERNALS = Object.entries(DEPENDENCIES).reduce<Record<string, string>>((acc, [key, dep]) => {
+export const DEFAULT_EXTERNALS = Object.entries(DEPENDENCIES).reduce<Record<string, string>>((acc, [key, dep]) => {
   if (dep) acc[key] = dep.global;
   return acc;
 }, {});

@@ -101,7 +101,7 @@ export class Bundler {
       logLevel: 'silent',
       // publicPath: 'https://www.example.com/v1',
 
-      plugins: [plugin.define(pluginOptions), plugin.externals(pluginOptions)],
+      plugins: [plugin.reactFactory(pluginOptions), plugin.define(pluginOptions), plugin.externals(pluginOptions)],
     };
 
     return options;
