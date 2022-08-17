@@ -23,7 +23,7 @@ msgstr ""
 msgid "Example theme"
 msgstr ""
 
-#: src/main.ts:5
+#: src/main.ts:6
 msgid "Hello world! (theme)"
 msgstr "Hej världen! (tema)"
 

@@ -33,9 +33,9 @@ describe('Theme', () => {
         "admin.BRZ25XL2.nomodule.js",
         "admin.KRT7TWFX.js",
         "languages",
-        "main.A4RZX4NB.nomodule.js",
+        "main.337537ZJ.js",
+        "main.GSPWX7R3.nomodule.js",
         "main.TGLZWPB2.css",
-        "main.UNJITHPP.js",
       ]
     `);
   });
@@ -138,6 +138,14 @@ describe('Build', () => {
       ":root{--color-brand: rgba(0, 0, 255, .9)}::-moz-placeholder{color:var(--color-brand)}::placeholder{color:var(--color-brand)}
       "
     `);
+  });
+
+  it('should include @wordpress/icons in bundle', async () => {
+    await $.theme('build', ['--mode', 'dev']);
+
+    let content = read.theme('main.js');
+    expect(content).toContain('var bug = ');
+    expect(content).toContain('viewBox: "0 0 24 24"');
   });
 });
 
