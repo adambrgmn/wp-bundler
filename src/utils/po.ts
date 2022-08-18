@@ -1,5 +1,7 @@
+import { Buffer } from 'node:buffer';
 import * as fs from 'node:fs/promises';
 
+import { OutputFile } from 'esbuild';
 import { GetTextTranslation, GetTextTranslations, mo, po } from 'gettext-parser';
 import mergeWith from 'lodash.mergewith';
 import * as z from 'zod';
@@ -81,6 +83,15 @@ export class Po {
 
   async write(filename = this.filename, foldLength?: number) {
     await fs.writeFile(filename, this.toString(foldLength) + '\n');
+  }
+
+  toOutputFile(filename = this.filename, foldLength?: number): OutputFile {
+    let text = this.toString(foldLength);
+    return {
+      path: filename,
+      contents: Buffer.from(text, 'utf-8'),
+      text: text,
+    };
   }
 
   has(id: string, context: string = '') {
