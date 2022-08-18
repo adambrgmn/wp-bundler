@@ -1,7 +1,8 @@
 import * as process from 'node:process';
+import { Writable } from 'node:stream';
 import * as util from 'node:util';
 
-import chalk from 'chalk';
+import _chalk, { ChalkInstance } from 'chalk';
 import { BuildResult, Metafile, OutputFile, PartialMessage } from 'esbuild';
 import fileSize from 'filesize';
 
@@ -10,13 +11,23 @@ import { figures } from './utils/figures';
 
 export class Logger {
   #prefixValue: string;
-  #target: NodeJS.WriteStream;
+  #target: Writable;
 
-  chalk = chalk;
+  chalk: ChalkInstance;
 
-  constructor(prefix: string, target: NodeJS.WriteStream = process.stdout) {
+  #prefixColors: Record<string, [icon: typeof _chalk, prefix: typeof _chalk]>;
+
+  constructor(prefix: string, target: Writable = process.stdout, chalk: ChalkInstance = _chalk) {
     this.#prefixValue = prefix;
     this.#target = target;
+    this.chalk = chalk;
+
+    this.#prefixColors = {
+      warning: [chalk.yellowBright, chalk.black.bgYellowBright],
+      error: [chalk.redBright, chalk.white.bgRedBright],
+      success: [chalk.greenBright, chalk.black.bgGreenBright],
+      default: [chalk.blue, chalk.black.bgBlue],
+    };
   }
 
   info(message: unknown) {
@@ -24,20 +35,20 @@ export class Logger {
   }
 
   success(message: unknown) {
-    this.#write(chalk.green(message), { state: 'success' });
+    this.#write(this.chalk.green(message), { state: 'success' });
   }
 
   warn(message: unknown) {
-    this.#write(chalk.yellow(message), { prefix: 'WARNING' });
+    this.#write(this.chalk.yellow(message), { prefix: 'WARNING' });
   }
 
   error(message: unknown) {
-    this.#write(chalk.red(message), { prefix: 'ERROR' });
+    this.#write(this.chalk.red(message), { prefix: 'ERROR' });
   }
 
   formattedMessage(kind: 'error' | 'warning', message: PartialMessage) {
     let lines = [];
-    lines.push(`${this.#prefix({ prefix: kind.toUpperCase() })}${chalk.bold(message.text)}`);
+    lines.push(`${this.#prefix({ prefix: kind.toUpperCase() })}${this.chalk.bold(message.text)}`);
 
     if (message.location?.file != null) {
       lines.push('');
@@ -45,7 +56,7 @@ export class Logger {
     }
 
     if (message.location?.lineText != null) {
-      let mark = chalk.green;
+      let mark = this.chalk.green;
       let { column = 0, length = 0, line = 0, lineText } = message.location;
       let init = `      ${line} ${figures.lineVertical} `;
 
@@ -108,19 +119,19 @@ export class Logger {
   }
 
   #prefix({ prefix = this.#prefixValue, state = prefix }: PrefixOptions = {}) {
-    let [iconColor, prefixColor] = PREFIX_COLORS[state?.toLowerCase() ?? 'default'] ?? PREFIX_COLORS.default;
+    let [iconColor, prefixColor] = this.#prefixColors[state?.toLowerCase() ?? 'default'] ?? this.#prefixColors.default;
     let icon = PREFIX_ICONS[state?.toLowerCase() ?? 'default'] ?? PREFIX_ICONS.default;
 
     return `${iconColor(icon)} ${prefixColor(` ${prefix} `)} `;
   }
 }
 
-const PREFIX_COLORS: Record<string, [icon: typeof chalk, prefix: typeof chalk]> = {
-  warning: [chalk.yellowBright, chalk.black.bgYellowBright],
-  error: [chalk.redBright, chalk.white.bgRedBright],
-  success: [chalk.greenBright, chalk.black.bgGreenBright],
-  default: [chalk.blue, chalk.black.bgBlue],
-};
+// const PREFIX_COLORS: Record<string, [icon: typeof _chalk, prefix: typeof _chalk]> = {
+//   warning: [_chalk.yellowBright, _chalk.black.bgYellowBright],
+//   error: [_chalk.redBright, _chalk.white.bgRedBright],
+//   success: [_chalk.greenBright, _chalk.black.bgGreenBright],
+//   default: [_chalk.blue, _chalk.black.bgBlue],
+// };
 
 const PREFIX_ICONS: Record<string, string> = {
   warning: figures.triangleUp,
