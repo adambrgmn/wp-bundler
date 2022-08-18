@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import * as process from 'node:process';
 
 import esbuild, { BuildResult, Format, LogLevel, Metafile, OutputFile, Platform, Plugin } from 'esbuild';
@@ -36,6 +37,18 @@ export class Bundler {
     this.#port = port;
   }
 
+  prepare() {
+    process.env.NODE_ENV = process.env.NODE_ENV || this.#mode === 'dev' ? 'development' : 'production';
+
+    let { bundler, project, config } = getMetadata(this.#cwd, __dirname);
+
+    this.#bundler = bundler;
+    this.#project = project;
+    this.#config = config;
+
+    rimraf(this.#project.paths.absolute(this.#config.outdir));
+  }
+
   async build() {
     let options = this.#createBundlerOptions('modern');
     let tasks = [esbuild.build(options)];
@@ -50,30 +63,26 @@ export class Bundler {
       .slice(1)
       .reduce((acc, result) => merge(acc, omit(result, 'outputFiles')), omit(results[0], 'outputFiles'));
 
+    ensureMetafile(result);
+    this.#buildAssetLoader(result);
+
     let outputFiles = [...results.flatMap((res) => res.outputFiles), ...this.#additionalOutput].map((file) => ({
       ...file,
       path: this.#project.paths.relative(file.path),
     }));
 
-    ensureMetafile(result);
-
-    let pluginOptions = this.#createPluginOptions();
-    let compileAssetLoader = createAssetLoaderTemplate(pluginOptions);
-    await compileAssetLoader({ metafile: result.metafile });
-
     return { ...result, outputFiles } as const;
   }
 
-  prepare() {
-    process.env.NODE_ENV = process.env.NODE_ENV || this.#mode === 'dev' ? 'development' : 'production';
-
-    let { bundler, project, config } = getMetadata(this.#cwd, __dirname);
-
-    this.#bundler = bundler;
-    this.#project = project;
-    this.#config = config;
-
-    rimraf(this.#project.paths.absolute(this.#config.outdir));
+  #buildAssetLoader(result: { metafile: Metafile }) {
+    let pluginOptions = this.#createPluginOptions();
+    let compileAssetLoader = createAssetLoaderTemplate(pluginOptions);
+    let text = compileAssetLoader({ metafile: result.metafile });
+    this.#additionalOutput.add({
+      path: this.#project.paths.absolute(this.#config.assetLoader.path),
+      contents: Buffer.from(text, 'utf-8'),
+      text,
+    });
   }
 
   #createBundlerOptions(variant: 'modern' | 'legacy' = 'modern') {
