@@ -31,7 +31,7 @@ interface TemplateCompileOptions {
 export function createAssetLoaderTemplate({ config, bundler, project, mode, host, port }: BundlerPluginOptions) {
   let templatePath = bundler.paths.absolute('./assets/AssetLoader.php');
   let compile = createTemplate(readFileSync(templatePath, 'utf-8'));
-  let client = readFileSync(path.join(__dirname, './dev-client.js'), 'utf-8');
+  let client = readFileSync(bundler.paths.absolute('dist/dev-client.js'), 'utf-8');
 
   return ({ metafile }: Pick<TemplateCompileOptions, 'metafile'>) => {
     return compile({ metafile, config, bundler, project, mode, client, host, port });

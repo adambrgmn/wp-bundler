@@ -11,7 +11,7 @@ import { createAssetLoaderTemplate } from './utils/asset-loader';
 import { getMetadata } from './utils/read-pkg';
 import { rimraf } from './utils/rimraf';
 
-interface BundlerOptions {
+export interface BundlerOptions {
   mode: Mode;
   cwd: string;
   host: string;
