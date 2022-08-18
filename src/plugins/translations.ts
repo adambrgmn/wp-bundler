@@ -62,17 +62,14 @@ export const translations: BundlerPlugin = ({ project, config, output }): Plugin
 
       pos.forEach((po) => po.updateFromTemplate(template));
       let foldLength = getFoldLength(project.packageJson);
-      // await Promise.all([template.write(undefined, foldLength), ...pos.map((po) => po.write(undefined, foldLength))]);
       output.add(template.toOutputFile(undefined, foldLength));
       for (let po of pos) {
         output.add(po.toOutputFile(undefined, foldLength));
       }
 
       let langDir = project.paths.absolute(config.outdir, 'languages');
-      // await fs.mkdir(langDir, { recursive: true });
       let missingLangWarnings: Po[] = [];
 
-      // let writes: Promise<unknown>[] = [];
       for (let po of pos) {
         let language = po.header('Language');
         if (language == null) {
@@ -86,7 +83,6 @@ export const translations: BundlerPlugin = ({ project, config, output }): Plugin
           contents: buffer,
           text: buffer.toString('utf-8'),
         });
-        // writes.push(fs.writeFile(po.filename.replace(/\.po$/, '.mo'), buffer));
 
         for (let distFile of Object.keys(metafile.outputs)) {
           let meta = metafile.outputs[distFile];
@@ -104,11 +100,9 @@ export const translations: BundlerPlugin = ({ project, config, output }): Plugin
             contents: Buffer.from(text, 'utf-8'),
             text,
           });
-          // writes.push(fs.writeFile(path.join(langDir, filename), JSON.stringify(jed)));
         }
       }
 
-      // await Promise.all(writes);
       warnings.push(
         ...validateTranslations(translations),
         ...missingLangWarnings.map((po) => {
