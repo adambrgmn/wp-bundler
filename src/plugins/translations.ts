@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
@@ -12,7 +13,7 @@ import { Po } from '../utils/po';
 
 let name = 'wp-bundler-translations';
 
-export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
+export const translations: BundlerPlugin = ({ project, config, output }): Plugin => ({
   name,
   async setup(build) {
     if (config.translations == null) return;
@@ -51,23 +52,24 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
         ...(await findTwigTranslations(project.paths.root, translationsConfig.ignore)),
       );
 
-      let pot = await Po.load(project.paths.absolute(translationsConfig.pot));
+      let template = await Po.load(project.paths.absolute(translationsConfig.pot));
       let pos = await Promise.all(translationsConfig.pos?.map((po) => Po.load(project.paths.absolute(po))) ?? []);
 
-      pot.clear();
+      template.clear();
       for (let t of translations) {
-        if (t.domain === translationsConfig.domain) pot.set(t);
+        if (t.domain === translationsConfig.domain) template.set(t);
       }
 
-      pos.forEach((po) => po.updateFromTemplate(pot));
+      pos.forEach((po) => po.updateFromTemplate(template));
       let foldLength = getFoldLength(project.packageJson);
-      await Promise.all([pot.write(undefined, foldLength), ...pos.map((po) => po.write(undefined, foldLength))]);
+      output.add(template.toOutputFile(undefined, foldLength));
+      for (let po of pos) {
+        output.add(po.toOutputFile(undefined, foldLength));
+      }
 
       let langDir = project.paths.absolute(config.outdir, 'languages');
-      await fs.mkdir(langDir, { recursive: true });
       let missingLangWarnings: Po[] = [];
 
-      let writes: Promise<unknown>[] = [];
       for (let po of pos) {
         let language = po.header('Language');
         if (language == null) {
@@ -76,7 +78,11 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
         }
 
         let buffer = po.toMo();
-        writes.push(fs.writeFile(po.filename.replace(/\.po$/, '.mo'), buffer));
+        output.add({
+          path: po.filename.replace(/\.po$/, '.mo'),
+          contents: buffer,
+          text: buffer.toString('utf-8'),
+        });
 
         for (let distFile of Object.keys(metafile.outputs)) {
           let meta = metafile.outputs[distFile];
@@ -88,11 +94,15 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
 
           if (jed == null) continue;
           let filename = generateTranslationFilename(translationsConfig.domain, language, distFile);
-          writes.push(fs.writeFile(path.join(langDir, filename), JSON.stringify(jed)));
+          let text = JSON.stringify(jed);
+          output.add({
+            path: path.join(langDir, filename),
+            contents: Buffer.from(text, 'utf-8'),
+            text,
+          });
         }
       }
 
-      await Promise.all(writes);
       warnings.push(
         ...validateTranslations(translations),
         ...missingLangWarnings.map((po) => {

@@ -1,7 +1,7 @@
 import { performance } from 'node:perf_hooks';
 import * as process from 'node:process';
 
-import { BuildFailure, BuildResult, Metafile } from 'esbuild';
+import { BuildFailure, Metafile, OutputFile } from 'esbuild';
 import { assign, createMachine, interpret } from 'xstate';
 
 import { Bundler } from './bundler';
@@ -9,6 +9,9 @@ import { Logger } from './logger';
 import { Server } from './server';
 import { Mode } from './types';
 import { Watcher } from './watcher';
+import { Writer } from './writer';
+
+type BuildResult = Awaited<ReturnType<Bundler['build']>>;
 
 export type MachineContext = {
   mode: Mode;
@@ -20,11 +23,13 @@ export type MachineContext = {
 
 type MachineContextInternal = {
   bundler: Bundler;
+  writer: Writer;
   server: Server;
   watcher: Watcher;
   logger: Logger;
   result: Pick<BuildResult, 'errors' | 'warnings'> | null;
   metafile: Metafile | null;
+  outputFiles: OutputFile[] | null;
   error: unknown | null;
   changedFiles: string[];
   startTime: number;
@@ -46,12 +51,14 @@ const defaultContext: Context = {
   port: 3000,
 
   bundler: null as any as Bundler,
+  writer: null as any as Writer,
   server: null as any as Server,
   watcher: null as any as Watcher,
   logger: null as any as Logger,
 
   result: null,
   metafile: null,
+  outputFiles: null,
   error: null,
   changedFiles: [],
   startTime: performance.now(),
@@ -74,7 +81,7 @@ export const machine =
       schema: {
         context: {} as Context,
         events: {} as Events,
-        services: {} as { build: { data: BuildResult | BuildFailure } },
+        services: {} as { build: { data: BuildResult } },
       },
       entry: ['createDependencies', 'logSetup'],
       invoke: {
@@ -101,12 +108,12 @@ export const machine =
             id: 'wp-bundler-build',
             onDone: [
               {
-                actions: ['setResult'],
+                actions: ['setResult', 'writeOutput'],
                 cond: 'isWatchMode',
                 target: '#wp-bundler.watching.success',
               },
               {
-                actions: ['setResult'],
+                actions: ['setResult', 'writeOutput'],
                 target: 'success',
               },
             ],
@@ -215,7 +222,7 @@ export const machine =
         },
         logBuildSuccess: (context, _) => {
           if (context.metafile != null) {
-            context.logger.buildOutput(context.metafile, context.cwd);
+            context.logger.buildOutput(context.metafile, context.outputFiles ?? []);
           }
 
           let errors = context.result?.errors.length ?? 0;
@@ -243,7 +250,7 @@ export const machine =
         },
         logWatchSuccess: (context, _) => {
           if (context.metafile != null) {
-            context.logger.buildOutput(context.metafile, context.cwd);
+            context.logger.buildOutput(context.metafile, context.outputFiles ?? []);
           }
 
           let errors = context.result?.errors.length ?? 0;
@@ -261,6 +268,7 @@ export const machine =
 
         createDependencies: assign({
           bundler: (context, _) => new Bundler(context),
+          writer: (context, _) => new Writer(context.cwd),
           server: (context, _) => new Server(context),
           watcher: (context, __) => new Watcher(context.cwd),
           logger: (_, __) => new Logger('WP-BUNDLER', process.stderr),
@@ -276,6 +284,7 @@ export const machine =
         setResult: assign({
           result: (_, event) => event.data,
           metafile: (_, event) => ('metafile' in event.data ? event.data.metafile ?? null : null),
+          outputFiles: (_, event) => ('outputFiles' in event.data ? event.data.outputFiles ?? null : null),
         }),
         setErrorResult: assign({
           result: (_, event) => (isEsbuildBuildFailure(event.data) ? event.data : null),
@@ -287,8 +296,14 @@ export const machine =
         resetResults: assign({
           result: (_, __) => null,
           metafile: (_, __) => null,
+          outputFiles: (_, __) => null,
           error: (_, __) => null,
         }),
+        writeOutput: (context, event) => {
+          if ('outputFiles' in event.data) {
+            context.writer.write(event.data.outputFiles);
+          }
+        },
       },
     },
   );

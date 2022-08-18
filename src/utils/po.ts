@@ -1,5 +1,7 @@
+import { Buffer } from 'node:buffer';
 import * as fs from 'node:fs/promises';
 
+import { OutputFile } from 'esbuild';
 import { GetTextTranslation, GetTextTranslations, mo, po } from 'gettext-parser';
 import mergeWith from 'lodash.mergewith';
 import * as z from 'zod';
@@ -8,8 +10,8 @@ import { TranslationMessage, isContextMessage, isPluralMessage, isTranslationMes
 
 const GetTextTranslationSchema = z.object({
   msgctxt: z.string().optional(),
-  msgid: z.string().nonempty(),
-  msgid_plural: z.string().nonempty().optional(),
+  msgid: z.string().min(1),
+  msgid_plural: z.string().min(1).optional(),
   msgstr: z.array(z.string()).default([]),
   comments: z
     .object({
@@ -80,7 +82,16 @@ export class Po {
   }
 
   async write(filename = this.filename, foldLength?: number) {
-    await fs.writeFile(filename, this.toString(foldLength) + '\n');
+    await fs.writeFile(filename, this.toString(foldLength));
+  }
+
+  toOutputFile(filename = this.filename, foldLength?: number): OutputFile {
+    let text = this.toString(foldLength);
+    return {
+      path: filename,
+      contents: Buffer.from(text, 'utf-8'),
+      text: text,
+    };
   }
 
   has(id: string, context: string = '') {
@@ -201,7 +212,7 @@ export class Po {
 
   toString(foldLength: number = 120 - 9) {
     let buffer = po.compile(this.parsedTranslations, { sort: compareTranslations, foldLength });
-    return buffer.toString('utf-8');
+    return buffer.toString('utf-8') + '\n';
   }
 
   toMo(filterTranslation?: (t: GetTextTranslation) => boolean): Buffer {

@@ -1,6 +1,7 @@
+import { Buffer } from 'node:buffer';
 import * as process from 'node:process';
 
-import esbuild, { BuildOptions, BuildResult, Metafile, Plugin } from 'esbuild';
+import esbuild, { BuildResult, Format, LogLevel, Metafile, OutputFile, Platform, Plugin } from 'esbuild';
 import merge from 'lodash.merge';
 
 import * as plugin from './plugins';
@@ -10,7 +11,7 @@ import { createAssetLoaderTemplate } from './utils/asset-loader';
 import { getMetadata } from './utils/read-pkg';
 import { rimraf } from './utils/rimraf';
 
-interface BundlerOptions {
+export interface BundlerOptions {
   mode: Mode;
   cwd: string;
   host: string;
@@ -22,6 +23,9 @@ export class Bundler {
   #cwd: string;
   #host: string;
   #port: number;
+
+  #additionalOutput = new Set<OutputFile>();
+
   #project: ProjectInfo = {} as unknown as any;
   #bundler: ProjectInfo = {} as unknown as any;
   #config: BundlerConfig = {} as unknown as any;
@@ -31,35 +35,6 @@ export class Bundler {
     this.#cwd = cwd;
     this.#host = host;
     this.#port = port;
-  }
-
-  async build() {
-    let pluginOptions = this.#pluginOptions();
-    let tasks: Promise<esbuild.BuildResult>[] = [];
-
-    let options = this.#createBundlerOptions();
-    options.plugins.push(plugin.translations(pluginOptions), plugin.postcss(pluginOptions));
-    tasks.push(esbuild.build(options));
-
-    if (this.#mode === 'prod') {
-      let nomoduleOptions = this.#createBundlerOptions();
-      nomoduleOptions.format = 'iife';
-      nomoduleOptions.entryNames = `${nomoduleOptions.entryNames}.nomodule`;
-      nomoduleOptions.target = 'es5';
-      nomoduleOptions.plugins.push(plugin.swc(pluginOptions), plugin.ignoreCss(pluginOptions));
-
-      tasks.push(esbuild.build(nomoduleOptions));
-    }
-
-    let results = await Promise.all(tasks);
-    let result = results.slice(1).reduce<BuildResult>((acc, result) => merge(acc, result), results[0]);
-
-    ensureMetafile(result);
-
-    let writeTemplate = createAssetLoaderTemplate(pluginOptions);
-    await writeTemplate({ metafile: result.metafile });
-
-    return result;
   }
 
   prepare() {
@@ -74,40 +49,91 @@ export class Bundler {
     rimraf(this.#project.paths.absolute(this.#config.outdir));
   }
 
-  #createBundlerOptions(): BuildOptions & { plugins: Plugin[] } {
-    let pluginOptions = this.#pluginOptions();
+  async build() {
+    let options = this.#createBundlerOptions('modern');
+    let tasks = [esbuild.build(options)];
 
-    let options: BuildOptions & { plugins: Plugin[] } = {
+    if (this.#mode === 'prod') {
+      let legacyOptions = this.#createBundlerOptions('legacy');
+      tasks.push(esbuild.build(legacyOptions));
+    }
+
+    let results = await Promise.all(tasks);
+    let result = results
+      .slice(1)
+      .reduce((acc, result) => merge(acc, omit(result, 'outputFiles')), omit(results[0], 'outputFiles'));
+
+    ensureMetafile(result);
+    this.#buildAssetLoader(result);
+
+    let outputFiles = [...results.flatMap((res) => res.outputFiles), ...this.#additionalOutput].map((file) => ({
+      ...file,
+      path: this.#project.paths.relative(file.path),
+    }));
+
+    return { ...result, outputFiles } as const;
+  }
+
+  #buildAssetLoader(result: { metafile: Metafile }) {
+    let pluginOptions = this.#createPluginOptions();
+    let compileAssetLoader = createAssetLoaderTemplate(pluginOptions);
+    let text = compileAssetLoader({ metafile: result.metafile });
+    this.#additionalOutput.add({
+      path: this.#project.paths.absolute(this.#config.assetLoader.path),
+      contents: Buffer.from(text, 'utf-8'),
+      text,
+    });
+  }
+
+  #createBundlerOptions(variant: 'modern' | 'legacy' = 'modern') {
+    let pluginOptions = this.#createPluginOptions();
+
+    let entryNames = this.#mode === 'prod' ? '[dir]/[name].[hash]' : '[dir]/[name]';
+    if (variant === 'legacy') {
+      entryNames = `${entryNames}.nomodule`;
+    }
+
+    let plugins: Plugin[] = [
+      plugin.reactFactory(pluginOptions),
+      plugin.define(pluginOptions),
+      plugin.externals(pluginOptions),
+    ];
+
+    if (variant === 'modern') {
+      plugins.push(plugin.translations(pluginOptions), plugin.postcss(pluginOptions));
+    } else {
+      plugins.push(plugin.swc(pluginOptions), plugin.ignoreCss(pluginOptions));
+    }
+
+    return {
       entryPoints: this.#config.entryPoints,
       outdir: this.#project.paths.absolute(this.#config.outdir),
-      entryNames: this.#mode === 'prod' ? '[dir]/[name].[hash]' : '[dir]/[name]',
+      entryNames,
       bundle: true,
-      format: 'esm',
-      platform: 'browser',
-      target: 'es2020',
+      format: (variant === 'legacy' ? 'iife' : 'esm') as Format,
+      platform: 'browser' as Platform,
+      target: variant === 'legacy' ? 'es5' : 'es2020',
+      write: false as const,
+      metafile: true as const,
 
       loader: {
         '.ttf': 'file',
         '.eot': 'file',
         '.woff': 'file',
         '.woff2': 'file',
-      },
+      } as const,
 
       sourcemap: this.#config.sourcemap || this.#mode === 'dev',
       minify: this.#mode === 'prod',
 
       absWorkingDir: this.#project.paths.root,
-      metafile: true,
-      logLevel: 'silent',
-      // publicPath: 'https://www.example.com/v1',
+      logLevel: 'silent' as LogLevel,
 
-      plugins: [plugin.reactFactory(pluginOptions), plugin.define(pluginOptions), plugin.externals(pluginOptions)],
-    };
-
-    return options;
+      plugins,
+    } as const;
   }
 
-  #pluginOptions(): BundlerPluginOptions {
+  #createPluginOptions(): BundlerPluginOptions {
     return {
       mode: this.#mode,
       config: this.#config,
@@ -115,11 +141,24 @@ export class Bundler {
       bundler: this.#bundler,
       host: this.#host,
       port: this.#port,
+      output: this.#additionalOutput,
     };
   }
 }
 
-function ensureMetafile(result: BuildResult): asserts result is BuildResult & { metafile: Metafile } {
+function omit<T, Key extends keyof T & string>(obj: T, ...keys: Key[]) {
+  let clone = {} as T;
+  let availableKeys = Object.keys(obj) as Key[];
+  for (let key of availableKeys) {
+    if (!keys.includes(key)) {
+      clone[key] = obj[key];
+    }
+  }
+
+  return clone as Omit<T, Key>;
+}
+
+function ensureMetafile<T extends BuildResult>(result: T): asserts result is T & { metafile: Metafile } {
   if (result.metafile == null) {
     throw new Error('No metafile emitted. Make sure that metafile is set to true in esbuild options.');
   }

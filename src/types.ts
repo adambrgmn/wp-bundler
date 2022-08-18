@@ -1,4 +1,4 @@
-import { Plugin } from 'esbuild';
+import { OutputFile, Plugin } from 'esbuild';
 import { PackageJson } from 'type-fest';
 
 import { BundlerConfig } from './schema';
@@ -24,6 +24,7 @@ export interface BundlerPluginOptions {
   bundler: ProjectInfo;
   host: string;
   port: number;
+  output: Set<OutputFile>;
 }
 
 export type BundlerPlugin = (options: BundlerPluginOptions) => Plugin;

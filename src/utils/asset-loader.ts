@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs';
-import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { Metafile } from 'esbuild';
@@ -31,13 +30,11 @@ interface TemplateCompileOptions {
 
 export function createAssetLoaderTemplate({ config, bundler, project, mode, host, port }: BundlerPluginOptions) {
   let templatePath = bundler.paths.absolute('./assets/AssetLoader.php');
-  let templateOutPath = project.paths.absolute(config.assetLoader.path);
   let compile = createTemplate(readFileSync(templatePath, 'utf-8'));
+  let client = readFileSync(bundler.paths.absolute('dist/dev-client.js'), 'utf-8');
 
-  return async ({ metafile }: Pick<TemplateCompileOptions, 'metafile'>) => {
-    let client = await fs.readFile(path.join(__dirname, './dev-client.js'), 'utf-8');
-    await fs.mkdir(path.dirname(templateOutPath), { recursive: true });
-    await fs.writeFile(templateOutPath, compile({ metafile, config, bundler, project, mode, client, host, port }));
+  return ({ metafile }: Pick<TemplateCompileOptions, 'metafile'>) => {
+    return compile({ metafile, config, bundler, project, mode, client, host, port });
   };
 }
 

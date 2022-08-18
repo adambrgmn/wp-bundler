@@ -2,7 +2,7 @@ import * as process from 'node:process';
 import * as util from 'node:util';
 
 import chalk from 'chalk';
-import { BuildResult, Metafile, PartialMessage } from 'esbuild';
+import { BuildResult, Metafile, OutputFile, PartialMessage } from 'esbuild';
 import fileSize from 'filesize';
 
 import { constructBundleOutput } from './utils/bundle-output';
@@ -82,12 +82,13 @@ export class Logger {
     }
   }
 
-  buildOutput(metafile: Metafile, cwd: string) {
-    let output = constructBundleOutput(metafile, { withSize: true, cwd });
+  buildOutput(metafile: Metafile, outputFiles: OutputFile[]) {
+    let output = constructBundleOutput(metafile, outputFiles);
     for (let [name, part] of Object.entries(output)) {
       this.raw('\n' + this.chalk.blue(name));
       for (let { file, size } of part) {
-        this.raw(`  ${file} (${fileSize(size ?? 0)})`);
+        let sizeStr = size == null ? '' : `(${fileSize(size)})`;
+        this.raw(`  ${file} ${sizeStr}`);
       }
     }
 
