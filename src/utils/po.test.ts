@@ -57,7 +57,8 @@ it('can update a po file with data from a pot', async () => {
     #: test.ts:1
     #. translators: New translator
     msgid \\"A\\"
-    msgstr \\"A\\""
+    msgstr \\"A\\"
+    "
   `);
 });
 
@@ -95,7 +96,8 @@ it('keeps unreferenced translations in the bottom', async () => {
 
     # THIS TRANSLATION IS NO LONGER REFERENCED INSIDE YOUR PROJECT
     msgid \\"A unused 2\\"
-    msgstr \\"Unused\\""
+    msgstr \\"Unused\\"
+    "
   `);
 });
 
@@ -188,7 +190,8 @@ it('will output translations sorted by their msgid then their msgctxt', async ()
 
     #: test.ts:1
     msgid \\"B\\"
-    msgstr \\"\\""
+    msgstr \\"\\"
+    "
   `);
 });
 
@@ -222,7 +225,8 @@ it('should not overwrite headers in po file when updating from pot', async () =>
 
     #: test.ts:1
     msgid \\"a\\"
-    msgstr \\"\\""
+    msgstr \\"\\"
+    "
   `);
 });
 
@@ -242,7 +246,8 @@ it('creates correct plural templates translations', async () => {
     msgid \\"test\\"
     msgid_plural \\"tester\\"
     msgstr[0] \\"\\"
-    msgstr[1] \\"\\""
+    msgstr[1] \\"\\"
+    "
   `);
 });
 
@@ -277,7 +282,8 @@ it('handles translations that exists as single but get appended as plural', asyn
     msgid \\"test\\"
     msgid_plural \\"tester\\"
     msgstr[0] \\"test\\"
-    msgstr[1] \\"\\""
+    msgstr[1] \\"\\"
+    "
   `);
 });
 
@@ -315,7 +321,8 @@ it('removes removed comment if translation is brought back', async () => {
 
     #: test.ts:1
     msgid \\"test\\"
-    msgstr \\"test\\""
+    msgstr \\"test\\"
+    "
   `);
 });
 
