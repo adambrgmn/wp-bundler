@@ -41,6 +41,7 @@ export interface Typegen0 {
     setErrorResult: 'error.platform.wp-bundler-build';
     setResult: 'done.invoke.wp-bundler-build';
     setStartTime: 'BUILD' | 'REBUILD';
+    writeOutput: 'done.invoke.wp-bundler-build';
   };
   eventsCausingServices: {
     build: 'BUILD' | 'REBUILD';

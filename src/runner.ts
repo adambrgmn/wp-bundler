@@ -9,6 +9,7 @@ import { Logger } from './logger';
 import { Server } from './server';
 import { Mode } from './types';
 import { Watcher } from './watcher';
+import { Writer } from './writer';
 
 type BuildResult = Awaited<ReturnType<Bundler['build']>>;
 
@@ -22,6 +23,7 @@ export type MachineContext = {
 
 type MachineContextInternal = {
   bundler: Bundler;
+  writer: Writer;
   server: Server;
   watcher: Watcher;
   logger: Logger;
@@ -49,6 +51,7 @@ const defaultContext: Context = {
   port: 3000,
 
   bundler: null as any as Bundler,
+  writer: null as any as Writer,
   server: null as any as Server,
   watcher: null as any as Watcher,
   logger: null as any as Logger,
@@ -105,12 +108,12 @@ export const machine =
             id: 'wp-bundler-build',
             onDone: [
               {
-                actions: ['setResult'],
+                actions: ['setResult', 'writeOutput'],
                 cond: 'isWatchMode',
                 target: '#wp-bundler.watching.success',
               },
               {
-                actions: ['setResult'],
+                actions: ['setResult', 'writeOutput'],
                 target: 'success',
               },
             ],
@@ -265,6 +268,7 @@ export const machine =
 
         createDependencies: assign({
           bundler: (context, _) => new Bundler(context),
+          writer: (context, _) => new Writer(context.cwd),
           server: (context, _) => new Server(context),
           watcher: (context, __) => new Watcher(context.cwd),
           logger: (_, __) => new Logger('WP-BUNDLER', process.stderr),
@@ -295,6 +299,11 @@ export const machine =
           outputFiles: (_, __) => null,
           error: (_, __) => null,
         }),
+        writeOutput: (context, event) => {
+          if ('outputFiles' in event.data) {
+            context.writer.write(event.data.outputFiles);
+          }
+        },
       },
     },
   );
