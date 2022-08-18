@@ -1,5 +1,11 @@
 # @fransvilhelm/wp-bundler
 
+## 3.0.1
+
+### Patch Changes
+
+- Update documentation for v3 (by [@adambrgmn](https://github.com/adambrgmn) in [#58](https://github.com/adambrgmn/wp-bundler/pull/58))
+
 ## 3.0.0
 
 ### Major Changes
