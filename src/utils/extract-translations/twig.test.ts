@@ -1,3 +1,5 @@
+import { expect, it } from 'vitest';
+
 import { TranslationMessage } from '.';
 import { extractTranslations } from './twig';
 

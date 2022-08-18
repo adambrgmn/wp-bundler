@@ -1,4 +1,5 @@
 import { Location } from 'esbuild';
+import { expect, it } from 'vitest';
 
 import { Po } from './po';
 
@@ -106,22 +107,22 @@ it('outputs proper JED with `.toJed`', async () => {
   po.set({ msgid: 'Hello', msgstr: ['Hejsan'], msgctxt: 'relaxed' });
 
   expect(po.toJed('wp')).toMatchInlineSnapshot(`
-    Object {
+    {
       "domain": "wp",
-      "locale_data": Object {
-        "wp": Object {
-          "": Object {
+      "locale_data": {
+        "wp": {
+          "": {
             "domain": "wp",
             "lang": "",
             "plural-forms": "nplurals=2; plural=(n != 1);",
           },
-          "Hello": Array [
+          "Hello": [
             "Hej",
           ],
-          "World": Array [
+          "World": [
             "Världen",
           ],
-          "relaxedHello": Array [
+          "relaxedHello": [
             "Hejsan",
           ],
         },
@@ -138,16 +139,16 @@ it('outputs proper JED with `.toJed` with filtered translations', async () => {
   po.set({ msgid: 'Hello', msgstr: ['Hejsan'], msgctxt: 'relaxed' });
 
   expect(po.toJed('wp', ({ msgctxt }) => msgctxt === 'relaxed')).toMatchInlineSnapshot(`
-    Object {
+    {
       "domain": "wp",
-      "locale_data": Object {
-        "wp": Object {
-          "": Object {
+      "locale_data": {
+        "wp": {
+          "": {
             "domain": "wp",
             "lang": "",
             "plural-forms": "nplurals=2; plural=(n != 1);",
           },
-          "relaxed\u0004Hello": Array [
+          "relaxedHello": [
             "Hejsan",
           ],
         },

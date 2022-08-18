@@ -1,3 +1,5 @@
+import { expect, it } from 'vitest';
+
 import { extractTranslations } from './javascript';
 
 it('extract translations from regular ts files', () => {
