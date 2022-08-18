@@ -1,14 +1,16 @@
 import merge from 'lodash.merge';
+import { JsonValue } from 'type-fest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ProjectInfo } from '../types';
 import { createPaths } from './read-pkg';
 import { _resolveConfig } from './resolve-config';
 
-const readJson = jest.fn<unknown, [string]>();
+const readJson = vi.fn<[path: string], JsonValue | undefined>();
 const resolveConfig = (project: ProjectInfo) => _resolveConfig(project, readJson);
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('resolveConfig()', () => {
@@ -55,7 +57,7 @@ describe('resolveConfig()', () => {
       }
     });
 
-    let spy = jest.spyOn(console, 'warn').mockImplementation();
+    let spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
     let project = createPackageInfo({ packageJson: { 'wp-bundler': { entryPoints: { entry: './src/index.ts' } } } });
     resolveConfig(project);
@@ -74,7 +76,7 @@ describe('resolveConfig()', () => {
   });
 
   it('will throw an error if the resolved configuration does not match the expected schema', () => {
-    let spy = jest.spyOn(console, 'error').mockImplementation();
+    let spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     let project = createPackageInfo({ packageJson: { 'wp-bundler': { entryPoints: { entry: 1 } } } });
     expect(() => resolveConfig(project)).toThrowErrorMatchingInlineSnapshot(

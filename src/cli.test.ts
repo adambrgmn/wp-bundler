@@ -2,6 +2,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { execa } from 'execa';
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 
 import { existsSync } from './utils/exists';
 import { rimraf } from './utils/rimraf';
@@ -28,7 +29,7 @@ describe('Theme', () => {
     await $.theme('build');
 
     expect(read.theme()).toMatchInlineSnapshot(`
-      Array [
+      [
         "AssetLoader.php",
         "admin.BRZ25XL2.nomodule.js",
         "admin.KRT7TWFX.js",
@@ -38,7 +39,7 @@ describe('Theme', () => {
         "main.TGLZWPB2.css",
       ]
     `);
-  });
+  }, 10_000);
 });
 
 describe('Plugin', () => {
@@ -46,7 +47,7 @@ describe('Plugin', () => {
     await $.plugin('build');
 
     expect(read.plugin()).toMatchInlineSnapshot(`
-      Array [
+      [
         "AssetLoader.php",
         "admin.B2QIUYTG.nomodule.js",
         "admin.EYKEWSYL.js",
