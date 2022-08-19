@@ -14,7 +14,7 @@ export class Writer {
     this.#project = project;
   }
 
-  async write(outputFiles: OutputFile[]) {
+  write(outputFiles: OutputFile[]) {
     for (let file of outputFiles) {
       let filePath = this.#project.paths.absolute(file.path);
       ensureDir(path.dirname(filePath));
