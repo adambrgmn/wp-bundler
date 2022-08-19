@@ -212,7 +212,7 @@ export class Po {
 
   toString(foldLength: number = 120 - 9) {
     let buffer = po.compile(this.parsedTranslations, { sort: compareTranslations, foldLength });
-    return buffer.toString('utf-8') + '\n';
+    return buffer.toString('utf-8');
   }
 
   toMo(filterTranslation?: (t: GetTextTranslation) => boolean): Buffer {
