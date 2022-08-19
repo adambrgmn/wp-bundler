@@ -2,7 +2,7 @@ import * as process from 'node:process';
 import { Writable } from 'node:stream';
 import * as util from 'node:util';
 
-import _chalk, { ChalkInstance } from 'chalk';
+import chalkDefault, { ChalkInstance } from 'chalk';
 import { BuildResult, Metafile, OutputFile, PartialMessage } from 'esbuild';
 import fileSize from 'filesize';
 
@@ -15,9 +15,9 @@ export class Logger {
 
   chalk: ChalkInstance;
 
-  #prefixColors: Record<string, [icon: typeof _chalk, prefix: typeof _chalk]>;
+  #prefixColors: Record<string, [icon: typeof chalkDefault, prefix: typeof chalkDefault]>;
 
-  constructor(prefix: string, target: Writable = process.stdout, chalk: ChalkInstance = _chalk) {
+  constructor(prefix: string, target: Writable = process.stdout, chalk: ChalkInstance = chalkDefault) {
     this.#prefixValue = prefix;
     this.#target = target;
     this.chalk = chalk;
@@ -125,13 +125,6 @@ export class Logger {
     return `${iconColor(icon)} ${prefixColor(` ${prefix} `)} `;
   }
 }
-
-// const PREFIX_COLORS: Record<string, [icon: typeof _chalk, prefix: typeof _chalk]> = {
-//   warning: [_chalk.yellowBright, _chalk.black.bgYellowBright],
-//   error: [_chalk.redBright, _chalk.white.bgRedBright],
-//   success: [_chalk.greenBright, _chalk.black.bgGreenBright],
-//   default: [_chalk.blue, _chalk.black.bgBlue],
-// };
 
 const PREFIX_ICONS: Record<string, string> = {
   warning: figures.triangleUp,
