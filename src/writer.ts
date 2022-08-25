@@ -3,14 +3,12 @@ import * as path from 'node:path';
 
 import { OutputFile } from 'esbuild';
 
-import { ProjectInfo } from './types';
-import { getMetadata } from './utils/read-pkg';
+import { BundlerOptions, ProjectInfo } from './types';
 
 export class Writer {
   #project: ProjectInfo = {} as unknown as any;
 
-  constructor(cwd: string) {
-    let { project } = getMetadata(cwd, __dirname);
+  constructor({ project }: BundlerOptions) {
     this.#project = project;
   }
 

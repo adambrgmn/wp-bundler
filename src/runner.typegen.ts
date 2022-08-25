@@ -28,7 +28,6 @@ export interface Typegen0 {
     delays: never;
   };
   eventsCausingActions: {
-    createDependencies: 'xstate.init';
     logBuildError: 'SETUP_FAILURE' | 'error.platform.wp-bundler-build';
     logBuildStart: 'BUILD' | 'REBUILD';
     logBuildSuccess: 'CANCEL' | 'done.invoke.wp-bundler-build';

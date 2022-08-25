@@ -2,9 +2,9 @@ import chokidar from 'chokidar';
 import debounce from 'lodash.debounce';
 
 import { BundlerConfig } from './schema';
+import { BundlerOptions } from './types';
 import { isNotNullable } from './utils/assert';
 import { TypedEventEmitter } from './utils/event-emitter';
-import { getMetadata } from './utils/read-pkg';
 
 interface WatcherEvents {
   'watcher.change': { files: string[] };
@@ -14,20 +14,17 @@ export class Watcher extends TypedEventEmitter<WatcherEvents> {
   #config: BundlerConfig;
   #watcher: chokidar.FSWatcher;
 
-  constructor(cwd: string) {
+  constructor({ config, project }: BundlerOptions) {
     super();
-
-    let { config } = getMetadata(cwd, __dirname);
-
     this.#config = config;
-    this.#watcher = this.#setupFileWatcher(cwd);
+    this.#watcher = this.#setupFileWatcher(project.paths.root);
   }
 
   close() {
     this.#watcher.close();
   }
 
-  #setupFileWatcher(cwd: string) {
+  #setupFileWatcher(root: string) {
     let ignored = [
       'vendor',
       'node_modules',
@@ -38,7 +35,7 @@ export class Watcher extends TypedEventEmitter<WatcherEvents> {
       ...(this.#config.translations?.pos ?? []),
     ].filter(isNotNullable);
 
-    let watcher = chokidar.watch('.', { cwd: cwd, persistent: true, ignored });
+    let watcher = chokidar.watch('.', { cwd: root, persistent: true, ignored });
 
     let changed = new Set<string>();
 

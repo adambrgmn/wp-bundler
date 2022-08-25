@@ -2,7 +2,9 @@ import * as path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { Bundler, BundlerOptions } from './bundler';
+import { Bundler } from './bundler';
+import { BundlerOptions } from './types';
+import { getMetadata } from './utils/read-pkg';
 
 describe('Theme', () => {
   it('should build a proper theme in production mode', async () => {
@@ -222,8 +224,16 @@ const paths = {
 } as const;
 
 function bundle(kind: keyof typeof paths, options: Partial<Omit<BundlerOptions, 'cwd'>> = {}) {
-  let cwd = paths[kind];
-  let bundler = new Bundler({ mode: 'prod', cwd, host: 'localhost', port: 8080, ...options });
+  let meta = getMetadata(paths[kind], __dirname);
+  let finalOptions: BundlerOptions = {
+    mode: 'prod',
+    watch: false,
+    host: 'localhost',
+    port: 3000,
+    ...meta,
+    ...options,
+  };
+  let bundler = new Bundler(finalOptions);
 
   bundler.prepare();
   return bundler.build();
