@@ -2,7 +2,8 @@
   "name": "@fransvilhelm/wp-bundler",
   "version": "3.0.1",
   "description": "A fast bundler tailored for WordPress based on esbuild",
-  "main": "dist/index.js",
+  "type": "module",
+  "module": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/adambrgmn/wp-bundler.git"
@@ -30,7 +31,7 @@
     "node": ">=14.18.0"
   },
   "scripts": {
-    "build": "node bundle.mjs",
+    "build": "rm -rf dist && tsc -p ./tsconfig.build.json",
     "dev": "node bundle.mjs --watch",
     "lint": "eslint . --ext .ts --ext .tsx --ext .js --ignore-path .gitignore",
     "test": "vitest",

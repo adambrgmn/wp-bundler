@@ -1,7 +1,7 @@
 import { Call, Comment, CommentBlock, Engine, Node, String } from 'php-parser';
 
-import { TranslationMessage } from './types';
-import { isTranslatorsComment, phpNodeToLocation, trimComment } from './utils';
+import { TranslationMessage } from './types.js';
+import { isTranslatorsComment, phpNodeToLocation, trimComment } from './utils.js';
 
 export const WP_TRANSLATION_FUNCTIONS = [
   '__',

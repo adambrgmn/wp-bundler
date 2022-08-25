@@ -1,4 +1,4 @@
-import { BundlerPlugin } from '../types';
+import { BundlerPlugin } from '../types.js';
 
 export const reactFactory: BundlerPlugin = ({ bundler }) => ({
   name: 'wp-bundler-react-factory',

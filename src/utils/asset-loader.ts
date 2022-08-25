@@ -4,9 +4,9 @@ import * as path from 'node:path';
 import { Metafile } from 'esbuild';
 import { slugify } from 'strman';
 
-import { BundlerConfig } from '../schema';
-import { BundlerPluginOptions, Mode, ProjectInfo } from '../types';
-import { findBuiltinDependencies } from './externals';
+import { BundlerConfig } from '../schema.js';
+import { BundlerPluginOptions, Mode, ProjectInfo } from '../types.js';
+import { findBuiltinDependencies } from './externals.js';
 
 interface Asset {
   js?: string;

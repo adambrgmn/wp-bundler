@@ -2,10 +2,10 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { PartialMessage } from 'esbuild';
-import postcss, { AcceptedPlugin, Warning } from 'postcss';
+import { AcceptedPlugin, Warning, default as postcss } from 'postcss';
 import postcssPresetEnv from 'postcss-preset-env';
 
-import { BundlerPlugin } from '../types';
+import { BundlerPlugin } from '../types.js';
 
 const pluginName = 'wp-bundler-postcss';
 

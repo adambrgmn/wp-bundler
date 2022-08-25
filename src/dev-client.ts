@@ -1,4 +1,4 @@
-import { WebSocketEvent } from './types';
+import { WebSocketEvent } from './types.js';
 
 let url = new URL(`ws://${window.WP_BUNDLER_HOST}:${window.WP_BUNDLER_PORT}`);
 setup();

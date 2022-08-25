@@ -2,9 +2,12 @@ import * as path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { Bundler } from './bundler';
-import { BundlerOptions } from './types';
-import { getMetadata } from './utils/read-pkg';
+import { Bundler } from './bundler.js';
+import { BundlerOptions } from './types.js';
+import { dirname } from './utils/dirname.js';
+import { getMetadata } from './utils/read-pkg.js';
+
+const { __dirname } = dirname(import.meta.url);
 
 describe('Theme', () => {
   it('should build a proper theme in production mode', async () => {

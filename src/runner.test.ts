@@ -4,10 +4,13 @@ import * as path from 'node:path';
 import { TestContext, TestFunction, expect, it } from 'vitest';
 import { interpret } from 'xstate';
 
-import { createContext, machine } from './runner';
-import { TestLogger, TestWriter } from './test-utils/extensions';
-import { BundlerOptions, Mode } from './types';
-import { getMetadata } from './utils/read-pkg';
+import { createContext, machine } from './runner.js';
+import { TestLogger, TestWriter } from './test-utils/extensions.js';
+import { BundlerOptions, Mode } from './types.js';
+import { dirname } from './utils/dirname.js';
+import { getMetadata } from './utils/read-pkg.js';
+
+const { __dirname } = dirname(import.meta.url);
 
 it(
   'generates the expected output',

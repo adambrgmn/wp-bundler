@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest';
 
-import { TranslationMessage } from '.';
-import { extractTranslations } from './twig';
+import { TranslationMessage } from './index.js';
+import { extractTranslations } from './twig.js';
 
 it('extracts translations from php files', () => {
   let source = `

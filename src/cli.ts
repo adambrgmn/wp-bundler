@@ -3,9 +3,12 @@ import * as process from 'node:process';
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 
-import { createRunner } from './runner';
-import { Mode } from './types';
-import { getMetadata } from './utils/read-pkg';
+import { createRunner } from './runner.js';
+import { Mode } from './types.js';
+import { dirname } from './utils/dirname.js';
+import { getMetadata } from './utils/read-pkg.js';
+
+const { __dirname } = dirname(import.meta.url);
 
 export async function cli() {
   let argv = await yargs(hideBin(process.argv))

@@ -6,7 +6,12 @@ import { GetTextTranslation, GetTextTranslations, mo, po } from 'gettext-parser'
 import mergeWith from 'lodash.mergewith';
 import * as z from 'zod';
 
-import { TranslationMessage, isContextMessage, isPluralMessage, isTranslationMessage } from './extract-translations';
+import {
+  TranslationMessage,
+  isContextMessage,
+  isPluralMessage,
+  isTranslationMessage,
+} from './extract-translations/index.js';
 
 const GetTextTranslationSchema = z.object({
   msgctxt: z.string().optional(),

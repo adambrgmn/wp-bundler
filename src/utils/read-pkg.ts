@@ -4,10 +4,10 @@ import * as process from 'node:process';
 
 import { PackageJson } from 'type-fest';
 
-import { BundlerConfig } from '../schema';
-import { ProjectInfo, ProjectPaths } from '../types';
-import { readJson } from './read-json';
-import { resolveConfig } from './resolve-config';
+import { BundlerConfig } from '../schema.js';
+import { ProjectInfo, ProjectPaths } from '../types.js';
+import { readJson } from './read-json.js';
+import { resolveConfig } from './resolve-config.js';
 
 interface Metadata {
   bundler: ProjectInfo;

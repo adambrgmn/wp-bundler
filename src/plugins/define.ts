@@ -3,7 +3,7 @@ import * as process from 'node:process';
 
 import * as dotenv from 'dotenv';
 
-import { BundlerPlugin } from '../types';
+import { BundlerPlugin } from '../types.js';
 
 export const define: BundlerPlugin = ({ mode, project }) => ({
   name: 'wp-bundler-define',

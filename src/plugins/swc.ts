@@ -2,7 +2,7 @@ import * as fs from 'node:fs/promises';
 
 import { transform } from '@swc/core';
 
-import { BundlerPlugin } from '../types';
+import { BundlerPlugin } from '../types.js';
 
 export const swc: BundlerPlugin = () => ({
   name: 'wp-bundler-swc',

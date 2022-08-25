@@ -1,7 +1,7 @@
 import ts from 'typescript';
 
-import { TranslationMessage } from './types';
-import { isTranslatorsComment, trimComment, tsNodeToLocation } from './utils';
+import { TranslationMessage } from './types.js';
+import { isTranslatorsComment, trimComment, tsNodeToLocation } from './utils.js';
 
 export function mightHaveTranslations(source: string): boolean {
   return source.includes('wp.i18n') || source.includes('@wordpress/i18n');

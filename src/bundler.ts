@@ -4,10 +4,10 @@ import * as process from 'node:process';
 import esbuild, { BuildResult, Format, LogLevel, Metafile, OutputFile, Platform, Plugin } from 'esbuild';
 import merge from 'lodash.merge';
 
-import * as plugin from './plugins';
-import { BundlerOptions, BundlerPluginOptions } from './types';
-import { createAssetLoaderTemplate } from './utils/asset-loader';
-import { rimraf } from './utils/rimraf';
+import * as plugin from './plugins/index.js';
+import { BundlerOptions, BundlerPluginOptions } from './types.js';
+import { createAssetLoaderTemplate } from './utils/asset-loader.js';
+import { rimraf } from './utils/rimraf.js';
 
 export class Bundler {
   #options: BundlerOptions;

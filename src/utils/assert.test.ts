@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { assert, ensure, isNotNullable } from './assert';
+import { assert, ensure, isNotNullable } from './assert.js';
 
 describe('assert', () => {
   it("throws an error if check doesn't pass", () => {

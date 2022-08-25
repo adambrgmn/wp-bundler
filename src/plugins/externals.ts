@@ -1,8 +1,8 @@
 import { PluginBuild } from 'esbuild';
 import { toCamelCase } from 'strman';
 
-import { BundlerPlugin } from '../types';
-import { DEFAULT_EXTERNALS } from '../utils/externals';
+import { BundlerPlugin } from '../types.js';
+import { DEFAULT_EXTERNALS } from '../utils/externals.js';
 
 export const externals: BundlerPlugin = ({ config }) => ({
   name: 'wp-bundler-externals',
