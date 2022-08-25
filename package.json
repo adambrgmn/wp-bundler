@@ -31,8 +31,10 @@
     "node": ">=14.18.0"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc -p ./tsconfig.build.json",
-    "dev": "node bundle.mjs --watch",
+    "build": "rm -rf dist && tsc -p ./tsconfig.build.json && yarn build:dev-client",
+    "build:dev-client": "esbuild --bundle ./src/dev-client.ts --outfile=dist/dev-client.js --sourcemap=inline --format=esm",
+    "dev": "yarn build --watch",
+    "dev:dev-client": "yarn build:dev-client --watch",
     "lint": "eslint . --ext .ts --ext .tsx --ext .js --ignore-path .gitignore",
     "test": "vitest",
     "type-check": "tsc --noEmit",
