@@ -11,34 +11,15 @@ import { rimraf } from './utils/rimraf';
 
 export class Bundler {
   #options: BundlerOptions;
-  // #mode: Mode;
-  // #cwd: string;
-  // #host: string;
-  // #port: number;
 
   #additionalOutput = new Set<OutputFile>();
 
-  // #project: ProjectInfo = {} as unknown as any;
-  // #bundler: ProjectInfo = {} as unknown as any;
-  // #config: BundlerConfig = {} as unknown as any;
-
   constructor(options: BundlerOptions) {
     this.#options = options;
-    // this.#mode = mode;
-    // this.#cwd = cwd;
-    // this.#host = host;
-    // this.#port = port;
   }
 
   prepare() {
     process.env.NODE_ENV = process.env.NODE_ENV || this.#options.mode === 'dev' ? 'development' : 'production';
-
-    // let { bundler, project, config } = getMetadata(this.#cwd, __dirname);
-
-    // this.#bundler = bundler;
-    // this.#project = project;
-    // this.#config = config;
-
     rimraf(this.#options.project.paths.absolute(this.#options.config.outdir));
   }
 
