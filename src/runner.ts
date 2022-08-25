@@ -79,6 +79,7 @@ export const machine =
       },
       id: 'wp-bundler',
       initial: 'idle',
+      predictableActionArguments: true,
       states: {
         idle: {
           on: {
