@@ -3,7 +3,13 @@
   "version": "3.0.1",
   "description": "A fast bundler tailored for WordPress based on esbuild",
   "type": "module",
-  "module": "dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "wp-bundler": "./cli.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/adambrgmn/wp-bundler.git"
@@ -14,9 +20,6 @@
   },
   "homepage": "https://github.com/adambrgmn/wp-bundler#readme",
   "license": "MIT",
-  "bin": {
-    "wp-bundler": "./cli.js"
-  },
   "files": [
     "dist",
     "assets",
