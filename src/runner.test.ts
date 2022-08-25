@@ -4,9 +4,10 @@ import * as path from 'node:path';
 import { TestContext, TestFunction, expect, it } from 'vitest';
 import { interpret } from 'xstate';
 
-import { machine } from './runner';
+import { createContext, machine } from './runner';
 import { TestLogger, TestWriter } from './test-utils/extensions';
-import { Mode } from './types';
+import { BundlerOptions, Mode } from './types';
+import { getMetadata } from './utils/read-pkg';
 
 it(
   'generates the expected output',
@@ -108,32 +109,20 @@ const paths = {
   theme: path.join(__dirname, '../examples/wp-bundler-theme'),
 } as const;
 
-function createService(type: keyof typeof paths, mode: Mode) {
-  let writer = new TestWriter(paths[type]);
+function createService(kind: keyof typeof paths, mode: Mode) {
+  let meta = getMetadata(paths[kind], __dirname);
+  let options: BundlerOptions = {
+    mode,
+    watch: false,
+    host: 'localhost',
+    port: 3000,
+    ...meta,
+  };
+
+  let writer = new TestWriter(options);
   let logger = new TestLogger('WP-BUNDLER');
 
-  let service = interpret(
-    machine.withContext({
-      mode,
-      watch: mode === 'dev',
-      cwd: paths[type],
-      host: 'localhost',
-      port: 3000,
-
-      writer,
-      logger,
-      bundler: null as any,
-      server: null as any,
-      watcher: null as any,
-
-      result: null,
-      metafile: null,
-      outputFiles: null,
-      error: null,
-      changedFiles: [],
-      startTime: performance.now(),
-    }),
-  );
+  let service = interpret(machine.withContext({ ...createContext(options), writer, logger }));
 
   return [service, writer, logger] as const;
 }

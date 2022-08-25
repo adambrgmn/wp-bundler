@@ -5,55 +5,29 @@ import esbuild, { BuildResult, Format, LogLevel, Metafile, OutputFile, Platform,
 import merge from 'lodash.merge';
 
 import * as plugin from './plugins';
-import { BundlerConfig } from './schema';
-import { BundlerPluginOptions, Mode, ProjectInfo } from './types';
+import { BundlerOptions, BundlerPluginOptions } from './types';
 import { createAssetLoaderTemplate } from './utils/asset-loader';
-import { getMetadata } from './utils/read-pkg';
 import { rimraf } from './utils/rimraf';
 
-export interface BundlerOptions {
-  mode: Mode;
-  cwd: string;
-  host: string;
-  port: number;
-}
-
 export class Bundler {
-  #mode: Mode;
-  #cwd: string;
-  #host: string;
-  #port: number;
+  #options: BundlerOptions;
 
   #additionalOutput = new Set<OutputFile>();
 
-  #project: ProjectInfo = {} as unknown as any;
-  #bundler: ProjectInfo = {} as unknown as any;
-  #config: BundlerConfig = {} as unknown as any;
-
-  constructor({ mode, cwd, host, port }: BundlerOptions) {
-    this.#mode = mode;
-    this.#cwd = cwd;
-    this.#host = host;
-    this.#port = port;
+  constructor(options: BundlerOptions) {
+    this.#options = options;
   }
 
   prepare() {
-    process.env.NODE_ENV = process.env.NODE_ENV || this.#mode === 'dev' ? 'development' : 'production';
-
-    let { bundler, project, config } = getMetadata(this.#cwd, __dirname);
-
-    this.#bundler = bundler;
-    this.#project = project;
-    this.#config = config;
-
-    rimraf(this.#project.paths.absolute(this.#config.outdir));
+    process.env.NODE_ENV = process.env.NODE_ENV || this.#options.mode === 'dev' ? 'development' : 'production';
+    rimraf(this.#options.project.paths.absolute(this.#options.config.outdir));
   }
 
   async build() {
     let options = this.#createBundlerOptions('modern');
     let tasks = [esbuild.build(options)];
 
-    if (this.#mode === 'prod') {
+    if (this.#options.mode === 'prod') {
       let legacyOptions = this.#createBundlerOptions('legacy');
       tasks.push(esbuild.build(legacyOptions));
     }
@@ -68,7 +42,7 @@ export class Bundler {
 
     let outputFiles = [...results.flatMap((res) => res.outputFiles), ...this.#additionalOutput].map((file) => ({
       ...file,
-      path: this.#project.paths.relative(file.path),
+      path: this.#options.project.paths.relative(file.path),
     }));
 
     return { ...result, outputFiles } as const;
@@ -79,7 +53,7 @@ export class Bundler {
     let compileAssetLoader = createAssetLoaderTemplate(pluginOptions);
     let text = compileAssetLoader({ metafile: result.metafile });
     this.#additionalOutput.add({
-      path: this.#project.paths.absolute(this.#config.assetLoader.path),
+      path: this.#options.project.paths.absolute(this.#options.config.assetLoader.path),
       contents: Buffer.from(text, 'utf-8'),
       text,
     });
@@ -88,7 +62,7 @@ export class Bundler {
   #createBundlerOptions(variant: 'modern' | 'legacy' = 'modern') {
     let pluginOptions = this.#createPluginOptions();
 
-    let entryNames = this.#mode === 'prod' ? '[dir]/[name].[hash]' : '[dir]/[name]';
+    let entryNames = this.#options.mode === 'prod' ? '[dir]/[name].[hash]' : '[dir]/[name]';
     if (variant === 'legacy') {
       entryNames = `${entryNames}.nomodule`;
     }
@@ -106,8 +80,8 @@ export class Bundler {
     }
 
     return {
-      entryPoints: this.#config.entryPoints,
-      outdir: this.#project.paths.absolute(this.#config.outdir),
+      entryPoints: this.#options.config.entryPoints,
+      outdir: this.#options.project.paths.absolute(this.#options.config.outdir),
       entryNames,
       bundle: true,
       format: (variant === 'legacy' ? 'iife' : 'esm') as Format,
@@ -123,10 +97,10 @@ export class Bundler {
         '.woff2': 'file',
       } as const,
 
-      sourcemap: this.#config.sourcemap || this.#mode === 'dev',
-      minify: this.#mode === 'prod',
+      sourcemap: this.#options.config.sourcemap || this.#options.mode === 'dev',
+      minify: this.#options.mode === 'prod',
 
-      absWorkingDir: this.#project.paths.root,
+      absWorkingDir: this.#options.project.paths.root,
       logLevel: 'silent' as LogLevel,
 
       plugins,
@@ -135,12 +109,7 @@ export class Bundler {
 
   #createPluginOptions(): BundlerPluginOptions {
     return {
-      mode: this.#mode,
-      config: this.#config,
-      project: this.#project,
-      bundler: this.#bundler,
-      host: this.#host,
-      port: this.#port,
+      ...this.#options,
       output: this.#additionalOutput,
     };
   }

@@ -7,18 +7,14 @@ import { assign, createMachine, interpret } from 'xstate';
 import { Bundler } from './bundler';
 import { Logger } from './logger';
 import { Server } from './server';
-import { Mode } from './types';
+import { BundlerOptions } from './types';
 import { Watcher } from './watcher';
 import { Writer } from './writer';
 
 type BuildResult = Awaited<ReturnType<Bundler['build']>>;
 
 export type MachineContext = {
-  mode: Mode;
-  watch: boolean;
-  cwd: string;
-  host: string;
-  port: number;
+  options: BundlerOptions;
 };
 
 type MachineContextInternal = {
@@ -43,48 +39,40 @@ type Events =
   | { type: 'CANCEL' }
   | { type: 'SETUP_FAILURE'; error: unknown };
 
-const defaultContext: Context = {
-  mode: 'prod',
-  watch: false,
-  cwd: process.cwd(),
-  host: 'localhost',
-  port: 3000,
+export function createContext(options: BundlerOptions): Context {
+  return {
+    options,
 
-  bundler: null as any as Bundler,
-  writer: null as any as Writer,
-  server: null as any as Server,
-  watcher: null as any as Watcher,
-  logger: null as any as Logger,
+    bundler: new Bundler(options),
+    writer: new Writer(options),
+    server: new Server(options),
+    watcher: new Watcher(options),
+    logger: new Logger('WP-BUNDLER', process.stderr),
 
-  result: null,
-  metafile: null,
-  outputFiles: null,
-  error: null,
-  changedFiles: [],
-  startTime: performance.now(),
-};
+    result: null,
+    metafile: null,
+    outputFiles: null,
+    error: null,
+    changedFiles: [],
+    startTime: performance.now(),
+  };
+}
 
-export const createRunner = (context: Partial<MachineContext>) => {
-  return interpret(
-    machine.withContext({
-      ...defaultContext,
-      ...context,
-    }),
-  );
-};
+export function createRunner(options: BundlerOptions) {
+  return interpret(machine.withContext(createContext(options)));
+}
 
 export const machine =
   /** @xstate-layout N4IgpgJg5mDOIC5QHcAOBaARgVwHYQBswAnAOgEtCwBiAIQFUBJAGQBFFRUB7WcgF3JdcHEAA9EARgBsABlIBORfIDsADgCsAZk0zV8qQBoQAT0nL5pGVZkAWAEx2ZUiXb0BfN0bRY8VMpSJqAGUAUQAVegAFAH0AMQBBFnoAJRCRbl4BIRFxBAdVUns9DXV5dWUZTRcjUwRFUnVrCXlXTVVNG2V1Dy8MHHwiMhxyAghyXChqCCEwClwANy4Aa1nvfr8fEYh0nn5BYSQxRHK5Rx1nTTspfRllGsQpDstrZxs9fU0pHpA130HSYajcaTEjELhkVAEACGfAAZuCALakX4DEibUY7TL7HLHVSnSpOCSXa6yO4mRBtKTPKwddRSLRSezfFF+AHYLbA6gAYXiADkuSFmJi9tlDrlSvjzkSrjcybUJG9qTI7Op2lLGcy+n8SMiYQBjAAWnJ5-MFwqyB1AuQkyoKlzxb1Kdk06lc9wQnQkDReeM08maMm6nh+WtRZGQ+qNE2oqQYLHYhwyIstRwQEgk6hshSKqhsNpc9k07rzym9Vn0ah0zVUHmDuC4EDgIhZ-wCYHN2LFiHs7okyk0Soq8hsilVEk1PjDbI5Ew7oqtiBVFgzUkcyhsOmV6gkvc6ZZkzVa7U6Qd6k9ZEb4huBpFB4LnKdyGgHCsDymuymdn2LeMHdhsgYdBINbBi2OqXteEykLA2B6nqcDwImuwWjiCDPqQr7lB+X6GOSCCZhY1jKp8I7yKoXygaGF6RsCD6oaodjLgBWEqDhxa3EqVaKHYLjyBO6z-HexB0V2CAVOopCyPIVTKAquZlLh8r2EqMjyKpry5hRZ4CTqMFwQhIkLmmCoDv2G62HmbSqKo7qNAURFVIxtyNFIWkhuegyGamwHuugsiFEoZGZjYzirhRHhAA */
   createMachine(
     {
-      context: defaultContext,
       tsTypes: {} as import('./runner.typegen').Typegen0,
       schema: {
         context: {} as Context,
         events: {} as Events,
         services: {} as { build: { data: BuildResult } },
       },
-      entry: ['createDependencies', 'logSetup'],
+      entry: ['logSetup'],
       invoke: {
         src: 'setupServices',
         id: 'wp-bundler-watchers',
@@ -167,7 +155,7 @@ export const machine =
     },
     {
       guards: {
-        isWatchMode: (context) => context.watch,
+        isWatchMode: (context) => context.options.watch,
       },
       services: {
         build: async (context) => {
@@ -177,7 +165,7 @@ export const machine =
           try {
             context.bundler.prepare();
 
-            if (context.watch) {
+            if (context.options.watch) {
               context.server.listen();
 
               const handleFileChange = ({ files }: { files: string[] }) => {
@@ -188,7 +176,7 @@ export const machine =
               send({ type: 'BUILD' });
 
               return () => {
-                if (context.watch) {
+                if (context.options.watch) {
                   context.watcher.off('watcher.change', handleFileChange);
                   context.watcher.close();
                   context.server.close();
@@ -204,7 +192,7 @@ export const machine =
       },
       actions: {
         logSetup: (context, _) => {
-          context.logger.info(`Running bundler in ${context.logger.chalk.blue(context.mode)} mode.`);
+          context.logger.info(`Running bundler in ${context.logger.chalk.blue(context.options.mode)} mode.`);
         },
         logBuildStart: (context, _) => {
           context.logger.info('Building...');
@@ -266,14 +254,6 @@ export const machine =
 
           context.logger.info('Watching files...');
         },
-
-        createDependencies: assign({
-          bundler: (context, _) => (context.bundler == null ? new Bundler(context) : context.bundler),
-          writer: (context, _) => (context.writer == null ? new Writer(context.cwd) : context.writer),
-          server: (context, _) => (context.server == null ? new Server(context) : context.server),
-          watcher: (context, __) => (context.watcher == null ? new Watcher(context.cwd) : context.watcher),
-          logger: (context, __) => (context.logger == null ? new Logger('WP-BUNDLER', process.stderr) : context.logger),
-        }),
 
         reloadDevServer: (context, _) => {
           context.server.broadcast({ type: 'reload', files: context.changedFiles });

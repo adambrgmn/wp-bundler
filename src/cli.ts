@@ -5,6 +5,7 @@ import yargs from 'yargs/yargs';
 
 import { createRunner } from './runner';
 import { Mode } from './types';
+import { getMetadata } from './utils/read-pkg';
 
 export async function cli() {
   let argv = await yargs(hideBin(process.argv))
@@ -24,7 +25,16 @@ export async function cli() {
         },
       },
       (argv) => {
-        let service = createRunner(argv);
+        let { project, bundler, config } = getMetadata(argv.cwd ?? process.cwd(), __dirname);
+        let service = createRunner({
+          mode: argv.mode,
+          watch: false,
+          config,
+          project,
+          bundler,
+          host: 'localhost',
+          port: 3000,
+        });
 
         service.subscribe((state) => {
           if (state.matches('success')) process.exit(0);
@@ -60,7 +70,16 @@ export async function cli() {
         },
       },
       (argv) => {
-        let service = createRunner({ ...argv, watch: true });
+        let { project, bundler, config } = getMetadata(argv.cwd ?? process.cwd(), __dirname);
+        let service = createRunner({
+          mode: argv.mode,
+          watch: true,
+          config,
+          project,
+          bundler,
+          host: argv.host,
+          port: argv.port,
+        });
 
         service.subscribe((state) => {
           if (state.matches('success')) process.exit(0);
@@ -79,10 +98,14 @@ export async function cli() {
         'See wp-bundler --help for more information.',
     );
 
+    let { project, bundler, config } = getMetadata((argv.cwd as string) ?? process.cwd(), __dirname);
     let service = createRunner({
-      ...argv,
+      ...(argv as unknown as any),
       mode: argv.watch ? 'dev' : 'prod',
-      watch: typeof argv.watch === 'boolean' ? argv.watch : false,
+      watch: true,
+      config,
+      project,
+      bundler,
     });
 
     service.subscribe((state) => {
