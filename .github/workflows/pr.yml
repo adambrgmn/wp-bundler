@@ -30,3 +30,6 @@ jobs:
 
       - name: Test
         run: yarn test:coverage
+
+      - name: Examples
+        run: yarn examples:build
