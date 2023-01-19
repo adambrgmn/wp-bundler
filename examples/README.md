@@ -4,9 +4,9 @@ This directory can be used to test the functionality of `wp-bundler`. To run the
 
 ```sh
 # Move into this folder
-$ cd ./wp-bundler-plugin
-$ yarn --cwd ./wp-bundler-plugin build
-$ yarn --cwd ./wp-bundler-theme build
+$ cd ./examples
+$ npm run --prefix ./wp-bundler-plugin build
+$ npm run --prefix ./wp-bundler-theme build
 $ npx -p @wordpress/env wp-env start
 ```
 

@@ -34,20 +34,22 @@
     "node": ">=14.18.0"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc -p ./tsconfig.build.json && yarn build:dev-client",
+    "prebuild": "rm -rf dist",
+    "build": "tsc -p ./tsconfig.build.json && npm run build:dev-client",
     "build:dev-client": "esbuild --bundle ./src/dev-client.ts --outfile=dist/dev-client.js --sourcemap=inline --format=esm",
+    "predev": "rm -rf dist",
     "dev": "tsc -p ./tsconfig.build.json --watch",
-    "dev:dev-client": "yarn build:dev-client --watch",
+    "dev:dev-client": "npm run build:dev-client -- --watch",
     "lint": "eslint . --ext .ts --ext .tsx --ext .js --ignore-path .gitignore",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit",
-    "release": "yarn build && yarn changeset publish",
+    "release": "npm run build && changeset publish",
     "prepare": "husky install",
     "examples:start": "cd examples && npx -p @wordpress/env wp-env start",
     "examples:destroy": "cd examples && npx -p @wordpress/env wp-env destroy",
     "examples:stop": "cd examples && npx -p @wordpress/env wp-env stop",
-    "examples:build": "yarn --cwd ./examples/wp-bundler-theme build && yarn --cwd ./examples/wp-bundler-plugin build"
+    "examples:build": "npm run --prefix ./examples/wp-bundler-theme build && npm run --prefix ./examples/wp-bundler-plugin build"
   },
   "dependencies": {
     "@swc/core": "^1.2.239",

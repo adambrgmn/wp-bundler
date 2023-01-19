@@ -14,22 +14,19 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-          cache: yarn
+          cache: npm
 
       - name: Install
-        run: yarn --frozen-lockfile
+        run: npm ci
 
       - name: Lint
-        run: yarn lint
-
-      - name: Type Check
-        run: yarn type-check
+        run: npm run lint
 
       - name: Build
-        run: yarn build
+        run: npm run build
 
       - name: Test
-        run: yarn test:coverage
+        run: npm run test:coverage
 
       - name: Examples
-        run: yarn examples:build
+        run: npm run examples:build
