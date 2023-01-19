@@ -1,10 +1,10 @@
 import chokidar from 'chokidar';
 import debounce from 'lodash.debounce';
 
-import { BundlerConfig } from './schema';
-import { BundlerOptions } from './types';
-import { isNotNullable } from './utils/assert';
-import { TypedEventEmitter } from './utils/event-emitter';
+import { BundlerConfig } from './schema.js';
+import { BundlerOptions } from './types.js';
+import { isNotNullable } from './utils/assert.js';
+import { TypedEventEmitter } from './utils/event-emitter.js';
 
 interface WatcherEvents {
   'watcher.change': { files: string[] };

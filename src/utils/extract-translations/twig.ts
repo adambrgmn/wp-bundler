@@ -10,10 +10,10 @@ import {
   TwingSource,
 } from 'twing';
 
-import { TranslationMessage } from './types';
-import { isTranslatorsComment } from './utils';
+import { TranslationMessage } from './types.js';
+import { isTranslatorsComment } from './utils.js';
 
-export { mightHaveTranslations } from './php';
+export { mightHaveTranslations } from './php.js';
 
 export function extractTranslations(source: string, filename: string): TranslationMessage[] {
   let messages: TranslationMessage[] = [];

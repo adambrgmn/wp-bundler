@@ -7,9 +7,9 @@ import { Message, Plugin } from 'esbuild';
 import { globby } from 'globby';
 import md5 from 'md5';
 
-import { BundlerPlugin } from '../types';
-import { TranslationMessage, js, php, theme, twig } from '../utils/extract-translations';
-import { Po } from '../utils/po';
+import { BundlerPlugin } from '../types.js';
+import { TranslationMessage, js, php, theme, twig } from '../utils/extract-translations/index.js';
+import { Po } from '../utils/po.js';
 
 let name = 'wp-bundler-translations';
 

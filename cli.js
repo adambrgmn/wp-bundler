@@ -1,3 +1,4 @@
 #!/usr/bin/env node
-const { cli } = require('./dist/index.js');
+import { cli } from './dist/index.js';
+
 cli();

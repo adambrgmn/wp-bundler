@@ -1,7 +1,7 @@
 import { OutputFile, Plugin } from 'esbuild';
 import { PackageJson } from 'type-fest';
 
-import { BundlerConfig } from './schema';
+import { BundlerConfig } from './schema.js';
 
 export type BundlerOptions = {
   mode: Mode;

@@ -2,9 +2,12 @@ import * as path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { Bundler } from './bundler';
-import { BundlerOptions } from './types';
-import { getMetadata } from './utils/read-pkg';
+import { Bundler } from './bundler.js';
+import { BundlerOptions } from './types.js';
+import { dirname } from './utils/dirname.js';
+import { getMetadata } from './utils/read-pkg.js';
+
+const { __dirname } = dirname(import.meta.url);
 
 describe('Theme', () => {
   it('should build a proper theme in production mode', async () => {
@@ -14,9 +17,9 @@ describe('Theme', () => {
         "dist/AssetLoader.php",
         "dist/admin.BRZ25XL2.nomodule.js",
         "dist/admin.KRT7TWFX.js",
-        "dist/languages/wp-bundler-theme-sv_SE-f7a614340d4c781c15358372503374f7.json",
-        "dist/main.337537ZJ.js",
-        "dist/main.GSPWX7R3.nomodule.js",
+        "dist/languages/wp-bundler-theme-sv_SE-4ab6a619862dd109dd5d98b79223f0c0.json",
+        "dist/main.GSEJHYHX.js",
+        "dist/main.RARWFVT3.nomodule.js",
         "dist/main.TGLZWPB2.css",
         "languages/sv_SE.mo",
         "languages/sv_SE.po",
@@ -34,7 +37,7 @@ describe('Plugin', () => {
         "dist/AssetLoader.php",
         "dist/admin.B2QIUYTG.nomodule.js",
         "dist/admin.EYKEWSYL.js",
-        "dist/main.DPDP3RVU.nomodule.js",
+        "dist/main.KINSPPQM.nomodule.js",
         "dist/main.ZY3XGKPK.js",
       ]
     `);

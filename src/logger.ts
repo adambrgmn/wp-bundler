@@ -2,12 +2,12 @@ import * as process from 'node:process';
 import { Writable } from 'node:stream';
 import * as util from 'node:util';
 
-import chalkDefault, { ChalkInstance } from 'chalk';
+import { ChalkInstance, default as chalkDefault } from 'chalk';
 import { BuildResult, Metafile, OutputFile, PartialMessage } from 'esbuild';
-import fileSize from 'filesize';
+import { filesize } from 'filesize';
 
-import { constructBundleOutput } from './utils/bundle-output';
-import { figures } from './utils/figures';
+import { constructBundleOutput } from './utils/bundle-output.js';
+import { figures } from './utils/figures.js';
 
 export class Logger {
   #prefixValue: string;
@@ -98,7 +98,7 @@ export class Logger {
     for (let [name, part] of Object.entries(output)) {
       this.raw('\n' + this.chalk.blue(name));
       for (let { file, size } of part) {
-        let sizeStr = size == null ? '' : `(${fileSize(size)})`;
+        let sizeStr = size == null ? '' : `(${filesize(size)})`;
         this.raw(`  ${file} ${sizeStr}`);
       }
     }

@@ -1,7 +1,7 @@
 import { expect, it } from 'vitest';
 
-import { TranslationMessage } from '.';
-import { extractTranslations } from './php';
+import { TranslationMessage } from './index.js';
+import { extractTranslations } from './php.js';
 
 it('extracts translations from php files', () => {
   let source = `

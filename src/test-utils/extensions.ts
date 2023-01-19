@@ -3,8 +3,8 @@ import { Writable } from 'node:stream';
 import { Chalk } from 'chalk';
 import { OutputFile } from 'esbuild';
 
-import { Logger } from '../logger';
-import { Writer } from '../writer';
+import { Logger } from '../logger.js';
+import { Writer } from '../writer.js';
 
 export class TestWriter extends Writer {
   #writes = new Set<OutputFile[]>();

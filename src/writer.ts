@@ -3,7 +3,7 @@ import * as path from 'node:path';
 
 import { OutputFile } from 'esbuild';
 
-import { BundlerOptions, ProjectInfo } from './types';
+import { BundlerOptions, ProjectInfo } from './types.js';
 
 export class Writer {
   #project: ProjectInfo = {} as unknown as any;

@@ -1,7 +1,7 @@
 import { Location } from 'esbuild';
 import { expect, it } from 'vitest';
 
-import { Po } from './po';
+import { Po } from './po.js';
 
 it('appends a new translation if a similar one does not exist', async () => {
   let po = await Po.load('test.po');

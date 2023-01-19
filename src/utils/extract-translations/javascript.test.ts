@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 
-import { extractTranslations } from './javascript';
+import { extractTranslations } from './javascript.js';
 
 it('extract translations from regular ts files', () => {
   let source = `

@@ -2,9 +2,9 @@ import merge from 'lodash.merge';
 import { JsonValue } from 'type-fest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ProjectInfo } from '../types';
-import { createPaths } from './read-pkg';
-import { _resolveConfig } from './resolve-config';
+import { ProjectInfo } from '../types.js';
+import { createPaths } from './read-pkg.js';
+import { _resolveConfig } from './resolve-config.js';
 
 const readJson = vi.fn<[path: string], JsonValue | undefined>();
 const resolveConfig = (project: ProjectInfo) => _resolveConfig(project, readJson);

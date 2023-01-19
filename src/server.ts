@@ -2,8 +2,8 @@ import * as http from 'node:http';
 
 import { WebSocket, WebSocketServer } from 'ws';
 
-import { WebSocketEvent } from './types';
-import { TypedEventEmitter } from './utils/event-emitter';
+import { WebSocketEvent } from './types.js';
+import { TypedEventEmitter } from './utils/event-emitter.js';
 
 interface ServerEvents {
   'server.listen': void;
