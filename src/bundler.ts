@@ -115,7 +115,7 @@ export class Bundler {
   }
 }
 
-function omit<T, Key extends keyof T & string>(obj: T, ...keys: Key[]) {
+function omit<T extends object, Key extends keyof T & string>(obj: T, ...keys: Key[]) {
   let clone = {} as T;
   let availableKeys = Object.keys(obj) as Key[];
   for (let key of availableKeys) {

@@ -21,11 +21,11 @@ export async function cli() {
           default: 'prod' as Mode,
           choices: ['dev', 'prod'],
           description: 'Version of your source to output',
-        },
+        } as const,
         cwd: {
           description: 'Optional path to your project',
           type: 'string',
-        },
+        } as const,
       },
       (argv) => {
         let { project, bundler, config } = getMetadata(argv.cwd ?? process.cwd(), __dirname);
@@ -66,11 +66,11 @@ export async function cli() {
           default: 'dev' as Mode,
           choices: ['dev', 'prod'],
           description: 'Version of your source to output',
-        },
+        } as const,
         cwd: {
           description: 'Optional path to your project',
           type: 'string',
-        },
+        } as const,
       },
       (argv) => {
         let { project, bundler, config } = getMetadata(argv.cwd ?? process.cwd(), __dirname);

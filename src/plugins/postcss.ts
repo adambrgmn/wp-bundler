@@ -2,11 +2,13 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { PartialMessage } from 'esbuild';
-import { AcceptedPlugin, Warning, default as postcss } from 'postcss';
+import { AcceptedPlugin, Postcss, Warning, default as _postcss } from 'postcss';
 import postcssPresetEnv from 'postcss-preset-env';
 
 import { BundlerPlugin } from '../types.js';
 
+// Something, not sure what, is broken with the postcss types default export. Never use default exports...
+const postcss = _postcss as unknown as Postcss;
 const pluginName = 'wp-bundler-postcss';
 
 const postcssPlugin: BundlerPlugin = () => ({
