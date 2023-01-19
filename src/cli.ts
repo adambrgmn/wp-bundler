@@ -10,8 +10,8 @@ import { getMetadata } from './utils/read-pkg.js';
 
 const { __dirname } = dirname(import.meta.url);
 
-export async function cli() {
-  let argv = await yargs(hideBin(process.argv))
+export function cli() {
+  return yargs(hideBin(process.argv))
     .command(
       'build',
       'Create production ready version of your project',
@@ -93,29 +93,4 @@ export async function cli() {
       },
     )
     .parse();
-
-  if (argv._.length === 0) {
-    console.warn(
-      'Using wp-bundler without a sub command is deprecated and will be removed in the next major release.\n' +
-        'Instead you can use `wp-bundler build` or `wp-bundler dev`.\n\n' +
-        'See wp-bundler --help for more information.',
-    );
-
-    let { project, bundler, config } = getMetadata((argv.cwd as string) ?? process.cwd(), __dirname);
-    let service = createRunner({
-      ...(argv as unknown as any),
-      mode: argv.watch ? 'dev' : 'prod',
-      watch: true,
-      config,
-      project,
-      bundler,
-    });
-
-    service.subscribe((state) => {
-      if (state.matches('success')) process.exit(0);
-      if (state.matches('error')) process.exit(1);
-    });
-
-    service.start();
-  }
 }
