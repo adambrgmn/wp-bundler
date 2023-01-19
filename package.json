@@ -57,7 +57,7 @@
     "chalk": "^5.2.0",
     "chokidar": "^3.5.3",
     "dotenv": "^16.0.3",
-    "esbuild": "^0.15.5",
+    "esbuild": "^0.17.3",
     "execa": "^6.1.0",
     "filesize": "^10.0.6",
     "gettext-parser": "^6.0.0",

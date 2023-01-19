@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer';
 import * as process from 'node:process';
 
-import esbuild, { BuildResult, Format, LogLevel, Metafile, OutputFile, Platform, Plugin } from 'esbuild';
+import esbuild, { Format, LogLevel, Metafile, OutputFile, Platform, Plugin } from 'esbuild';
 import merge from 'lodash.merge';
 
 import * as plugin from './plugins/index.js';
@@ -127,7 +127,7 @@ function omit<T extends object, Key extends keyof T & string>(obj: T, ...keys: K
   return clone as Omit<T, Key>;
 }
 
-function ensureMetafile<T extends BuildResult>(result: T): asserts result is T & { metafile: Metafile } {
+function ensureMetafile<T extends { metafile?: Metafile }>(result: T): asserts result is T & { metafile: Metafile } {
   if (result.metafile == null) {
     throw new Error('No metafile emitted. Make sure that metafile is set to true in esbuild options.');
   }
