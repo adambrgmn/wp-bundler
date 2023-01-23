@@ -1,84 +1,51 @@
-import { WebSocketEvent } from './types.js';
+const url = new URL('/esbuild', `http://${window.WP_BUNDLER_HOST}:${window.WP_BUNDLER_PORT}`);
 
-let url = new URL(`ws://${window.WP_BUNDLER_HOST}:${window.WP_BUNDLER_PORT}`);
 setup();
 
-function setup() {
-  const socket = new WebSocket(url);
+async function setup() {
+  let eventSource = new EventSource(url);
 
-  socket.addEventListener('close', handleClose);
-  socket.addEventListener('open', handleOpen);
-  socket.addEventListener('message', handleMessage);
-
-  function handleClose(event: CloseEvent) {
-    if (event.wasClean) {
-      log.info('Dev server closed and connection lost');
-    } else {
-      log.error(new Error(`Dev server disconnected: ${event.code} ${event.reason}`));
-    }
-
-    log.info('Retrying in five seconds');
-    setTimeout(setup, 5000);
-  }
-
-  function handleOpen() {
+  eventSource.addEventListener('open', () => {
     log.info('Dev server connection established');
-  }
+  });
 
-  function handleMessage(event: MessageEvent<unknown>) {
-    try {
-      let data = parseSocketEvent(event);
+  eventSource.addEventListener('error', (event) => {
+    log.error(new Error(`Dev server errored`));
+    console.log(event);
+  });
 
-      switch (data.type) {
-        case 'reload':
-          if (isCssOnlyChange(data.files)) {
-            log.info('Styles updated, refreshing.');
-            window.requestIdleCallback(reloadCss);
-          } else {
-            log.info('Source code updated, reloading.');
-            window.requestIdleCallback(reloadWindow);
-            socket.removeEventListener('close', handleClose);
-            socket.removeEventListener('open', handleOpen);
-            socket.removeEventListener('message', handleMessage);
-          }
-          break;
+  eventSource.addEventListener('change', (e) => {
+    const { added, removed, updated } = parseEventPayload(e.data);
 
-        default:
-          log.info(`Unknown event sent with type ${data.type}`);
+    if (!added.length && !removed.length && updated.length === 1) {
+      for (const link of document.getElementsByTagName('link')) {
+        const url = new URL(link.href);
+
+        if (url.host === window.location.host && url.pathname === updated[0]) {
+          const next = link.cloneNode() as HTMLLinkElement;
+          next.href = updated[0] + '?' + Math.random().toString(36).slice(2);
+          next.onload = () => link.remove();
+          link.parentNode?.insertBefore(next, link.nextSibling);
+          return;
+        }
       }
-    } catch (error) {
-      log.error(new Error('Could not parse incoming data from socket'));
     }
-  }
 
-  function reloadWindow() {
-    socket.close();
     window.location.reload();
-  }
-
-  function reloadCss() {
-    let linkElements = Array.from(document.querySelectorAll('link')).filter((link) =>
-      link.id.startsWith('wp-bundler.'),
-    );
-    for (let link of linkElements) {
-      let queryString = `?reload=${new Date().getTime()}`;
-      link.href = link.href.replace(/\?.*|$/, queryString);
-    }
-  }
+  });
 }
 
-function isCssOnlyChange(files: string[]) {
-  return files.every((e) => e.endsWith('.css'));
-}
+type Payload = { added: string[]; removed: string[]; updated: string[] };
 
-function parseSocketEvent(event: MessageEvent<unknown>): WebSocketEvent {
-  if (typeof event.data !== 'string') throw new Error('Websocket data not passed as string');
-  let data = JSON.parse(event.data);
-  if (typeof data === 'object' && data != null && 'type' in data) {
-    return data;
+function parseEventPayload(payload: string) {
+  try {
+    let value = JSON.parse(payload);
+    if (typeof value === 'object' && value != null) return value as Payload;
+
+    throw new Error('Bad data format');
+  } catch (error) {
+    throw new Error('Could not parse event payload', { cause: error });
   }
-
-  throw new Error('Invalid message data');
 }
 
 const log = {
