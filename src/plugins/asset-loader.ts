@@ -2,6 +2,7 @@ import { Metafile } from 'esbuild';
 
 import { BundlerPlugin } from '../types.js';
 import { createAssetLoaderTemplate } from '../utils/asset-loader.js';
+import { createFileHandler } from '../utils/handle-bundled-file.js';
 
 export const PLUGIN_NAME = 'wp-bundler-asset-loader';
 
@@ -13,23 +14,10 @@ export const assetLoader: BundlerPlugin = (options) => ({
       ensureMetafile(result);
 
       let compileAssetLoader = createAssetLoaderTemplate(options);
-      let text = compileAssetLoader({ metafile: result.metafile });
+      let contents = compileAssetLoader({ metafile: result.metafile });
 
-      let absolute = options.project.paths.absolute(options.config.assetLoader.path);
-      let relative = options.project.paths.relative(options.config.assetLoader.path);
-
-      result.metafile.outputs[relative] = {
-        bytes: Buffer.from(text, 'utf-8').byteLength,
-        exports: [],
-        imports: [],
-        inputs: {},
-      };
-
-      (result.outputFiles ?? []).push({
-        path: absolute,
-        contents: Buffer.from(text, 'utf-8'),
-        text,
-      });
+      let files = createFileHandler(result, options);
+      files.append({ path: options.config.assetLoader.path, contents });
     });
   },
 });

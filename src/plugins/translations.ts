@@ -3,17 +3,18 @@ import * as crypto from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
-import { Message, OutputFile, Plugin } from 'esbuild';
+import { Message, Plugin } from 'esbuild';
 import { globby } from 'globby';
 import md5 from 'md5';
 
 import { BundlerPlugin } from '../types.js';
 import { TranslationMessage, js, php, theme, twig } from '../utils/extract-translations/index.js';
+import { createFileHandler } from '../utils/handle-bundled-file.js';
 import { Po } from '../utils/po.js';
 
 export const PLUGIN_NAME = 'wp-bundler-translations';
 
-export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
+export const translations: BundlerPlugin = ({ project, config, ...options }): Plugin => ({
   name: PLUGIN_NAME,
   async setup(build) {
     if (config.translations == null) return;
@@ -43,21 +44,11 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
     /**
      * Write all po- and pot-files to disk.
      */
-    build.onEnd(async ({ metafile, outputFiles, warnings }) => {
-      if (metafile == null) return;
-      if (outputFiles == null) return;
+    build.onEnd(async (result) => {
+      let warnings: Message[] = [];
+      if (result.metafile == null) return;
 
-      function addToOutput(output: OutputFile, addToMetafile = true) {
-        outputFiles?.push(output);
-        if (addToMetafile && metafile) {
-          metafile.outputs[project.paths.relative(output.path)] = {
-            bytes: output.contents.byteLength,
-            exports: [],
-            imports: [],
-            inputs: {},
-          };
-        }
-      }
+      let files = createFileHandler(result, { project, config, ...options });
 
       translations.unshift(...(await findThemeTranslations(project.paths.root, translationsConfig.domain)));
       translations.push(
@@ -75,9 +66,9 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
 
       pos.forEach((po) => po.updateFromTemplate(template));
       let foldLength = getFoldLength(project.packageJson);
-      addToOutput(template.toOutputFile(undefined, foldLength));
+      files.append(template.toOutputFile(undefined, foldLength));
       for (let po of pos) {
-        addToOutput(po.toOutputFile(undefined, foldLength));
+        files.append(po.toOutputFile(undefined, foldLength));
       }
 
       let langDir = project.paths.absolute(config.outdir, 'languages');
@@ -91,14 +82,10 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
         }
 
         let buffer = po.toMo();
-        addToOutput({
-          path: po.filename.replace(/\.po$/, '.mo'),
-          contents: buffer,
-          text: buffer.toString('utf-8'),
-        });
+        files.append({ path: po.filename.replace(/\.po$/, '.mo'), contents: buffer });
 
-        for (let distFile of Object.keys(metafile.outputs)) {
-          let meta = metafile.outputs[distFile];
+        for (let distFile of Object.keys(result.metafile.outputs)) {
+          let meta = result.metafile.outputs[distFile];
           let srcFiles = Object.keys(meta.inputs);
 
           let jed = po.toJed(translationsConfig.domain, ({ comments }) => {
@@ -108,11 +95,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
           if (jed == null) continue;
           let filename = generateTranslationFilename(translationsConfig.domain, language, distFile);
           let text = JSON.stringify(jed);
-          addToOutput({
-            path: path.join(langDir, filename),
-            contents: Buffer.from(text, 'utf-8'),
-            text,
-          });
+          files.append({ path: path.join(langDir, filename), contents: Buffer.from(text, 'utf-8') });
         }
       }
 
@@ -137,6 +120,8 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
           };
         }),
       );
+
+      return { warnings };
     });
   },
 });

@@ -63,7 +63,7 @@ export function createPaths(pkgPath: string): ProjectPaths {
   let root = path.dirname(pkgPath);
   return {
     root,
-    absolute: (...to: string[]) => path.join(root, ...to),
+    absolute: (to: string, ...rest: string[]) => (path.isAbsolute(to) ? to : path.join(root, to, ...rest)),
     relative: (to: string) => path.relative(root, path.isAbsolute(to) ? to : path.join(root, to)),
   };
 }
