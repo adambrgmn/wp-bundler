@@ -212,7 +212,12 @@ export const machine =
         },
         logBuildSuccess: (context, _) => {
           if (context.metafile != null) {
-            context.logger.buildOutput(context.metafile, context.outputFiles ?? []);
+            context.logger.buildOutput({
+              metafile: context.metafile,
+              outputFiles: context.outputFiles ?? [],
+              root: context.options.project.paths.root,
+              entryPoints: context.options.config.entryPoints,
+            });
           }
 
           let errors = context.result?.errors.length ?? 0;
@@ -240,7 +245,12 @@ export const machine =
         },
         logWatchSuccess: (context, _) => {
           if (context.metafile != null) {
-            context.logger.buildOutput(context.metafile, context.outputFiles ?? []);
+            context.logger.buildOutput({
+              metafile: context.metafile,
+              outputFiles: context.outputFiles ?? [],
+              root: context.options.project.paths.root,
+              entryPoints: context.options.config.entryPoints,
+            });
           }
 
           let errors = context.result?.errors.length ?? 0;

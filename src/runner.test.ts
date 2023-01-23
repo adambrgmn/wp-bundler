@@ -31,6 +31,15 @@ it.only(
           dist/admin.KRT7TWFX.js (108 B)
           dist/admin.nomodule.K3AVKCJ4.js (221 B)
 
+        translations
+          languages/theme.pot (1.11 kB)
+          languages/sv_SE.po (991 B)
+          languages/sv_SE.mo (467 B)
+          dist/languages/wp-bundler-theme-sv_SE-b3d4ea03d549de3b657a18b46bf56e02.json (208 B)
+
+        asset-loader
+          dist/AssetLoader.php (21.85 kB)
+
         ✔  WP-BUNDLER  Build succeeded in XX ms.
         "
       `);
