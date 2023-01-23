@@ -60,7 +60,7 @@ export class Bundler {
     ];
 
     if (mode === 'prod') {
-      plugins.unshift(plugin.swc(pluginOptions));
+      plugins.unshift(plugin.nomodule(pluginOptions));
     }
 
     return {

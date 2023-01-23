@@ -12,7 +12,7 @@ const PLUGIN_NAME = 'wp-bundler-nomodule';
 
 const IGNORED_PLUGINS = [PLUGIN_NAME, TRANSLATIONS, POSTCSS];
 
-export const swc: BundlerPlugin = ({ project }) => ({
+export const nomodule: BundlerPlugin = ({ project }) => ({
   name: PLUGIN_NAME,
   setup(build) {
     if (build.initialOptions.entryPoints == null) {
