@@ -25,7 +25,7 @@ it(
         main
           dist/main.NMV57XSA.js (1.32 kB)
           dist/main.TGLZWPB2.css (125 B)
-          dist/main.nomodule.D52XGR2F.js (1.66 kB)
+          dist/main.nomodule.BAHQUTN7.js (1.51 kB)
 
         admin
           dist/admin.KRT7TWFX.js (108 B)
@@ -39,7 +39,7 @@ it(
         [
           "dist/main.NMV57XSA.js",
           "dist/main.TGLZWPB2.css",
-          "dist/main.nomodule.D52XGR2F.js",
+          "dist/main.nomodule.BAHQUTN7.js",
           "dist/admin.KRT7TWFX.js",
           "dist/admin.nomodule.K3AVKCJ4.js",
           "languages/theme.pot",

@@ -1,3 +1,4 @@
+import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { transform } from '@swc/core';
@@ -42,35 +43,51 @@ export const nomodule: BundlerPlugin = ({ project }) => ({
     });
 
     build.onLoad({ filter: /.+/, namespace: NAMESPACE }, async (args) => {
+      let plugins = (build.initialOptions.plugins ?? []).filter((plugin) => !IGNORED_PLUGINS.includes(plugin.name));
+      plugins.push(swc());
+
       let result = await esbuild.build({
         ...build.initialOptions,
         entryPoints: [args.path],
         write: false,
         format: 'iife',
+        target: 'es5',
         loader: {
           ...build.initialOptions.loader,
           '.css': 'empty',
         },
-        plugins: (build.initialOptions.plugins ?? []).filter((plugin) => !IGNORED_PLUGINS.includes(plugin.name)),
+        plugins,
       });
 
       let output = result.outputFiles[0];
-      if (output) {
-        let contents = output.text;
-        let { code } = await transform(contents, {
-          filename: args.path,
-          sourceMaps: false,
-          isModule: true,
-
-          jsc: {
-            parser: { syntax: 'typescript', tsx: true },
-            target: 'es5',
-          },
-        });
-        return { contents: code };
-      }
-
+      if (output) return { contents: output.text };
       return undefined;
+    });
+  },
+});
+
+const swc = (): esbuild.Plugin => ({
+  name: 'wp-bundler-swc',
+  setup(build) {
+    build.onLoad({ filter: /.(js|ts|tsx|jsx)$/, namespace: '' }, async (args) => {
+      const contents = await fs.readFile(args.path, 'utf-8');
+      let { code } = await transform(contents, {
+        filename: args.path,
+        sourceMaps: false,
+        isModule: true,
+        env: {
+          targets: {
+            chrome: '58',
+            ie: '11',
+          },
+        },
+        jsc: {
+          parser: { syntax: 'typescript', tsx: true },
+          target: 'es5',
+        },
+      });
+
+      return { contents: code };
     });
   },
 });

@@ -20,7 +20,7 @@ describe('Theme', () => {
         "dist/languages/wp-bundler-theme-sv_SE-b3d4ea03d549de3b657a18b46bf56e02.json",
         "dist/main.NMV57XSA.js",
         "dist/main.TGLZWPB2.css",
-        "dist/main.nomodule.D52XGR2F.js",
+        "dist/main.nomodule.BAHQUTN7.js",
         "languages/sv_SE.mo",
         "languages/sv_SE.po",
         "languages/theme.pot",
@@ -36,9 +36,9 @@ describe('Plugin', () => {
       [
         "dist/AssetLoader.php",
         "dist/admin.EYKEWSYL.js",
-        "dist/admin.nomodule.RGGVGUO6.js",
+        "dist/admin.nomodule.5UYSHB2K.js",
         "dist/main.UGCVKHPS.js",
-        "dist/main.nomodule.XBLKS554.js",
+        "dist/main.nomodule.NXTWLLGJ.js",
       ]
     `);
   });
@@ -91,9 +91,9 @@ describe('Build', () => {
 
   it('outputs transpiled nomodule version of javascript in production mode', async () => {
     let { outputFiles } = await bundle('plugin', { mode: 'prod' });
-    let admin = outputFiles.find((file) => file.path.includes('admin') && file.path.endsWith('.nomodule.js'));
+    let admin = outputFiles.find((file) => file.path.includes('admin.nomodule'));
     expect(admin?.text).toMatchInlineSnapshot(`
-      "\\"use strict\\";(function(){var f=function(r,e){return function(){return r&&(e=r(r=0)),e}};var o=f(function(){\\"use strict\\"});o();o();function a(r,e){(e==null||e>r.length)&&(e=r.length);for(var t=0,n=new Array(e);t<e;t++)n[t]=r[t];return n}function y(r){if(Array.isArray(r))return a(r)}function c(r){if(typeof Symbol!=\\"undefined\\"&&r[Symbol.iterator]!=null||r[\\"@@iterator\\"]!=null)return Array.from(r)}function s(){throw new TypeError(\\"Invalid attempt to spread non-iterable instance.\\\\\\\\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.\\")}function m(r){return y(r)||c(r)||p(r)||s()}function p(r,e){if(!!r){if(typeof r==\\"string\\")return a(r,e);var t=Object.prototype.toString.call(r).slice(8,-1);if(t===\\"Object\\"&&r.constructor&&(t=r.constructor.name),t===\\"Map\\"||t===\\"Set\\")return Array.from(t);if(t===\\"Arguments\\"||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t))return a(r,e)}}var l=function(){for(var r=arguments.length,e=new Array(r),t=0;t<r;t++)e[t]=arguments[t];var n;(n=console).log.apply(n,m(e))};function i(r,e){(e==null||e>r.length)&&(e=r.length);for(var t=0,n=new Array(e);t<e;t++)n[t]=r[t];return n}function b(r){if(Array.isArray(r))return i(r)}function A(r){if(typeof Symbol!=\\"undefined\\"&&r[Symbol.iterator]!=null||r[\\"@@iterator\\"]!=null)return Array.from(r)}function d(){throw new TypeError(\\"Invalid attempt to spread non-iterable instance.\\\\\\\\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.\\")}function g(r){return b(r)||A(r)||_(r)||d()}function _(r,e){if(!!r){if(typeof r==\\"string\\")return i(r,e);var t=Object.prototype.toString.call(r).slice(8,-1);if(t===\\"Object\\"&&r.constructor&&(t=r.constructor.name),t===\\"Map\\"||t===\\"Set\\")return Array.from(t);if(t===\\"Arguments\\"||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t))return i(r,e)}}var h=[\\"Hello\\",\\"World\\"];l.apply(void 0,g(h));})();
+      "var S=(o,a)=>()=>(o&&(a=o(o=0)),a);var l=S(()=>{\\"use strict\\"});l();(function(){var o=function(n,t){return function(){return n&&(t=n(n=0)),t}},a=o(function(){\\"use strict\\"});a(),a();function i(n,t){(t==null||t>n.length)&&(t=n.length);for(var r=0,e=new Array(t);r<t;r++)e[r]=n[r];return e}function f(n){if(Array.isArray(n))return i(n)}function c(n){if(typeof Symbol<\\"u\\"&&n[Symbol.iterator]!=null||n[\\"@@iterator\\"]!=null)return Array.from(n)}function s(){throw new TypeError(\\"Invalid attempt to spread non-iterable instance.\\\\\\\\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.\\")}function y(n){return f(n)||c(n)||m(n)||s()}function m(n,t){if(n){if(typeof n==\\"string\\")return i(n,t);var r=Object.prototype.toString.call(n).slice(8,-1);if(r===\\"Object\\"&&n.constructor&&(r=n.constructor.name),r===\\"Map\\"||r===\\"Set\\")return Array.from(r);if(r===\\"Arguments\\"||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(r))return i(n,t)}}var p=function(){for(var n=arguments.length,t=new Array(n),r=0;r<n;r++)t[r]=arguments[r];var e;(e=console).log.apply(e,y(t))};function u(n,t){(t==null||t>n.length)&&(t=n.length);for(var r=0,e=new Array(t);r<t;r++)e[r]=n[r];return e}function b(n){if(Array.isArray(n))return u(n)}function d(n){if(typeof Symbol<\\"u\\"&&n[Symbol.iterator]!=null||n[\\"@@iterator\\"]!=null)return Array.from(n)}function g(){throw new TypeError(\\"Invalid attempt to spread non-iterable instance.\\\\\\\\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.\\")}function A(n){return b(n)||d(n)||v(n)||g()}function v(n,t){if(n){if(typeof n==\\"string\\")return u(n,t);var r=Object.prototype.toString.call(n).slice(8,-1);if(r===\\"Object\\"&&n.constructor&&(r=n.constructor.name),r===\\"Map\\"||r===\\"Set\\")return Array.from(r);if(r===\\"Arguments\\"||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(r))return u(n,t)}}var h=[\\"Hello\\",\\"World\\"];p.apply(void 0,A(h))})();
       "
     `);
   });
