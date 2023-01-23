@@ -23,13 +23,13 @@ it(
         ▶  WP-BUNDLER  Building...
 
         main
-          dist/main.GSEJHYHX.js (1.32 kB)
+          dist/main.NMV57XSA.js (1.32 kB)
           dist/main.TGLZWPB2.css (125 B)
-          dist/main.RARWFVT3.nomodule.js (1.85 kB)
+          dist/main.nomodule.D52XGR2F.js (1.66 kB)
 
         admin
           dist/admin.KRT7TWFX.js (108 B)
-          dist/admin.BRZ25XL2.nomodule.js (172 B)
+          dist/admin.nomodule.K3AVKCJ4.js (221 B)
 
         ✔  WP-BUNDLER  Build succeeded in XX ms.
         "
@@ -37,15 +37,15 @@ it(
 
       expect(writer.getLastOutput()?.map((file) => file.path)).toMatchInlineSnapshot(`
         [
-          "dist/main.GSEJHYHX.js",
+          "dist/main.NMV57XSA.js",
           "dist/main.TGLZWPB2.css",
+          "dist/main.nomodule.D52XGR2F.js",
           "dist/admin.KRT7TWFX.js",
-          "dist/main.RARWFVT3.nomodule.js",
-          "dist/admin.BRZ25XL2.nomodule.js",
+          "dist/admin.nomodule.K3AVKCJ4.js",
           "languages/theme.pot",
           "languages/sv_SE.po",
           "languages/sv_SE.mo",
-          "dist/languages/wp-bundler-theme-sv_SE-4ab6a619862dd109dd5d98b79223f0c0.json",
+          "dist/languages/wp-bundler-theme-sv_SE-b3d4ea03d549de3b657a18b46bf56e02.json",
           "dist/AssetLoader.php",
         ]
       `);

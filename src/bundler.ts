@@ -27,7 +27,7 @@ export class Bundler {
     let result = await esbuild.build(options);
     this.#buildAssetLoader(result);
 
-    let outputFiles = result.outputFiles.map((file) => ({
+    let outputFiles = [...result.outputFiles, ...this.#additionalOutput].map((file) => ({
       ...file,
       path: this.#options.project.paths.relative(file.path),
     }));

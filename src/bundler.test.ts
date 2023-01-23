@@ -15,12 +15,12 @@ describe('Theme', () => {
     expect(outputFiles.map((file) => file.path).sort()).toMatchInlineSnapshot(`
       [
         "dist/AssetLoader.php",
-        "dist/admin.BRZ25XL2.nomodule.js",
         "dist/admin.KRT7TWFX.js",
-        "dist/languages/wp-bundler-theme-sv_SE-4ab6a619862dd109dd5d98b79223f0c0.json",
-        "dist/main.GSEJHYHX.js",
-        "dist/main.RARWFVT3.nomodule.js",
+        "dist/admin.nomodule.K3AVKCJ4.js",
+        "dist/languages/wp-bundler-theme-sv_SE-b3d4ea03d549de3b657a18b46bf56e02.json",
+        "dist/main.NMV57XSA.js",
         "dist/main.TGLZWPB2.css",
+        "dist/main.nomodule.D52XGR2F.js",
         "languages/sv_SE.mo",
         "languages/sv_SE.po",
         "languages/theme.pot",
@@ -35,10 +35,10 @@ describe('Plugin', () => {
     expect(outputFiles.map((file) => file.path).sort()).toMatchInlineSnapshot(`
       [
         "dist/AssetLoader.php",
-        "dist/admin.B2QIUYTG.nomodule.js",
         "dist/admin.EYKEWSYL.js",
-        "dist/main.KINSPPQM.nomodule.js",
-        "dist/main.ZY3XGKPK.js",
+        "dist/admin.nomodule.RGGVGUO6.js",
+        "dist/main.UGCVKHPS.js",
+        "dist/main.nomodule.XBLKS554.js",
       ]
     `);
   });
@@ -156,6 +156,10 @@ describe('Build', () => {
         return to;
       };
       var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+        // If the importer is in node compatibility mode or this is not an ESM
+        // file that has been converted to a CommonJS file using a Babel-
+        // compatible transform (i.e. \\"__esModule\\" has not been set), then set
+        // \\"default\\" to the CommonJS \\"module.exports\\" for node compatibility.
         isNodeMode || !mod || !mod.__esModule ? __defProp(target, \\"default\\", { value: mod, enumerable: true }) : target,
         mod
       ));
