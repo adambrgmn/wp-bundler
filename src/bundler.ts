@@ -1,11 +1,9 @@
-import { Buffer } from 'node:buffer';
 import * as process from 'node:process';
 
-import esbuild, { Format, LogLevel, Metafile, OutputFile, Platform, Plugin } from 'esbuild';
+import esbuild, { Format, LogLevel, OutputFile, Platform, Plugin } from 'esbuild';
 
 import * as plugin from './plugins/index.js';
 import { BundlerOptions, BundlerPluginOptions, Mode } from './types.js';
-import { createAssetLoaderTemplate } from './utils/asset-loader.js';
 import { rimraf } from './utils/rimraf.js';
 
 export class Bundler {
@@ -25,7 +23,6 @@ export class Bundler {
   async build() {
     let options = this.#createBundlerOptions(this.#options.mode);
     let result = await esbuild.build(options);
-    this.#buildAssetLoader(result);
 
     let outputFiles = [...result.outputFiles, ...this.#additionalOutput].map((file) => ({
       ...file,
@@ -33,17 +30,6 @@ export class Bundler {
     }));
 
     return { ...result, outputFiles } as const;
-  }
-
-  #buildAssetLoader(result: { metafile: Metafile }) {
-    let pluginOptions = this.#createPluginOptions();
-    let compileAssetLoader = createAssetLoaderTemplate(pluginOptions);
-    let text = compileAssetLoader({ metafile: result.metafile });
-    this.#additionalOutput.add({
-      path: this.#options.project.paths.absolute(this.#options.config.assetLoader.path),
-      contents: Buffer.from(text, 'utf-8'),
-      text,
-    });
   }
 
   #createBundlerOptions(mode: Mode) {
@@ -57,6 +43,7 @@ export class Bundler {
       plugin.externals(pluginOptions),
       plugin.translations(pluginOptions),
       plugin.postcss(pluginOptions),
+      plugin.assetLoader(pluginOptions),
     ];
 
     if (mode === 'prod') {

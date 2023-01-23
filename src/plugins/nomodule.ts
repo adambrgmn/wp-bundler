@@ -5,13 +5,14 @@ import { transform } from '@swc/core';
 import esbuild from 'esbuild';
 
 import { BundlerPlugin } from '../types.js';
+import { PLUGIN_NAME as ASSET_LOADER } from './asset-loader.js';
 import { PLUGIN_NAME as POSTCSS } from './postcss.js';
 import { PLUGIN_NAME as TRANSLATIONS } from './translations.js';
 
 const NAMESPACE = 'wp-bundler-nomodule';
 const PLUGIN_NAME = 'wp-bundler-nomodule';
 
-const IGNORED_PLUGINS = [PLUGIN_NAME, TRANSLATIONS, POSTCSS];
+const IGNORED_PLUGINS = [PLUGIN_NAME, TRANSLATIONS, POSTCSS, ASSET_LOADER];
 
 export const nomodule: BundlerPlugin = ({ project }) => ({
   name: PLUGIN_NAME,

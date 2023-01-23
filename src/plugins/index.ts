@@ -1,3 +1,4 @@
+export { assetLoader } from './asset-loader.js';
 export { define } from './define.js';
 export { externals } from './externals.js';
 export { ignoreCss } from './ignore-css.js';
