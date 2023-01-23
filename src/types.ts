@@ -4,11 +4,14 @@ import { PackageJson } from 'type-fest';
 import { BundlerConfig } from './schema.js';
 
 export type BundlerOptions = {
-  mode: Mode;
-  watch: boolean;
   config: BundlerConfig;
   project: ProjectInfo;
   bundler: ProjectInfo;
+  mode: Mode;
+  /**
+   * @deprecated do not use. Check mode instead
+   */
+  watch: boolean;
   host: string;
   port: number;
 };

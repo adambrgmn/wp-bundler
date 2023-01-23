@@ -9,7 +9,7 @@ import { ProjectInfo, ProjectPaths } from '../types.js';
 import { readJson } from './read-json.js';
 import { resolveConfig } from './resolve-config.js';
 
-interface Metadata {
+export interface Metadata {
   bundler: ProjectInfo;
   project: ProjectInfo;
   config: BundlerConfig;

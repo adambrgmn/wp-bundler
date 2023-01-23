@@ -14,7 +14,7 @@ import { Po } from '../utils/po.js';
 
 export const PLUGIN_NAME = 'wp-bundler-translations';
 
-export const translations: BundlerPlugin = ({ project, config, ...options }): Plugin => ({
+export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
   name: PLUGIN_NAME,
   async setup(build) {
     if (config.translations == null) return;
@@ -48,7 +48,7 @@ export const translations: BundlerPlugin = ({ project, config, ...options }): Pl
       let warnings: Message[] = [];
       if (result.metafile == null) return;
 
-      let files = createFileHandler(result, { project, config, ...options });
+      let files = createFileHandler(result, project);
 
       translations.unshift(...(await findThemeTranslations(project.paths.root, translationsConfig.domain)));
       translations.push(

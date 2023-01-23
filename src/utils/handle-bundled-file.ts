@@ -3,12 +3,12 @@ import * as path from 'node:path';
 
 import { BuildOptions, BuildResult } from 'esbuild';
 
-import { BundlerOptions } from '../types.js';
+import { ProjectInfo } from '../types.js';
 
-export function createFileHandler<Opts extends BuildOptions>(result: BuildResult<Opts>, options: BundlerOptions) {
+export function createFileHandler<Opts extends BuildOptions>(result: BuildResult<Opts>, project: ProjectInfo) {
   function append(output: { path: string; contents: Uint8Array | Buffer | string }) {
-    let absolute = options.project.paths.absolute(output.path);
-    let relative = options.project.paths.relative(output.path);
+    let absolute = project.paths.absolute(output.path);
+    let relative = project.paths.relative(output.path);
 
     let contents = typeof output.contents === 'string' ? Buffer.from(output.contents, 'utf-8') : output.contents;
     let text = typeof output.contents === 'string' ? output.contents : output.contents.toString('utf-8');

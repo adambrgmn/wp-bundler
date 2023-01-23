@@ -16,7 +16,7 @@ export const assetLoader: BundlerPlugin = (options) => ({
       let compileAssetLoader = createAssetLoaderTemplate(options);
       let contents = compileAssetLoader({ metafile: result.metafile });
 
-      let files = createFileHandler(result, options);
+      let files = createFileHandler(result, options.project);
       files.append({ path: options.config.assetLoader.path, contents });
     });
   },
