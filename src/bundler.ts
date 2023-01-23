@@ -1,15 +1,13 @@
 import * as process from 'node:process';
 
-import esbuild, { Format, LogLevel, OutputFile, Platform, Plugin } from 'esbuild';
+import esbuild, { Format, LogLevel, Platform, Plugin } from 'esbuild';
 
 import * as plugin from './plugins/index.js';
-import { BundlerOptions, BundlerPluginOptions, Mode } from './types.js';
+import { BundlerOptions, Mode } from './types.js';
 import { rimraf } from './utils/rimraf.js';
 
 export class Bundler {
   #options: BundlerOptions;
-
-  #additionalOutput = new Set<OutputFile>();
 
   constructor(options: BundlerOptions) {
     this.#options = options;
@@ -24,7 +22,7 @@ export class Bundler {
     let options = this.#createBundlerOptions(this.#options.mode);
     let result = await esbuild.build(options);
 
-    let outputFiles = [...result.outputFiles, ...this.#additionalOutput].map((file) => ({
+    let outputFiles = result.outputFiles.map((file) => ({
       ...file,
       path: this.#options.project.paths.relative(file.path),
     }));
@@ -33,21 +31,18 @@ export class Bundler {
   }
 
   #createBundlerOptions(mode: Mode) {
-    let pluginOptions = this.#createPluginOptions();
-
     let entryNames = this.#options.mode === 'prod' ? '[dir]/[name].[hash]' : '[dir]/[name]';
-
     let plugins: Plugin[] = [
-      plugin.reactFactory(pluginOptions),
-      plugin.define(pluginOptions),
-      plugin.externals(pluginOptions),
-      plugin.translations(pluginOptions),
-      plugin.postcss(pluginOptions),
-      plugin.assetLoader(pluginOptions),
+      plugin.reactFactory(this.#options),
+      plugin.define(this.#options),
+      plugin.externals(this.#options),
+      plugin.translations(this.#options),
+      plugin.postcss(this.#options),
+      plugin.assetLoader(this.#options),
     ];
 
     if (mode === 'prod') {
-      plugins.unshift(plugin.nomodule(pluginOptions));
+      plugins.unshift(plugin.nomodule(this.#options));
     }
 
     return {
@@ -76,12 +71,5 @@ export class Bundler {
 
       plugins,
     } as const;
-  }
-
-  #createPluginOptions(): BundlerPluginOptions {
-    return {
-      ...this.#options,
-      output: this.#additionalOutput,
-    };
   }
 }

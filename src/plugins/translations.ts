@@ -3,7 +3,7 @@ import * as crypto from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
-import { Message, Plugin } from 'esbuild';
+import { Message, OutputFile, Plugin } from 'esbuild';
 import { globby } from 'globby';
 import md5 from 'md5';
 
@@ -13,7 +13,7 @@ import { Po } from '../utils/po.js';
 
 export const PLUGIN_NAME = 'wp-bundler-translations';
 
-export const translations: BundlerPlugin = ({ project, config, output }): Plugin => ({
+export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
   name: PLUGIN_NAME,
   async setup(build) {
     if (config.translations == null) return;
@@ -43,8 +43,21 @@ export const translations: BundlerPlugin = ({ project, config, output }): Plugin
     /**
      * Write all po- and pot-files to disk.
      */
-    build.onEnd(async ({ metafile, warnings }) => {
+    build.onEnd(async ({ metafile, outputFiles, warnings }) => {
       if (metafile == null) return;
+      if (outputFiles == null) return;
+
+      function addToOutput(output: OutputFile, addToMetafile = true) {
+        outputFiles?.push(output);
+        if (addToMetafile && metafile) {
+          metafile.outputs[project.paths.relative(output.path)] = {
+            bytes: output.contents.byteLength,
+            exports: [],
+            imports: [],
+            inputs: {},
+          };
+        }
+      }
 
       translations.unshift(...(await findThemeTranslations(project.paths.root, translationsConfig.domain)));
       translations.push(
@@ -62,9 +75,9 @@ export const translations: BundlerPlugin = ({ project, config, output }): Plugin
 
       pos.forEach((po) => po.updateFromTemplate(template));
       let foldLength = getFoldLength(project.packageJson);
-      output.add(template.toOutputFile(undefined, foldLength));
+      addToOutput(template.toOutputFile(undefined, foldLength));
       for (let po of pos) {
-        output.add(po.toOutputFile(undefined, foldLength));
+        addToOutput(po.toOutputFile(undefined, foldLength));
       }
 
       let langDir = project.paths.absolute(config.outdir, 'languages');
@@ -78,7 +91,7 @@ export const translations: BundlerPlugin = ({ project, config, output }): Plugin
         }
 
         let buffer = po.toMo();
-        output.add({
+        addToOutput({
           path: po.filename.replace(/\.po$/, '.mo'),
           contents: buffer,
           text: buffer.toString('utf-8'),
@@ -95,7 +108,7 @@ export const translations: BundlerPlugin = ({ project, config, output }): Plugin
           if (jed == null) continue;
           let filename = generateTranslationFilename(translationsConfig.domain, language, distFile);
           let text = JSON.stringify(jed);
-          output.add({
+          addToOutput({
             path: path.join(langDir, filename),
             contents: Buffer.from(text, 'utf-8'),
             text,

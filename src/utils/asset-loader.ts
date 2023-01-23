@@ -5,7 +5,7 @@ import { Metafile } from 'esbuild';
 import { slugify } from 'strman';
 
 import { BundlerConfig } from '../schema.js';
-import { BundlerPluginOptions, Mode, ProjectInfo } from '../types.js';
+import { BundlerOptions, Mode, ProjectInfo } from '../types.js';
 import { findBuiltinDependencies } from './externals.js';
 
 interface Asset {
@@ -28,7 +28,7 @@ interface TemplateCompileOptions {
   port: number;
 }
 
-export function createAssetLoaderTemplate({ config, bundler, project, mode, host, port }: BundlerPluginOptions) {
+export function createAssetLoaderTemplate({ config, bundler, project, mode, host, port }: BundlerOptions) {
   let templatePath = bundler.paths.absolute('./assets/AssetLoader.php');
   let compile = createTemplate(readFileSync(templatePath, 'utf-8'));
   let client = readFileSync(bundler.paths.absolute('dist/dev-client.js'), 'utf-8');

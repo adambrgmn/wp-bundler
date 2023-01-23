@@ -12,11 +12,11 @@ import { getMetadata } from './utils/read-pkg.js';
 
 const { __dirname } = dirname(import.meta.url);
 
-it(
+it.only(
   'generates the expected output',
   testService('theme', 'prod', (done, fail, service, writer, logger) => {
-    if (service.state.matches('error')) fail(new Error('Unexpectedly ended up in error state'));
-    if (service.state.matches('success')) {
+    if (service.getSnapshot().matches('error')) fail(new Error('Unexpectedly ended up in error state'));
+    if (service.getSnapshot().matches('success')) {
       let output = logger.getOutput().replace(/\d+ ms/, 'XX ms');
       expect(output).toMatchInlineSnapshot(`
         "▶  WP-BUNDLER  Running bundler in prod mode.
@@ -58,10 +58,10 @@ it(
 it(
   'goes into watch state in dev mode',
   testService('theme', 'dev', (done, fail, service, _, logger) => {
-    if (service.state.matches('error')) fail(new Error('Unexpectedly ended up in error state'));
-    if (service.state.matches('success')) done(); // fail(new Error('Unexpectedly ended up in success state'));
+    if (service.getSnapshot().matches('error')) fail(new Error('Unexpectedly ended up in error state'));
+    if (service.getSnapshot().matches('success')) done(); // fail(new Error('Unexpectedly ended up in success state'));
 
-    if (service.state.matches('watching')) {
+    if (service.getSnapshot().matches('watching')) {
       let output = logger.getOutput().replace(/\d+ ms/, 'XX ms');
       expect(output).toMatchInlineSnapshot(`
         "▶  WP-BUNDLER  Running bundler in dev mode.

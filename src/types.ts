@@ -1,4 +1,4 @@
-import { OutputFile, Plugin } from 'esbuild';
+import { Plugin } from 'esbuild';
 import { PackageJson } from 'type-fest';
 
 import { BundlerConfig } from './schema.js';
@@ -27,8 +27,6 @@ export type ProjectInfo = {
   paths: ProjectPaths;
 };
 
-export type BundlerPluginOptions = BundlerOptions & { output: Set<OutputFile> };
-
-export type BundlerPlugin = (options: BundlerPluginOptions) => Plugin;
+export type BundlerPlugin = (options: BundlerOptions) => Plugin;
 
 export type WebSocketEvent = { type: 'reload'; files: string[] };

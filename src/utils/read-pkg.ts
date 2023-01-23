@@ -64,6 +64,6 @@ export function createPaths(pkgPath: string): ProjectPaths {
   return {
     root,
     absolute: (...to: string[]) => path.join(root, ...to),
-    relative: (to: string) => path.relative(root, to),
+    relative: (to: string) => path.relative(root, path.isAbsolute(to) ? to : path.join(root, to)),
   };
 }
