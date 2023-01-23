@@ -9,10 +9,10 @@ import { BundlerPlugin } from '../types.js';
 
 // Something, not sure what, is broken with the postcss types default export. Never use default exports...
 const postcss = _postcss as unknown as Postcss;
-const pluginName = 'wp-bundler-postcss';
+export const PLUGIN_NAME = 'wp-bundler-postcss';
 
 const postcssPlugin: BundlerPlugin = () => ({
-  name: pluginName,
+  name: PLUGIN_NAME,
   async setup(build) {
     let plugins: AcceptedPlugin[] = [postcssPresetEnv()];
     let processor = postcss(plugins);
@@ -22,7 +22,13 @@ const postcssPlugin: BundlerPlugin = () => ({
       let result = await processor.process(contents, { from: args.path, to: args.path });
       let warnings = transformPostcssWarnings(args.path, result.warnings());
 
-      return { contents: result.content, loader: 'css', pluginName, warnings, resolveDir: path.dirname(args.path) };
+      return {
+        contents: result.content,
+        loader: 'css',
+        pluginName: PLUGIN_NAME,
+        warnings,
+        resolveDir: path.dirname(args.path),
+      };
     });
   },
 });

@@ -11,10 +11,10 @@ import { BundlerPlugin } from '../types.js';
 import { TranslationMessage, js, php, theme, twig } from '../utils/extract-translations/index.js';
 import { Po } from '../utils/po.js';
 
-let name = 'wp-bundler-translations';
+export const PLUGIN_NAME = 'wp-bundler-translations';
 
 export const translations: BundlerPlugin = ({ project, config, output }): Plugin => ({
-  name,
+  name: PLUGIN_NAME,
   async setup(build) {
     if (config.translations == null) return;
 
@@ -108,7 +108,7 @@ export const translations: BundlerPlugin = ({ project, config, output }): Plugin
         ...missingLangWarnings.map((po) => {
           return {
             id: crypto.randomUUID(),
-            pluginName: name,
+            pluginName: PLUGIN_NAME,
             text: 'Missing language header in po file. No translations will be emitted.',
             location: {
               file: project.paths.relative(po.filename),
@@ -135,7 +135,7 @@ function validateTranslations(translations: TranslationMessage[]): Message[] {
     if (translation.domain == null) {
       warnings.push({
         id: crypto.randomUUID(),
-        pluginName: name,
+        pluginName: PLUGIN_NAME,
         text: 'Missing domain.',
         location: translation.location,
         detail: [],

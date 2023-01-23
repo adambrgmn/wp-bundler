@@ -80,7 +80,7 @@ function metafileToAssets({ outputs }: Pick<Metafile, 'outputs'>, entryPoints: B
     let keys = Object.keys(outputs);
     let js = keys.find((key) => key.includes(name) && key.endsWith('.js') && !key.endsWith('.nomodule.js'));
 
-    let nomodule = keys.find((key) => key.includes(name) && key.endsWith('.nomodule.js'));
+    let nomodule = keys.find((key) => key.includes(name) && /\.nomodule\.[a-zA-Z0-9]+\.js$/g.test(key));
 
     let css = keys.find((key) => key.includes(name) && key.endsWith('.css'));
 
