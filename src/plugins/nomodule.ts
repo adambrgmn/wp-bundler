@@ -1,7 +1,7 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
-import { transform } from '@swc/core';
+import swc from '@swc/core';
 import esbuild from 'esbuild';
 
 import { BundlerPlugin } from '../types.js';
@@ -16,7 +16,7 @@ const PLUGIN_NAME = 'wp-bundler-nomodule';
 
 const IGNORED_PLUGINS = [PLUGIN_NAME, TRANSLATIONS, POSTCSS, ASSET_LOADER, LOG, WATCH];
 
-export const nomodule: BundlerPlugin = () => ({
+export const nomodule: BundlerPlugin = ({ project }) => ({
   name: PLUGIN_NAME,
   setup(build) {
     if (build.initialOptions.entryPoints == null) {
@@ -41,10 +41,7 @@ export const nomodule: BundlerPlugin = () => ({
           kind: 'entry-point',
         });
 
-        return {
-          ...resolved,
-          namespace: NAMESPACE,
-        };
+        return { ...resolved, namespace: NAMESPACE };
       }
 
       return undefined;
@@ -52,50 +49,63 @@ export const nomodule: BundlerPlugin = () => ({
 
     build.onLoad({ filter: /.+/, namespace: NAMESPACE }, async (args) => {
       let plugins = (build.initialOptions.plugins ?? []).filter((plugin) => !IGNORED_PLUGINS.includes(plugin.name));
-      plugins.push(swc());
 
       let result = await esbuild.build({
         ...build.initialOptions,
         entryPoints: [args.path],
         write: false,
-        format: 'iife',
-        target: 'es5',
-        loader: {
-          ...build.initialOptions.loader,
-          '.css': 'empty',
-        },
+        minify: false,
+        splitting: false,
+        loader: { ...build.initialOptions.loader, '.css': 'empty' },
         plugins,
       });
 
       let output = result.outputFiles[0];
       if (output) return { contents: output.text };
+
       return undefined;
     });
-  },
-});
 
-const swc = (): esbuild.Plugin => ({
-  name: 'wp-bundler-swc',
-  setup(build) {
-    build.onLoad({ filter: /.(js|ts|tsx|jsx)$/, namespace: '' }, async (args) => {
-      const contents = await fs.readFile(args.path, 'utf-8');
-      let { code } = await transform(contents, {
-        filename: args.path,
-        sourceMaps: false,
-        isModule: true,
-        env: {
-          targets: {
-            chrome: '58',
-            ie: '11',
-          },
-        },
-        jsc: {
-          parser: { syntax: 'typescript', tsx: true },
-          target: 'es5',
-        },
-      });
+    build.onEnd(async (result) => {
+      function isNomodulePath(path: string) {
+        return path.includes('.nomodule.');
+      }
 
-      return { contents: code };
+      if (result.outputFiles) {
+        for (let output of result.outputFiles) {
+          if (!isNomodulePath(output.path)) continue;
+
+          let next = await transform(output.text, output.path);
+          output.contents = Buffer.from(next, 'utf-8');
+        }
+      } else if (result.metafile) {
+        for (let [path, output] of Object.entries(result.metafile.outputs)) {
+          if (!isNomodulePath(path)) continue;
+
+          let absolutePath = project.paths.absolute(path);
+          let text = await fs.readFile(absolutePath, 'utf-8');
+          let next = await transform(text, path);
+          await fs.writeFile(absolutePath, next, 'utf-8');
+          output.bytes = Buffer.from(next, 'utf-8').byteLength;
+        }
+      }
     });
   },
 });
+
+async function transform(contents: string, filename: string) {
+  let { code } = await swc.transform(contents, {
+    filename,
+    sourceMaps: false,
+    isModule: false,
+    minify: false,
+    jsc: {
+      parser: { syntax: 'ecmascript', jsx: false },
+      target: 'es5',
+      externalHelpers: false,
+    },
+  });
+
+  let wrapped = await esbuild.transform(code, { format: 'iife', minify: true, target: 'es5' });
+  return wrapped.code;
+}
