@@ -303,28 +303,17 @@ Except environment variable prefixed with `WP_` `wp-bundler` will also inject th
 
 Except the `.env` file you can use a few other `.env` files to inject variables from. The list below defines which files are read during which script. Files to the left have more priority than files to the right. Meaning that variables coming from a file to the left will override a variable coming from a file to the right.
 
-- `wp-bundler` (or `--mode prod`): `.env.production.local` > `.env.local` > `.env.production` > `.env`
-- `wp-bundler --watch` (or `--mode dev`): `.env.development.local` > `.env.local` > `.env.development` > `.env`
+- `wp-bundler build` (or `--mode prod`): `.env.production.local` > `.env.local` > `.env.production` > `.env`
+- `wp-bundler dev` (or `--mode dev`): `.env.development.local` > `.env.local` > `.env.development` > `.env`
 
-With this structure you could have a `.env` file tracked by `git` and then allow developers to override these defaults with their own `.env.local` files, which should not be checked into `git`. This is the same mechanism as [`create-react-app` uses](https://create-react-app.dev/docs/adding-custom-environment-variables/#adding-development-environment-variables-in-env).
+With this structure you could have a `.env` file tracked by `git` and then allow developers to override these defaults with their own `.env.local` files, which should not be checked into `git`. This is the same mechanism as e.g. [Next.js uses](https://nextjs.org/docs/basic-features/environment-variables#environment-variable-load-order).
 
 ## Other WordPress focused bundlers
 
 The following projects might interest you if `wp-bundler` doesn't meet your requirements.
 
 - [`wpack.io`](https://wpack.io/)
-- [`presspack`](https://github.com/jaredpalmer/presspack)
-
-## Roadmap
-
-Development of this module is still in a very early stage. It covers most of the basic needs and is used by its creator in a rather large production environment. But there are still things that can be improved.
-
-Below are a few things that migth come in the future.
-
-- [ ] Support for other config files (e.g. `.wpbundlerrc` or `wp-bundler.config.json`).
-- [ ] Show warnings for missing translations.
-- [x] Automatically detect and enqueue all externals specified in configuration.
-- [x] Built in browser refresh on successfull rebuilds. (released 2.0.0)
+- [`presspack`](https://github.com/jaredpalmer/presspack))
 
 ## LICENSE
 
