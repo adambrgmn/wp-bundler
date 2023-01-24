@@ -4,6 +4,7 @@ import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 
 import { createContext } from './context.js';
+import { Logger } from './logger.js';
 import { Mode } from './types.js';
 import { dirname } from './utils/dirname.js';
 import { Metadata, getMetadata } from './utils/read-pkg.js';
@@ -32,10 +33,13 @@ export function cli() {
         let metadata = getMetadata(argv.cwd ?? process.cwd(), __dirname);
         prerun(argv.mode, metadata);
 
-        let context = await createContext({ ...argv, ...metadata });
+        let context = await createContext({ ...argv, ...metadata, logger: new Logger('wp-bundler') });
 
         try {
           await context.rebuild();
+          process.exit(0);
+        } catch (error) {
+          process.exit(1);
         } finally {
           await context.dispose();
         }
@@ -70,7 +74,7 @@ export function cli() {
         let metadata = getMetadata(argv.cwd ?? process.cwd(), __dirname);
         prerun(argv.mode, metadata);
 
-        let context = await createContext({ ...argv, ...metadata });
+        let context = await createContext({ ...argv, ...metadata, watch: true, logger: new Logger('wp-bundler') });
 
         try {
           await context.watch();
@@ -81,6 +85,7 @@ export function cli() {
           });
         } catch (error) {
           console.error(error);
+          process.exit(1);
         }
       },
     )

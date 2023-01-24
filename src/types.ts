@@ -8,9 +8,6 @@ export type BundlerOptions = {
   project: ProjectInfo;
   bundler: ProjectInfo;
   mode: Mode;
-  /**
-   * @deprecated do not use. Check mode instead
-   */
   watch: boolean;
   host: string;
   port: number;

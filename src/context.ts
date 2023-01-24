@@ -2,20 +2,23 @@ import * as process from 'node:process';
 
 import esbuild from 'esbuild';
 
+import { Logger } from './logger.js';
 import * as plugin from './plugins/index.js';
 import { Mode } from './types.js';
 import { Metadata } from './utils/read-pkg.js';
 
 export type ContextOptions = Metadata & {
+  watch?: boolean;
   mode?: Mode;
   cwd?: string;
   host?: string;
   port?: number;
+  logger: Logger;
 };
 
 export function createContext(options: ContextOptions) {
   let pluginOptions = {
-    watch: false, // deprecated
+    watch: false,
     mode: 'prod' as const,
     cwd: process.cwd(),
     host: 'localhost',
@@ -30,6 +33,7 @@ export function createContext(options: ContextOptions) {
     plugin.translations(pluginOptions),
     plugin.postcss(pluginOptions),
     plugin.assetLoader(pluginOptions),
+    plugin.log(pluginOptions, options.logger),
   ];
 
   if (options.mode === 'prod') {
