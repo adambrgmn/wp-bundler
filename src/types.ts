@@ -28,5 +28,3 @@ export type ProjectInfo = {
 };
 
 export type BundlerPlugin = (options: BundlerOptions) => Plugin;
-
-export type WebSocketEvent = { type: 'reload'; files: string[] };

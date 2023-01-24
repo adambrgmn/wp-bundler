@@ -1,6 +1,5 @@
-import { Metafile } from 'esbuild';
-
 import { BundlerPlugin } from '../types.js';
+import { assert } from '../utils/assert.js';
 import { createAssetLoaderTemplate } from '../utils/asset-loader.js';
 import { createFileHandler } from '../utils/handle-bundled-file.js';
 
@@ -11,7 +10,7 @@ export const assetLoader: BundlerPlugin = (options) => ({
   setup(build) {
     build.initialOptions.metafile = true;
     build.onEnd((result) => {
-      ensureMetafile(result);
+      assert(result.metafile, 'No metafile generated');
 
       let compileAssetLoader = createAssetLoaderTemplate(options);
       let contents = compileAssetLoader({ metafile: result.metafile });
@@ -21,9 +20,3 @@ export const assetLoader: BundlerPlugin = (options) => ({
     });
   },
 });
-
-function ensureMetafile<T extends { metafile?: Metafile }>(result: T): asserts result is T & { metafile: Metafile } {
-  if (result.metafile == null) {
-    throw new Error('No metafile');
-  }
-}

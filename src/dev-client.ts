@@ -1,39 +1,35 @@
 const url = new URL('/esbuild', `http://${window.WP_BUNDLER_HOST}:${window.WP_BUNDLER_PORT}`);
 
-setup();
+let eventSource = new EventSource(url);
 
-async function setup() {
-  let eventSource = new EventSource(url);
+eventSource.addEventListener('open', () => {
+  log.info('Dev server connection established');
+});
 
-  eventSource.addEventListener('open', () => {
-    log.info('Dev server connection established');
-  });
+eventSource.addEventListener('error', (event) => {
+  log.error(new Error(`Dev server errored`));
+  console.log(event);
+});
 
-  eventSource.addEventListener('error', (event) => {
-    log.error(new Error(`Dev server errored`));
-    console.log(event);
-  });
+eventSource.addEventListener('change', (e) => {
+  const { added, removed, updated } = parseEventPayload(e.data);
 
-  eventSource.addEventListener('change', (e) => {
-    const { added, removed, updated } = parseEventPayload(e.data);
+  if (!added.length && !removed.length && updated.length === 1) {
+    for (const link of document.getElementsByTagName('link')) {
+      const url = new URL(link.href);
 
-    if (!added.length && !removed.length && updated.length === 1) {
-      for (const link of document.getElementsByTagName('link')) {
-        const url = new URL(link.href);
-
-        if (url.host === window.location.host && url.pathname === updated[0]) {
-          const next = link.cloneNode() as HTMLLinkElement;
-          next.href = updated[0] + '?' + Math.random().toString(36).slice(2);
-          next.onload = () => link.remove();
-          link.parentNode?.insertBefore(next, link.nextSibling);
-          return;
-        }
+      if (url.host === window.location.host && url.pathname === updated[0]) {
+        const next = link.cloneNode() as HTMLLinkElement;
+        next.href = updated[0] + '?' + Math.random().toString(36).slice(2);
+        next.onload = () => link.remove();
+        link.parentNode?.insertBefore(next, link.nextSibling);
+        return;
       }
     }
+  }
 
-    window.location.reload();
-  });
-}
+  window.location.reload();
+});
 
 type Payload = { added: string[]; removed: string[]; updated: string[] };
 
