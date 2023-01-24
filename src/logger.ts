@@ -1,12 +1,14 @@
 import * as process from 'node:process';
-import { Writable } from 'node:stream';
+import type { Writable } from 'node:stream';
 import * as util from 'node:util';
 
-import { ChalkInstance, default as chalkDefault } from 'chalk';
-import { BuildResult, PartialMessage } from 'esbuild';
+import type { ChalkInstance } from 'chalk';
+import { default as chalkDefault } from 'chalk';
+import type { BuildResult, PartialMessage } from 'esbuild';
 import { filesize } from 'filesize';
 
-import { BundleOutputOptions, constructBundleOutput } from './utils/bundle-output.js';
+import type { BundleOutputOptions } from './utils/bundle-output.js';
+import { constructBundleOutput } from './utils/bundle-output.js';
 import { figures } from './utils/figures.js';
 
 export class Logger {

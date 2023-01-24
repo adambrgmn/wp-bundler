@@ -1,5 +1,6 @@
-import { BundlerConfig, BundlerConfigSchema } from '../schema.js';
-import { ProjectInfo } from '../types.js';
+import type { BundlerConfig } from '../schema.js';
+import { BundlerConfigSchema } from '../schema.js';
+import type { ProjectInfo } from '../types.js';
 import { readJson } from './read-json.js';
 
 type ConfigKey = 'package.json' | '.wp-bundlerrc' | 'wp-bundler.config.json';

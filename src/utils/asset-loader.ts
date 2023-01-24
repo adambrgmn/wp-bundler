@@ -1,11 +1,11 @@
 import { readFileSync } from 'node:fs';
 import * as path from 'node:path';
 
-import { Metafile } from 'esbuild';
+import type { Metafile } from 'esbuild';
 import { slugify } from 'strman';
 
-import { BundlerConfig } from '../schema.js';
-import { BundlerOptions, Mode, ProjectInfo } from '../types.js';
+import type { BundlerConfig } from '../schema.js';
+import type { BundlerOptions, Mode, ProjectInfo } from '../types.js';
 import { findBuiltinDependencies } from './externals.js';
 
 interface Asset {

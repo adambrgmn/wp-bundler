@@ -1,6 +1,6 @@
 import { globbySync } from 'globby';
 
-import { BundlerPlugin } from '../types.js';
+import type { BundlerPlugin } from '../types.js';
 
 export const PLUGIN_NAME = 'wp-bundler-watch';
 

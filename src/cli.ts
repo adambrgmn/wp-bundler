@@ -5,9 +5,10 @@ import yargs from 'yargs/yargs';
 
 import { createContext } from './context.js';
 import { Logger } from './logger.js';
-import { Mode } from './types.js';
+import type { Mode } from './types.js';
 import { dirname } from './utils/dirname.js';
-import { Metadata, getMetadata } from './utils/read-pkg.js';
+import type { Metadata } from './utils/read-pkg.js';
+import { getMetadata } from './utils/read-pkg.js';
 import { rimraf } from './utils/rimraf.js';
 
 const { __dirname } = dirname(import.meta.url);

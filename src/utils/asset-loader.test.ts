@@ -1,5 +1,3 @@
-import { describe, expect, it } from 'vitest';
-
 import { toPhpArray } from './asset-loader.js';
 
 describe('toPhpArray', () => {

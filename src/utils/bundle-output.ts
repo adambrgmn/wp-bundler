@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 
-import { Metafile, OutputFile } from 'esbuild';
+import type { Metafile, OutputFile } from 'esbuild';
 
 type BundlerOutput = Record<string, { file: string; size: number | null }[]>;
 

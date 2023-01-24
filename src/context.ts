@@ -2,10 +2,10 @@ import * as process from 'node:process';
 
 import esbuild from 'esbuild';
 
-import { Logger } from './logger.js';
+import type { Logger } from './logger.js';
 import * as plugin from './plugins/index.js';
-import { Mode } from './types.js';
-import { Metadata } from './utils/read-pkg.js';
+import type { Mode } from './types.js';
+import type { Metadata } from './utils/read-pkg.js';
 
 export type ContextOptions = Metadata & {
   watch?: boolean;

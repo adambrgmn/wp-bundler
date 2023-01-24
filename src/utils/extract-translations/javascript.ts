@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { TranslationMessage } from './types.js';
+import type { TranslationMessage } from './types.js';
 import { isTranslatorsComment, trimComment, tsNodeToLocation } from './utils.js';
 
 export function mightHaveTranslations(source: string): boolean {
@@ -17,7 +17,7 @@ export function extractTranslations(source: string, filename: string): Translati
 }
 
 const translatableMethods = ['_n', '_nx', '_x', '__'] as const;
-type TranslatableMethod = typeof translatableMethods[number];
+type TranslatableMethod = (typeof translatableMethods)[number];
 const isTranslatableMethod = (name: any): name is TranslatableMethod => {
   return translatableMethods.includes(name);
 };

@@ -1,6 +1,4 @@
-import { expect, it } from 'vitest';
-
-import { TranslationMessage } from './index.js';
+import type { TranslationMessage } from './index.js';
 import { extractTranslations } from './twig.js';
 
 it('extracts translations from php files', () => {
@@ -130,7 +128,7 @@ it('extracts translations from multiline definitions', () => {
   expect(removeLocation(result)).toEqual([{ text: 'Translation', domain: 'wp-bundler' }]);
 });
 
-it.skip('extracts translations from language extensions', () => {
+it.todo('extracts translations from language extensions', () => {
   let source = `
     {% switch input.type %}
       {% case "checkbox" %}

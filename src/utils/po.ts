@@ -1,17 +1,14 @@
 import { Buffer } from 'node:buffer';
 import * as fs from 'node:fs/promises';
 
-import { OutputFile } from 'esbuild';
-import { GetTextTranslation, GetTextTranslations, mo, po } from 'gettext-parser';
+import type { OutputFile } from 'esbuild';
+import type { GetTextTranslation, GetTextTranslations } from 'gettext-parser';
+import { mo, po } from 'gettext-parser';
 import mergeWith from 'lodash.mergewith';
 import * as z from 'zod';
 
-import {
-  TranslationMessage,
-  isContextMessage,
-  isPluralMessage,
-  isTranslationMessage,
-} from './extract-translations/index.js';
+import type { TranslationMessage } from './extract-translations/index.js';
+import { isContextMessage, isPluralMessage, isTranslationMessage } from './extract-translations/index.js';
 
 const GetTextTranslationSchema = z.object({
   msgctxt: z.string().optional(),

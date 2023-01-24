@@ -41,6 +41,7 @@
     "dev": "tsc -p ./tsconfig.build.json --watch",
     "dev:dev-client": "npm run build:dev-client -- --watch",
     "lint": "eslint . --ext .ts --ext .tsx --ext .js --ignore-path .gitignore",
+    "format": "prettier src --write",
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit",
@@ -74,6 +75,7 @@
     "@changesets/cli": "^2.26.0",
     "@fransvilhelm/changeset-changelog": "^1.1.1",
     "@prettier/plugin-php": "^0.19.3",
+    "@remix-run/eslint-config": "^1.11.1",
     "@trivago/prettier-plugin-sort-imports": "^4.0.0",
     "@types/gettext-parser": "^4.0.2",
     "@types/lodash.merge": "^4.6.7",
@@ -84,7 +86,6 @@
     "@types/yargs": "^17.0.20",
     "@vitest/coverage-c8": "^0.28.1",
     "eslint": "^8.32.0",
-    "eslint-config-react-app": "^7.0.1",
     "lodash.merge": "^4.6.2",
     "prettier": "^2.8.3",
     "typescript": "^4.9.4",
@@ -98,9 +99,14 @@
   },
   "eslintConfig": {
     "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+      "@remix-run/eslint-config",
+      "@remix-run/eslint-config/jest-testing-library"
+    ],
+    "settings": {
+      "jest": {
+        "version": 27
+      }
+    }
   },
   "prettier": {
     "singleQuote": true,

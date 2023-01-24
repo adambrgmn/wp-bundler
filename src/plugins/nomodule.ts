@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import swc from '@swc/core';
 import esbuild from 'esbuild';
 
-import { BundlerPlugin } from '../types.js';
+import type { BundlerPlugin } from '../types.js';
 import { createFileHandler } from '../utils/file-handler.js';
 import { PLUGIN_NAME as ASSET_LOADER } from './asset-loader.js';
 import { PLUGIN_NAME as LOG } from './log.js';

@@ -1,7 +1,7 @@
-import { PluginBuild } from 'esbuild';
+import type { PluginBuild } from 'esbuild';
 import { toCamelCase } from 'strman';
 
-import { BundlerPlugin } from '../types.js';
+import type { BundlerPlugin } from '../types.js';
 import { DEFAULT_EXTERNALS } from '../utils/externals.js';
 
 export const externals: BundlerPlugin = ({ config }) => ({

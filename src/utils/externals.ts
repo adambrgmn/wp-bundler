@@ -1,4 +1,4 @@
-import { Metafile } from 'esbuild';
+import type { Metafile } from 'esbuild';
 
 interface Dependencies {
   [key: string]: { wpId: string; global: string } | undefined;

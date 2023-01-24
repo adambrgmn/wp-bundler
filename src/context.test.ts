@@ -1,16 +1,16 @@
 import * as path from 'node:path';
 
-import { BuildContext } from 'esbuild';
-import { afterEach, describe, expect, it } from 'vitest';
+import type { BuildContext } from 'esbuild';
 
+// import { afterEach, describe, expect, it } from 'vitest';
 import { createContext } from './context.js';
 import { TestLogger } from './test-utils/extensions.js';
-import { Mode } from './types.js';
+import type { Mode } from './types.js';
 import { dirname } from './utils/dirname.js';
 import { getMetadata } from './utils/read-pkg.js';
 
 describe('theme', () => {
-  it.skip('generates the expected output in prod mode', async () => {
+  it.todo('generates the expected output in prod mode', async () => {
     let [context, logger] = await createTestContext('theme', 'prod');
     let result = await context.rebuild();
     let output = cleanOutput(logger);
@@ -55,6 +55,7 @@ describe('theme', () => {
       ]
     `);
   });
+
   it('generates the expected output in dev mode', async () => {
     let [context] = await createTestContext('theme', 'dev');
     let result = await context.rebuild();
@@ -77,7 +78,7 @@ describe('theme', () => {
 });
 
 describe('plugin', () => {
-  it.skip('generates the expected output in prod mode', async () => {
+  it.todo('generates the expected output in prod mode', async () => {
     let [context, logger] = await createTestContext('plugin', 'prod');
     let result = await context.rebuild();
     let output = cleanOutput(logger);

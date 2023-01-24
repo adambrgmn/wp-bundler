@@ -1,5 +1,3 @@
-import { describe, expect, it } from 'vitest';
-
 import { assert, ensure, isNotNullable } from './assert.js';
 
 describe('assert', () => {

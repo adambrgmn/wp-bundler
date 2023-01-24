@@ -1,8 +1,7 @@
 import merge from 'lodash.merge';
-import { JsonValue } from 'type-fest';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { JsonValue } from 'type-fest';
 
-import { ProjectInfo } from '../types.js';
+import type { ProjectInfo } from '../types.js';
 import { createPaths } from './read-pkg.js';
 import { _resolveConfig } from './resolve-config.js';
 

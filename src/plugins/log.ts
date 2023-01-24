@@ -1,9 +1,9 @@
 import { performance } from 'node:perf_hooks';
 
-import { Plugin } from 'esbuild';
+import type { Plugin } from 'esbuild';
 
-import { Logger } from '../logger.js';
-import { BundlerOptions } from '../types.js';
+import type { Logger } from '../logger.js';
+import type { BundlerOptions } from '../types.js';
 
 export const PLUGIN_NAME = 'wp-bundler-logger';
 

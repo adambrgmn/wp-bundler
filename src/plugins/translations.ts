@@ -3,12 +3,13 @@ import * as crypto from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
-import { Message, Plugin } from 'esbuild';
+import type { Message, Plugin } from 'esbuild';
 import { globby } from 'globby';
 import md5 from 'md5';
 
-import { BundlerPlugin } from '../types.js';
-import { TranslationMessage, js, php, theme, twig } from '../utils/extract-translations/index.js';
+import type { BundlerPlugin } from '../types.js';
+import type { TranslationMessage } from '../utils/extract-translations/index.js';
+import { js, php, theme, twig } from '../utils/extract-translations/index.js';
 import { createFileHandler } from '../utils/file-handler.js';
 import { Po } from '../utils/po.js';
 

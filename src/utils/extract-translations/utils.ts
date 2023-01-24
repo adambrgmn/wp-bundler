@@ -1,6 +1,6 @@
-import { Location } from 'esbuild';
-import { Node as PhpNode } from 'php-parser';
-import { Node as TsNode } from 'typescript';
+import type { Location } from 'esbuild';
+import type { Node as PhpNode } from 'php-parser';
+import type { Node as TsNode } from 'typescript';
 
 export function phpNodeToLocation(node: PhpNode, file: string): Location {
   return {

@@ -1,16 +1,15 @@
-import { Location } from 'esbuild';
+import type { Location } from 'esbuild';
+import type { TwingNode, TwingNodeModule } from 'twing';
 import {
   TwingEnvironment,
   TwingLoaderNull,
-  TwingNode,
   TwingNodeComment,
   TwingNodeExpressionConstant,
   TwingNodeExpressionFunction,
-  TwingNodeModule,
   TwingSource,
 } from 'twing';
 
-import { TranslationMessage } from './types.js';
+import type { TranslationMessage } from './types.js';
 import { isTranslatorsComment } from './utils.js';
 
 export { mightHaveTranslations } from './php.js';
