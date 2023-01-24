@@ -1,10 +1,10 @@
-import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 import swc from '@swc/core';
 import esbuild from 'esbuild';
 
 import { BundlerPlugin } from '../types.js';
+import { createFileHandler } from '../utils/file-handler.js';
 import { PLUGIN_NAME as ASSET_LOADER } from './asset-loader.js';
 import { PLUGIN_NAME as LOG } from './log.js';
 import { PLUGIN_NAME as POSTCSS } from './postcss.js';
@@ -67,27 +67,16 @@ export const nomodule: BundlerPlugin = ({ project }) => ({
     });
 
     build.onEnd(async (result) => {
-      function isNomodulePath(path: string) {
-        return path.includes('.nomodule.');
+      let files = createFileHandler(result, project);
+
+      for (let output of files.items()) {
+        if (!isNomodulePath(output.path)) continue;
+        let next = await transform(output.text, output.path);
+        output.contents = Buffer.from(next, 'utf-8');
       }
 
-      if (result.outputFiles) {
-        for (let output of result.outputFiles) {
-          if (!isNomodulePath(output.path)) continue;
-
-          let next = await transform(output.text, output.path);
-          output.contents = Buffer.from(next, 'utf-8');
-        }
-      } else if (result.metafile) {
-        for (let [path, output] of Object.entries(result.metafile.outputs)) {
-          if (!isNomodulePath(path)) continue;
-
-          let absolutePath = project.paths.absolute(path);
-          let text = await fs.readFile(absolutePath, 'utf-8');
-          let next = await transform(text, path);
-          await fs.writeFile(absolutePath, next, 'utf-8');
-          output.bytes = Buffer.from(next, 'utf-8').byteLength;
-        }
+      function isNomodulePath(path: string) {
+        return path.includes('.nomodule.');
       }
     });
   },
@@ -107,5 +96,5 @@ async function transform(contents: string, filename: string) {
   });
 
   let wrapped = await esbuild.transform(code, { format: 'iife', minify: true, target: 'es5' });
-  return wrapped.code;
+  return '"use strict";' + wrapped.code;
 }

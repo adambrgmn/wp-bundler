@@ -9,7 +9,7 @@ import md5 from 'md5';
 
 import { BundlerPlugin } from '../types.js';
 import { TranslationMessage, js, php, theme, twig } from '../utils/extract-translations/index.js';
-import { createFileHandler } from '../utils/handle-bundled-file.js';
+import { createFileHandler } from '../utils/file-handler.js';
 import { Po } from '../utils/po.js';
 
 export const PLUGIN_NAME = 'wp-bundler-translations';

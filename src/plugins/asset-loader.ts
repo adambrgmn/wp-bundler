@@ -1,7 +1,7 @@
 import { BundlerPlugin } from '../types.js';
 import { assert } from '../utils/assert.js';
 import { createAssetLoaderTemplate } from '../utils/asset-loader.js';
-import { createFileHandler } from '../utils/handle-bundled-file.js';
+import { createFileHandler } from '../utils/file-handler.js';
 
 export const PLUGIN_NAME = 'wp-bundler-asset-loader';
 

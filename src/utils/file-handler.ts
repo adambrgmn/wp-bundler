@@ -1,7 +1,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { BuildOptions, BuildResult } from 'esbuild';
+import { BuildOptions, BuildResult, OutputFile } from 'esbuild';
 
 import { ProjectInfo } from '../types.js';
 
@@ -30,7 +30,35 @@ export function createFileHandler<Opts extends BuildOptions>(result: BuildResult
     }
   }
 
-  return { append } as const;
+  function items(): OutputFile[] {
+    if (result.outputFiles) {
+      return result.outputFiles;
+    }
+
+    if (result.metafile?.outputs != null) {
+      return Object.keys(result.metafile.outputs).map((path) => {
+        return {
+          path,
+          get contents() {
+            return fs.readFileSync(project.paths.absolute(path));
+          },
+          set contents(next) {
+            fs.writeFileSync(project.paths.absolute(path), next);
+          },
+          get text() {
+            return fs.readFileSync(project.paths.absolute(path), 'utf-8');
+          },
+          set text(next) {
+            fs.writeFileSync(project.paths.absolute(path), next, 'utf-8');
+          },
+        };
+      });
+    }
+
+    return [];
+  }
+
+  return { append, items } as const;
 }
 
 function ensureDir(file: string) {
