@@ -6,3 +6,4 @@ export { nomodule } from './nomodule.js';
 export { postcss } from './postcss.js';
 export { reactFactory } from './react-factory.js';
 export { translations } from './translations.js';
+export { watch } from './watch.js';

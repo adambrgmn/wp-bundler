@@ -9,11 +9,12 @@ import { PLUGIN_NAME as ASSET_LOADER } from './asset-loader.js';
 import { PLUGIN_NAME as LOG } from './log.js';
 import { PLUGIN_NAME as POSTCSS } from './postcss.js';
 import { PLUGIN_NAME as TRANSLATIONS } from './translations.js';
+import { PLUGIN_NAME as WATCH } from './watch.js';
 
 const NAMESPACE = 'wp-bundler-nomodule';
 const PLUGIN_NAME = 'wp-bundler-nomodule';
 
-const IGNORED_PLUGINS = [PLUGIN_NAME, TRANSLATIONS, POSTCSS, ASSET_LOADER, LOG];
+const IGNORED_PLUGINS = [PLUGIN_NAME, TRANSLATIONS, POSTCSS, ASSET_LOADER, LOG, WATCH];
 
 export const nomodule: BundlerPlugin = ({ project }) => ({
   name: PLUGIN_NAME,

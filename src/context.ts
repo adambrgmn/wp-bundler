@@ -27,12 +27,14 @@ export function createContext(options: ContextOptions) {
   };
 
   let plugins = [
-    plugin.reactFactory(pluginOptions),
+    plugin.assetLoader(pluginOptions),
     plugin.define(pluginOptions),
     plugin.externals(pluginOptions),
-    plugin.translations(pluginOptions),
     plugin.postcss(pluginOptions),
-    plugin.assetLoader(pluginOptions),
+    plugin.reactFactory(pluginOptions),
+    plugin.translations(pluginOptions),
+    plugin.watch(pluginOptions),
+
     plugin.log(pluginOptions, options.logger),
   ];
 
