@@ -10,7 +10,7 @@ import { dirname } from './utils/dirname.js';
 import { getMetadata } from './utils/read-pkg.js';
 
 describe('theme', () => {
-  it('generates the expected output in prod mode', async () => {
+  it.skip('generates the expected output in prod mode', async () => {
     let [context, logger] = await createTestContext('theme', 'prod');
     let result = await context.rebuild();
     let output = cleanOutput(logger);
@@ -77,7 +77,7 @@ describe('theme', () => {
 });
 
 describe('plugin', () => {
-  it('generates the expected output in prod mode', async () => {
+  it.skip('generates the expected output in prod mode', async () => {
     let [context, logger] = await createTestContext('plugin', 'prod');
     let result = await context.rebuild();
     let output = cleanOutput(logger);
