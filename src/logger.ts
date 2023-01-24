@@ -3,10 +3,10 @@ import { Writable } from 'node:stream';
 import * as util from 'node:util';
 
 import { ChalkInstance, default as chalkDefault } from 'chalk';
-import { BuildResult, Metafile, OutputFile, PartialMessage } from 'esbuild';
+import { BuildResult, PartialMessage } from 'esbuild';
 import { filesize } from 'filesize';
 
-import { constructBundleOutput } from './utils/bundle-output.js';
+import { BundleOutputOptions, constructBundleOutput } from './utils/bundle-output.js';
 import { figures } from './utils/figures.js';
 
 export class Logger {
@@ -93,8 +93,8 @@ export class Logger {
     }
   }
 
-  buildOutput(metafile: Metafile, outputFiles: OutputFile[]) {
-    let output = constructBundleOutput(metafile, outputFiles);
+  buildOutput(options: BundleOutputOptions) {
+    let output = constructBundleOutput(options);
     for (let [name, part] of Object.entries(output)) {
       this.raw('\n' + this.chalk.blue(name));
       for (let { file, size } of part) {

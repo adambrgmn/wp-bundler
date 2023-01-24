@@ -9,7 +9,7 @@ import { ProjectInfo, ProjectPaths } from '../types.js';
 import { readJson } from './read-json.js';
 import { resolveConfig } from './resolve-config.js';
 
-interface Metadata {
+export interface Metadata {
   bundler: ProjectInfo;
   project: ProjectInfo;
   config: BundlerConfig;
@@ -63,7 +63,7 @@ export function createPaths(pkgPath: string): ProjectPaths {
   let root = path.dirname(pkgPath);
   return {
     root,
-    absolute: (...to: string[]) => path.join(root, ...to),
-    relative: (to: string) => path.relative(root, to),
+    absolute: (to: string, ...rest: string[]) => (path.isAbsolute(to) ? to : path.join(root, to, ...rest)),
+    relative: (to: string) => path.relative(root, path.isAbsolute(to) ? to : path.join(root, to)),
   };
 }

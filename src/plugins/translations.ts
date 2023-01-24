@@ -9,12 +9,13 @@ import md5 from 'md5';
 
 import { BundlerPlugin } from '../types.js';
 import { TranslationMessage, js, php, theme, twig } from '../utils/extract-translations/index.js';
+import { createFileHandler } from '../utils/handle-bundled-file.js';
 import { Po } from '../utils/po.js';
 
-let name = 'wp-bundler-translations';
+export const PLUGIN_NAME = 'wp-bundler-translations';
 
-export const translations: BundlerPlugin = ({ project, config, output }): Plugin => ({
-  name,
+export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
+  name: PLUGIN_NAME,
   async setup(build) {
     if (config.translations == null) return;
 
@@ -43,8 +44,11 @@ export const translations: BundlerPlugin = ({ project, config, output }): Plugin
     /**
      * Write all po- and pot-files to disk.
      */
-    build.onEnd(async ({ metafile, warnings }) => {
-      if (metafile == null) return;
+    build.onEnd(async (result) => {
+      let warnings: Message[] = [];
+      if (result.metafile == null) return;
+
+      let files = createFileHandler(result, project);
 
       translations.unshift(...(await findThemeTranslations(project.paths.root, translationsConfig.domain)));
       translations.push(
@@ -62,9 +66,9 @@ export const translations: BundlerPlugin = ({ project, config, output }): Plugin
 
       pos.forEach((po) => po.updateFromTemplate(template));
       let foldLength = getFoldLength(project.packageJson);
-      output.add(template.toOutputFile(undefined, foldLength));
+      files.append(template.toOutputFile(undefined, foldLength));
       for (let po of pos) {
-        output.add(po.toOutputFile(undefined, foldLength));
+        files.append(po.toOutputFile(undefined, foldLength));
       }
 
       let langDir = project.paths.absolute(config.outdir, 'languages');
@@ -78,14 +82,10 @@ export const translations: BundlerPlugin = ({ project, config, output }): Plugin
         }
 
         let buffer = po.toMo();
-        output.add({
-          path: po.filename.replace(/\.po$/, '.mo'),
-          contents: buffer,
-          text: buffer.toString('utf-8'),
-        });
+        files.append({ path: po.filename.replace(/\.po$/, '.mo'), contents: buffer });
 
-        for (let distFile of Object.keys(metafile.outputs)) {
-          let meta = metafile.outputs[distFile];
+        for (let distFile of Object.keys(result.metafile.outputs)) {
+          let meta = result.metafile.outputs[distFile];
           let srcFiles = Object.keys(meta.inputs);
 
           let jed = po.toJed(translationsConfig.domain, ({ comments }) => {
@@ -95,11 +95,7 @@ export const translations: BundlerPlugin = ({ project, config, output }): Plugin
           if (jed == null) continue;
           let filename = generateTranslationFilename(translationsConfig.domain, language, distFile);
           let text = JSON.stringify(jed);
-          output.add({
-            path: path.join(langDir, filename),
-            contents: Buffer.from(text, 'utf-8'),
-            text,
-          });
+          files.append({ path: path.join(langDir, filename), contents: Buffer.from(text, 'utf-8') });
         }
       }
 
@@ -108,7 +104,7 @@ export const translations: BundlerPlugin = ({ project, config, output }): Plugin
         ...missingLangWarnings.map((po) => {
           return {
             id: crypto.randomUUID(),
-            pluginName: name,
+            pluginName: PLUGIN_NAME,
             text: 'Missing language header in po file. No translations will be emitted.',
             location: {
               file: project.paths.relative(po.filename),
@@ -124,6 +120,8 @@ export const translations: BundlerPlugin = ({ project, config, output }): Plugin
           };
         }),
       );
+
+      return { warnings };
     });
   },
 });
@@ -135,7 +133,7 @@ function validateTranslations(translations: TranslationMessage[]): Message[] {
     if (translation.domain == null) {
       warnings.push({
         id: crypto.randomUUID(),
-        pluginName: name,
+        pluginName: PLUGIN_NAME,
         text: 'Missing domain.',
         location: translation.location,
         detail: [],

@@ -3,15 +3,17 @@ import * as process from 'node:process';
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 
-import { createRunner } from './runner.js';
+import { createContext } from './context.js';
+import { Logger } from './logger.js';
 import { Mode } from './types.js';
 import { dirname } from './utils/dirname.js';
-import { getMetadata } from './utils/read-pkg.js';
+import { Metadata, getMetadata } from './utils/read-pkg.js';
+import { rimraf } from './utils/rimraf.js';
 
 const { __dirname } = dirname(import.meta.url);
 
-export async function cli() {
-  let argv = await yargs(hideBin(process.argv))
+export function cli() {
+  return yargs(hideBin(process.argv))
     .command(
       'build',
       'Create production ready version of your project',
@@ -27,24 +29,20 @@ export async function cli() {
           type: 'string',
         } as const,
       },
-      (argv) => {
-        let { project, bundler, config } = getMetadata(argv.cwd ?? process.cwd(), __dirname);
-        let service = createRunner({
-          mode: argv.mode,
-          watch: false,
-          config,
-          project,
-          bundler,
-          host: 'localhost',
-          port: 3000,
-        });
+      async function build(argv) {
+        let metadata = getMetadata(argv.cwd ?? process.cwd(), __dirname);
+        prerun(argv.mode, metadata);
 
-        service.subscribe((state) => {
-          if (state.matches('success')) process.exit(0);
-          if (state.matches('error')) process.exit(1);
-        });
+        let context = await createContext({ ...argv, ...metadata, logger: new Logger('wp-bundler') });
 
-        service.start();
+        try {
+          await context.rebuild();
+          process.exit(0);
+        } catch (error) {
+          process.exit(1);
+        } finally {
+          await context.dispose();
+        }
       },
     )
     .command(
@@ -54,16 +52,16 @@ export async function cli() {
         host: {
           alias: 'h',
           default: 'localhost',
-          description: 'Host to bind the server to',
+          description: 'Host to bind the dev server to',
         },
         port: {
           alias: 'p',
           default: 3000,
-          description: 'Port to bind the server to',
+          description: 'Port to bind the dev server to',
         },
         mode: {
           alias: 'm',
-          default: 'dev' as Mode,
+          default: 'dev',
           choices: ['dev', 'prod'],
           description: 'Version of your source to output',
         } as const,
@@ -72,50 +70,29 @@ export async function cli() {
           type: 'string',
         } as const,
       },
-      (argv) => {
-        let { project, bundler, config } = getMetadata(argv.cwd ?? process.cwd(), __dirname);
-        let service = createRunner({
-          mode: argv.mode,
-          watch: true,
-          config,
-          project,
-          bundler,
-          host: argv.host,
-          port: argv.port,
-        });
+      async function dev(argv) {
+        let metadata = getMetadata(argv.cwd ?? process.cwd(), __dirname);
+        prerun(argv.mode, metadata);
 
-        service.subscribe((state) => {
-          if (state.matches('success')) process.exit(0);
-          if (state.matches('error')) process.exit(1);
-        });
+        let context = await createContext({ ...argv, ...metadata, watch: true, logger: new Logger('wp-bundler') });
 
-        service.start();
+        try {
+          await context.watch();
+          await context.serve({
+            servedir: metadata.project.paths.absolute(metadata.config.outdir),
+            host: argv.host,
+            port: argv.port,
+          });
+        } catch (error) {
+          console.error(error);
+          process.exit(1);
+        }
       },
     )
     .parse();
+}
 
-  if (argv._.length === 0) {
-    console.warn(
-      'Using wp-bundler without a sub command is deprecated and will be removed in the next major release.\n' +
-        'Instead you can use `wp-bundler build` or `wp-bundler dev`.\n\n' +
-        'See wp-bundler --help for more information.',
-    );
-
-    let { project, bundler, config } = getMetadata((argv.cwd as string) ?? process.cwd(), __dirname);
-    let service = createRunner({
-      ...(argv as unknown as any),
-      mode: argv.watch ? 'dev' : 'prod',
-      watch: true,
-      config,
-      project,
-      bundler,
-    });
-
-    service.subscribe((state) => {
-      if (state.matches('success')) process.exit(0);
-      if (state.matches('error')) process.exit(1);
-    });
-
-    service.start();
-  }
+function prerun(mode: Mode, metadata: Metadata) {
+  process.env.NODE_ENV = process.env.NODE_ENV || mode === 'dev' ? 'development' : 'production';
+  rimraf(metadata.project.paths.absolute(metadata.config.outdir));
 }
