@@ -1,56 +1,139 @@
 import * as path from 'node:path';
 
-import { describe, expect, it } from 'vitest';
+import { BuildContext } from 'esbuild';
+import { afterEach, describe, expect, it } from 'vitest';
 
-import { Bundler } from './bundler.js';
-import { BundlerOptions } from './types.js';
+import { createContext } from './context.js';
+import { TestLogger } from './test-utils/extensions.js';
+import { Mode } from './types.js';
 import { dirname } from './utils/dirname.js';
 import { getMetadata } from './utils/read-pkg.js';
 
-const { __dirname } = dirname(import.meta.url);
+describe('theme', () => {
+  it('generates the expected output in prod mode', async () => {
+    let [context, logger] = await createTestContext('theme', 'prod');
+    let result = await context.rebuild();
+    let output = cleanOutput(logger);
 
-describe('Theme', () => {
-  it.skip('should build a proper theme in production mode', async () => {
-    let { outputFiles } = await bundle('theme');
-    expect(outputFiles.map((file) => file.path).sort()).toMatchInlineSnapshot(`
+    expect(output).toMatchInlineSnapshot(`
+      "▶  WP-BUNDLER  Running bundler in prod mode.
+      ▶  WP-BUNDLER  Building...
+
+      main
+      dist/main.NMV57XSA.js
+      dist/main.TGLZWPB2.css
+      dist/main.nomodule.BAHQUTN7.js
+
+      admin
+      dist/admin.KRT7TWFX.js
+      dist/admin.nomodule.K3AVKCJ4.js
+
+      asset-loader
+      dist/AssetLoader.php
+
+      translations
+      languages/theme.pot
+      languages/sv_SE.po
+      languages/sv_SE.mo
+      dist/languages/wp-bundler-theme-sv_SE-b3d4ea03d549de3b657a18b46bf56e02.json
+
+      ✔  WP-BUNDLER  Build succeeded in XX ms."
+    `);
+
+    expect(Object.keys(result.metafile?.outputs ?? {})).toMatchInlineSnapshot(`
       [
-        "dist/AssetLoader.php",
-        "dist/admin.KRT7TWFX.js",
-        "dist/admin.nomodule.K3AVKCJ4.js",
-        "dist/languages/wp-bundler-theme-sv_SE-b3d4ea03d549de3b657a18b46bf56e02.json",
         "dist/main.NMV57XSA.js",
         "dist/main.TGLZWPB2.css",
         "dist/main.nomodule.BAHQUTN7.js",
-        "languages/sv_SE.mo",
-        "languages/sv_SE.po",
+        "dist/admin.KRT7TWFX.js",
+        "dist/admin.nomodule.K3AVKCJ4.js",
+        "dist/AssetLoader.php",
         "languages/theme.pot",
+        "languages/sv_SE.po",
+        "languages/sv_SE.mo",
+        "dist/languages/wp-bundler-theme-sv_SE-b3d4ea03d549de3b657a18b46bf56e02.json",
+      ]
+    `);
+  });
+  it('generates the expected output in dev mode', async () => {
+    let [context] = await createTestContext('theme', 'dev');
+    let result = await context.rebuild();
+    expect(Object.keys(result.metafile?.outputs ?? {})).toMatchInlineSnapshot(`
+      [
+        "dist/main.js.map",
+        "dist/main.js",
+        "dist/main.css.map",
+        "dist/main.css",
+        "dist/admin.js.map",
+        "dist/admin.js",
+        "dist/AssetLoader.php",
+        "languages/theme.pot",
+        "languages/sv_SE.po",
+        "languages/sv_SE.mo",
+        "dist/languages/wp-bundler-theme-sv_SE-2770833218bd08d0b5d0c0157cfef742.json",
       ]
     `);
   });
 });
 
-describe('Plugin', () => {
-  it.skip('should build a proper plugin in production mode', async () => {
-    let { outputFiles } = await bundle('plugin');
-    expect(outputFiles.map((file) => file.path).sort()).toMatchInlineSnapshot(`
+describe('plugin', () => {
+  it('generates the expected output in prod mode', async () => {
+    let [context, logger] = await createTestContext('plugin', 'prod');
+    let result = await context.rebuild();
+    let output = cleanOutput(logger);
+
+    expect(output).toMatchInlineSnapshot(`
+      "▶  WP-BUNDLER  Running bundler in prod mode.
+      ▶  WP-BUNDLER  Building...
+
+      main
+      dist/main.UGCVKHPS.js
+      dist/main.nomodule.NXTWLLGJ.js
+
+      admin
+      dist/admin.EYKEWSYL.js
+      dist/admin.nomodule.5UYSHB2K.js
+
+      asset-loader
+      dist/AssetLoader.php
+
+      ✔  WP-BUNDLER  Build succeeded in XX ms."
+    `);
+
+    expect(Object.keys(result.metafile?.outputs ?? {})).toMatchInlineSnapshot(`
       [
-        "dist/AssetLoader.php",
-        "dist/admin.EYKEWSYL.js",
-        "dist/admin.nomodule.5UYSHB2K.js",
         "dist/main.UGCVKHPS.js",
         "dist/main.nomodule.NXTWLLGJ.js",
+        "dist/admin.EYKEWSYL.js",
+        "dist/admin.nomodule.5UYSHB2K.js",
+        "dist/AssetLoader.php",
+      ]
+    `);
+  });
+
+  it('generates the expected output in dev mode', async () => {
+    let [context] = await createTestContext('plugin', 'dev');
+    let result = await context.rebuild();
+    expect(Object.keys(result.metafile?.outputs ?? {})).toMatchInlineSnapshot(`
+      [
+        "dist/main.js.map",
+        "dist/main.js",
+        "dist/admin.js.map",
+        "dist/admin.js",
+        "dist/AssetLoader.php",
       ]
     `);
   });
 });
 
-describe('Build', () => {
-  it.skip('bundles js/ts in dev mode without transpilation', async () => {
-    let { outputFiles } = await bundle('plugin', { mode: 'dev' });
-    let admin = outputFiles.find((file) => file.path.endsWith('admin.js'));
-    expect(admin?.text).toMatchInlineSnapshot(`
+describe('output', () => {
+  it('bundles js/ts in dev mode without transpilation', async () => {
+    let [context] = await createTestContext('plugin', 'dev');
+    let files = await bundle(context);
+
+    expect(files.content('admin')).toMatchInlineSnapshot(`
       "var __getOwnPropNames = Object.getOwnPropertyNames;
-      var __esm = (fn, res) => function __init.skip() {
+      var __esm = (fn, res) => function __init() {
         return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
       };
 
@@ -78,30 +161,28 @@ describe('Build', () => {
     `);
   });
 
-  it.skip('outputs minified js/ts in production mode', async () => {
-    let { outputFiles } = await bundle('plugin', { mode: 'prod' });
-    let admin = outputFiles.find(
-      (file) => file.path.includes('admin') && !file.path.includes('nomodule') && file.path.endsWith('.js'),
-    );
-    expect(admin?.text).toMatchInlineSnapshot(`
+  it('outputs minified js/ts in production mode', async () => {
+    let [context] = await createTestContext('plugin', 'prod');
+    let files = await bundle(context);
+    expect(files.content('admin')).toMatchInlineSnapshot(`
       "var m=(e,r)=>()=>(e&&(r=e(e=0)),r);var o=m(()=>{\\"use strict\\"});o();o();var l=(...e)=>{console.log(...e)};var s=[\\"Hello\\",\\"World\\"];l(...s);
       "
     `);
   });
 
-  it.skip('outputs transpiled nomodule version of javascript in production mode', async () => {
-    let { outputFiles } = await bundle('plugin', { mode: 'prod' });
-    let admin = outputFiles.find((file) => file.path.includes('admin.nomodule'));
-    expect(admin?.text).toMatchInlineSnapshot(`
+  it('outputs transpiled nomodule version of javascript in production mode', async () => {
+    let [context] = await createTestContext('plugin', 'prod');
+    let files = await bundle(context);
+    expect(files.content('admin.nomodule')).toMatchInlineSnapshot(`
       "var S=(o,a)=>()=>(o&&(a=o(o=0)),a);var l=S(()=>{\\"use strict\\"});l();(function(){var o=function(n,t){return function(){return n&&(t=n(n=0)),t}},a=o(function(){\\"use strict\\"});a(),a();function i(n,t){(t==null||t>n.length)&&(t=n.length);for(var r=0,e=new Array(t);r<t;r++)e[r]=n[r];return e}function f(n){if(Array.isArray(n))return i(n)}function c(n){if(typeof Symbol<\\"u\\"&&n[Symbol.iterator]!=null||n[\\"@@iterator\\"]!=null)return Array.from(n)}function s(){throw new TypeError(\\"Invalid attempt to spread non-iterable instance.\\\\\\\\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.\\")}function y(n){return f(n)||c(n)||m(n)||s()}function m(n,t){if(n){if(typeof n==\\"string\\")return i(n,t);var r=Object.prototype.toString.call(n).slice(8,-1);if(r===\\"Object\\"&&n.constructor&&(r=n.constructor.name),r===\\"Map\\"||r===\\"Set\\")return Array.from(r);if(r===\\"Arguments\\"||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(r))return i(n,t)}}var p=function(){for(var n=arguments.length,t=new Array(n),r=0;r<n;r++)t[r]=arguments[r];var e;(e=console).log.apply(e,y(t))};function u(n,t){(t==null||t>n.length)&&(t=n.length);for(var r=0,e=new Array(t);r<t;r++)e[r]=n[r];return e}function b(n){if(Array.isArray(n))return u(n)}function d(n){if(typeof Symbol<\\"u\\"&&n[Symbol.iterator]!=null||n[\\"@@iterator\\"]!=null)return Array.from(n)}function g(){throw new TypeError(\\"Invalid attempt to spread non-iterable instance.\\\\\\\\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.\\")}function A(n){return b(n)||d(n)||v(n)||g()}function v(n,t){if(n){if(typeof n==\\"string\\")return u(n,t);var r=Object.prototype.toString.call(n).slice(8,-1);if(r===\\"Object\\"&&n.constructor&&(r=n.constructor.name),r===\\"Map\\"||r===\\"Set\\")return Array.from(r);if(r===\\"Arguments\\"||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(r))return u(n,t)}}var h=[\\"Hello\\",\\"World\\"];p.apply(void 0,A(h))})();
       "
     `);
   });
 
-  it.skip('runs postcss and autoprefixer on css', async () => {
-    let { outputFiles } = await bundle('theme', { mode: 'dev' });
-    let main = outputFiles.find((file) => file.path.endsWith('main.css'));
-    expect(main?.text).toMatchInlineSnapshot(`
+  it('runs postcss and autoprefixer on css', async () => {
+    let [context] = await createTestContext('theme', 'dev');
+    let files = await bundle(context);
+    expect(files.content('main', 'css')).toMatchInlineSnapshot(`
       "/* src/variables.css */
       :root {
         --color-brand: rgba(0, 0, 255, 0.9);
@@ -119,29 +200,30 @@ describe('Build', () => {
     `);
   });
 
-  it.skip('outputs minified css in production mode', async () => {
-    let { outputFiles } = await bundle('theme', { mode: 'prod' });
-    let main = outputFiles.find((file) => file.path.startsWith('dist/main') && file.path.endsWith('.css'));
-    expect(main?.text).toMatchInlineSnapshot(`
+  it('outputs minified css in production mode', async () => {
+    let [context] = await createTestContext('theme', 'prod');
+    let files = await bundle(context);
+    expect(files.content('main', 'css')).toMatchInlineSnapshot(`
       ":root{--color-brand: rgba(0, 0, 255, .9)}::-moz-placeholder{color:var(--color-brand)}::placeholder{color:var(--color-brand)}
       "
     `);
   });
 
-  it.skip('should include @wordpress/icons in bundle', async () => {
-    let { outputFiles } = await bundle('theme', { mode: 'dev' });
-    let main = outputFiles.find((file) => file.path.endsWith('main.js'));
+  it('should include @wordpress/icons in bundle', async () => {
+    let [context] = await createTestContext('theme', 'dev');
+    let files = await bundle(context);
+    let content = files.content('main');
 
-    expect(main?.text).toContain('var bug = ');
-    expect(main?.text).toContain('viewBox: "0 0 24 24"');
-    expect(main?.text).toMatchInlineSnapshot(`
+    expect(content).toContain('var bug = ');
+    expect(content).toContain('viewBox: "0 0 24 24"');
+    expect(content).toMatchInlineSnapshot(`
       "var __create = Object.create;
       var __defProp = Object.defineProperty;
       var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
       var __getOwnPropNames = Object.getOwnPropertyNames;
       var __getProtoOf = Object.getPrototypeOf;
       var __hasOwnProp = Object.prototype.hasOwnProperty;
-      var __esm = (fn, res) => function __init.skip() {
+      var __esm = (fn, res) => function __init() {
         return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
       };
       var __commonJS = (cb, mod) => function __require() {
@@ -225,23 +307,59 @@ describe('Build', () => {
   });
 });
 
+const createdContexts = new Set<BuildContext>();
+afterEach(async () => {
+  for (let ctx of createdContexts) {
+    await ctx.dispose();
+    createdContexts.delete(ctx);
+  }
+});
+
+const { __dirname } = dirname(import.meta.url);
+
 const paths = {
   plugin: path.join(__dirname, '../examples/wp-bundler-plugin'),
   theme: path.join(__dirname, '../examples/wp-bundler-theme'),
 } as const;
 
-function bundle(kind: keyof typeof paths, options: Partial<Omit<BundlerOptions, 'cwd'>> = {}) {
+async function createTestContext(kind: keyof typeof paths, mode: Mode) {
   let meta = getMetadata(paths[kind], __dirname);
-  let finalOptions: BundlerOptions = {
-    mode: 'prod',
+  let logger = new TestLogger('WP-BUNDLER');
+  let options = {
+    write: false,
+    mode,
     watch: false,
     host: 'localhost',
     port: 3000,
+    cwd: paths[kind],
+    logger,
     ...meta,
-    ...options,
-  };
-  let bundler = new Bundler(finalOptions);
+  } as const;
 
-  bundler.prepare();
-  return bundler.build();
+  let ctx = await createContext(options);
+  createdContexts.add(ctx);
+
+  return [ctx, logger] as const;
+}
+
+async function bundle(context: BuildContext) {
+  let result = await context.rebuild();
+  return {
+    content: (name: string, extension = 'js') => {
+      let file = result.outputFiles?.find((output) => {
+        return output.path.includes(name) && output.path.endsWith(extension);
+      });
+      return file?.text ?? '';
+    },
+  };
+}
+
+function cleanOutput(logger: TestLogger) {
+  return logger
+    .getOutput()
+    .replace(/\d+ ms/, 'XX ms')
+    .split('\n')
+    .map((l) => l.trim())
+    .join('\n')
+    .trim();
 }

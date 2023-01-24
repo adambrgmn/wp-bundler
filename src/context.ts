@@ -9,6 +9,7 @@ import { Metadata } from './utils/read-pkg.js';
 
 export type ContextOptions = Metadata & {
   watch?: boolean;
+  write?: boolean;
   mode?: Mode;
   cwd?: string;
   host?: string;
@@ -34,7 +35,6 @@ export function createContext(options: ContextOptions) {
     plugin.reactFactory(pluginOptions),
     plugin.translations(pluginOptions),
     plugin.watch(pluginOptions),
-
     plugin.log(pluginOptions, options.logger),
   ];
 
@@ -52,7 +52,7 @@ export function createContext(options: ContextOptions) {
     format: 'esm',
     platform: 'browser',
     target: 'es2020',
-    write: true,
+    write: options.write ?? true,
     metafile: true,
 
     loader: {

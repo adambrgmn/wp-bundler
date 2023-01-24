@@ -12,7 +12,7 @@ import { getMetadata } from './utils/read-pkg.js';
 
 const { __dirname } = dirname(import.meta.url);
 
-it.only(
+it.skip(
   'generates the expected output',
   testService('theme', 'prod', (done, fail, service, writer, logger) => {
     if (service.getSnapshot().matches('error')) fail(new Error('Unexpectedly ended up in error state'));
@@ -64,7 +64,7 @@ it.only(
   }),
 );
 
-it(
+it.skip(
   'goes into watch state in dev mode',
   testService('theme', 'dev', (done, fail, service, _, logger) => {
     if (service.getSnapshot().matches('error')) fail(new Error('Unexpectedly ended up in error state'));
