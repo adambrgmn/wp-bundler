@@ -16,7 +16,7 @@ const PLUGIN_NAME = 'wp-bundler-nomodule';
 
 const IGNORED_PLUGINS = [PLUGIN_NAME, TRANSLATIONS, POSTCSS, ASSET_LOADER, LOG, WATCH];
 
-export const nomodule: BundlerPlugin = ({ project }) => ({
+export const nomodule: BundlerPlugin = () => ({
   name: PLUGIN_NAME,
   setup(build) {
     if (build.initialOptions.entryPoints == null) {
@@ -34,10 +34,15 @@ export const nomodule: BundlerPlugin = ({ project }) => ({
 
     build.initialOptions.entryPoints = entryPoints;
 
-    build.onResolve({ filter: /\.nomodule/ }, (args) => {
+    build.onResolve({ filter: /\.nomodule/ }, async (args) => {
       if (args.kind === 'entry-point') {
+        let resolved = await build.resolve(args.path.replace('.nomodule', ''), {
+          resolveDir: args.resolveDir,
+          kind: 'entry-point',
+        });
+
         return {
-          path: project.paths.absolute(args.path.replace('.nomodule', '')),
+          ...resolved,
           namespace: NAMESPACE,
         };
       }
