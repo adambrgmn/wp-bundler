@@ -32,14 +32,292 @@ index 8ffa75d..0000000
 -declare const creator: PluginCreator<pluginOptions>;
 -export default creator;
 diff --git a/node_modules/postcss-preset-env/package.json b/node_modules/postcss-preset-env/package.json
-index 707adf2..8f1f88c 100644
+index 707adf2..d665f01 100644
 --- a/node_modules/postcss-preset-env/package.json
 +++ b/node_modules/postcss-preset-env/package.json
-@@ -30,7 +30,6 @@
- 	"types": "dist/index.d.ts",
- 	"exports": {
- 		".": {
+@@ -1,144 +1,143 @@
+ {
+-	"name": "postcss-preset-env",
+-	"description": "Convert modern CSS into something browsers understand",
+-	"version": "8.0.1",
+-	"contributors": [
+-		{
+-			"name": "Antonio Laguna",
+-			"email": "antonio@laguna.es",
+-			"url": "https://antonio.laguna.es"
+-		},
+-		{
+-			"name": "Romain Menke",
+-			"email": "romainmenke@gmail.com"
+-		},
+-		{
+-			"name": "Jonathan Neal",
+-			"email": "jonathantneal@hotmail.com"
+-		}
+-	],
+-	"license": "CC0-1.0",
+-	"funding": {
+-		"type": "opencollective",
+-		"url": "https://opencollective.com/csstools"
+-	},
+-	"engines": {
+-		"node": "^14 || ^16 || >=18"
+-	},
+-	"main": "dist/index.cjs",
+-	"module": "dist/index.mjs",
+-	"types": "dist/index.d.ts",
+-	"exports": {
+-		".": {
 -			"types": "./dist/index.d.ts",
- 			"import": "./dist/index.mjs",
- 			"require": "./dist/index.cjs",
- 			"default": "./dist/index.mjs"
+-			"import": "./dist/index.mjs",
+-			"require": "./dist/index.cjs",
+-			"default": "./dist/index.mjs"
+-		}
+-	},
+-	"files": [
+-		"CHANGELOG.md",
+-		"LICENSE.md",
+-		"README.md",
+-		"dist"
+-	],
+-	"dependencies": {
+-		"@csstools/postcss-cascade-layers": "^3.0.0",
+-		"@csstools/postcss-color-function": "^2.0.0",
+-		"@csstools/postcss-font-format-keywords": "^2.0.0",
+-		"@csstools/postcss-hwb-function": "^2.0.0",
+-		"@csstools/postcss-ic-unit": "^2.0.0",
+-		"@csstools/postcss-is-pseudo-class": "^3.0.0",
+-		"@csstools/postcss-logical-float-and-clear": "^1.0.0",
+-		"@csstools/postcss-logical-resize": "^1.0.0",
+-		"@csstools/postcss-logical-viewport-units": "^1.0.0",
+-		"@csstools/postcss-media-queries-aspect-ratio-number-values": "^1.0.0",
+-		"@csstools/postcss-nested-calc": "^2.0.0",
+-		"@csstools/postcss-normalize-display-values": "^2.0.0",
+-		"@csstools/postcss-oklab-function": "^2.0.0",
+-		"@csstools/postcss-progressive-custom-properties": "^2.0.0",
+-		"@csstools/postcss-scope-pseudo-class": "^2.0.0",
+-		"@csstools/postcss-stepped-value-functions": "^2.0.0",
+-		"@csstools/postcss-text-decoration-shorthand": "^2.0.0",
+-		"@csstools/postcss-trigonometric-functions": "^2.0.0",
+-		"@csstools/postcss-unset-value": "^2.0.0",
+-		"autoprefixer": "^10.4.13",
+-		"browserslist": "^4.21.4",
+-		"css-blank-pseudo": "^5.0.0",
+-		"css-has-pseudo": "^5.0.0",
+-		"css-prefers-color-scheme": "^8.0.0",
+-		"cssdb": "^7.4.0",
+-		"postcss-attribute-case-insensitive": "^6.0.0",
+-		"postcss-clamp": "^4.1.0",
+-		"postcss-color-functional-notation": "^5.0.0",
+-		"postcss-color-hex-alpha": "^9.0.0",
+-		"postcss-color-rebeccapurple": "^8.0.0",
+-		"postcss-custom-media": "^9.1.0",
+-		"postcss-custom-properties": "^13.1.0",
+-		"postcss-custom-selectors": "^7.1.0",
+-		"postcss-dir-pseudo-class": "^7.0.0",
+-		"postcss-double-position-gradients": "^4.0.0",
+-		"postcss-focus-visible": "^8.0.0",
+-		"postcss-focus-within": "^7.0.0",
+-		"postcss-font-variant": "^5.0.0",
+-		"postcss-gap-properties": "^4.0.0",
+-		"postcss-image-set-function": "^5.0.0",
+-		"postcss-initial": "^4.0.1",
+-		"postcss-lab-function": "^5.0.0",
+-		"postcss-logical": "^6.0.0",
+-		"postcss-media-minmax": "^5.0.0",
+-		"postcss-nesting": "^11.0.0",
+-		"postcss-opacity-percentage": "^1.1.3",
+-		"postcss-overflow-shorthand": "^4.0.0",
+-		"postcss-page-break": "^3.0.4",
+-		"postcss-place": "^8.0.0",
+-		"postcss-pseudo-class-any-link": "^8.0.0",
+-		"postcss-replace-overflow-wrap": "^4.0.0",
+-		"postcss-selector-not": "^7.0.0",
+-		"postcss-value-parser": "^4.2.0"
+-	},
+-	"peerDependencies": {
+-		"postcss": "^8.4"
+-	},
+-	"devDependencies": {
+-		"postcss-simple-vars": "^7.0.1"
+-	},
+-	"scripts": {
+-		"prebuild": "node ./scripts/generate-plugins-data.mjs && eslint --fix ./src/plugins/*.mjs && npm run clean",
+-		"build": "rollup -c ../../rollup/default.mjs",
+-		"clean": "node -e \"fs.rmSync('./dist', { recursive: true, force: true }); fs.mkdirSync('./dist');\"",
+-		"docs": "node ./docs/generate.mjs",
+-		"lint": "npm run lint:eslint && npm run lint:package-json",
+-		"lint:eslint": "eslint ./src --ext .js --ext .ts --ext .mjs --no-error-on-unmatched-pattern",
+-		"lint:package-json": "node ../../.github/bin/format-package-json.mjs",
+-		"prepublishOnly": "npm run clean && npm run build && npm run test",
+-		"stryker": "stryker run --logLevel error",
+-		"test": "node .tape.mjs && node ./src/test/test.mjs && npm run test:exports",
+-		"test:exports": "node ./test/_import.mjs && node ./test/_require.cjs",
+-		"test:rewrite-expects": "REWRITE_EXPECTS=true node .tape.mjs"
+-	},
+-	"homepage": "https://github.com/csstools/postcss-plugins/tree/main/plugin-packs/postcss-preset-env#readme",
+-	"repository": {
+-		"type": "git",
+-		"url": "https://github.com/csstools/postcss-plugins.git",
+-		"directory": "plugin-packs/postcss-preset-env"
+-	},
+-	"bugs": "https://github.com/csstools/postcss-plugins/issues",
+-	"keywords": [
+-		"css",
+-		"csswg",
+-		"features",
+-		"future",
+-		"lists",
+-		"next",
+-		"postcss",
+-		"postcss-plugin",
+-		"specifications",
+-		"specs",
+-		"stages",
+-		"w3c"
+-	],
+-	"volta": {
+-		"extends": "../../package.json"
+-	}
++  "name": "postcss-preset-env",
++  "description": "Convert modern CSS into something browsers understand",
++  "version": "8.0.1",
++  "contributors": [
++    {
++      "name": "Antonio Laguna",
++      "email": "antonio@laguna.es",
++      "url": "https://antonio.laguna.es"
++    },
++    {
++      "name": "Romain Menke",
++      "email": "romainmenke@gmail.com"
++    },
++    {
++      "name": "Jonathan Neal",
++      "email": "jonathantneal@hotmail.com"
++    }
++  ],
++  "license": "CC0-1.0",
++  "funding": {
++    "type": "opencollective",
++    "url": "https://opencollective.com/csstools"
++  },
++  "engines": {
++    "node": "^14 || ^16 || >=18"
++  },
++  "main": "dist/index.cjs",
++  "module": "dist/index.mjs",
++  "types": "dist/index.d.mts",
++  "exports": {
++    ".": {
++      "import": "./dist/index.mjs",
++      "require": "./dist/index.cjs",
++      "default": "./dist/index.mjs"
++    }
++  },
++  "files": [
++    "CHANGELOG.md",
++    "LICENSE.md",
++    "README.md",
++    "dist"
++  ],
++  "dependencies": {
++    "@csstools/postcss-cascade-layers": "^3.0.0",
++    "@csstools/postcss-color-function": "^2.0.0",
++    "@csstools/postcss-font-format-keywords": "^2.0.0",
++    "@csstools/postcss-hwb-function": "^2.0.0",
++    "@csstools/postcss-ic-unit": "^2.0.0",
++    "@csstools/postcss-is-pseudo-class": "^3.0.0",
++    "@csstools/postcss-logical-float-and-clear": "^1.0.0",
++    "@csstools/postcss-logical-resize": "^1.0.0",
++    "@csstools/postcss-logical-viewport-units": "^1.0.0",
++    "@csstools/postcss-media-queries-aspect-ratio-number-values": "^1.0.0",
++    "@csstools/postcss-nested-calc": "^2.0.0",
++    "@csstools/postcss-normalize-display-values": "^2.0.0",
++    "@csstools/postcss-oklab-function": "^2.0.0",
++    "@csstools/postcss-progressive-custom-properties": "^2.0.0",
++    "@csstools/postcss-scope-pseudo-class": "^2.0.0",
++    "@csstools/postcss-stepped-value-functions": "^2.0.0",
++    "@csstools/postcss-text-decoration-shorthand": "^2.0.0",
++    "@csstools/postcss-trigonometric-functions": "^2.0.0",
++    "@csstools/postcss-unset-value": "^2.0.0",
++    "autoprefixer": "^10.4.13",
++    "browserslist": "^4.21.4",
++    "css-blank-pseudo": "^5.0.0",
++    "css-has-pseudo": "^5.0.0",
++    "css-prefers-color-scheme": "^8.0.0",
++    "cssdb": "^7.4.0",
++    "postcss-attribute-case-insensitive": "^6.0.0",
++    "postcss-clamp": "^4.1.0",
++    "postcss-color-functional-notation": "^5.0.0",
++    "postcss-color-hex-alpha": "^9.0.0",
++    "postcss-color-rebeccapurple": "^8.0.0",
++    "postcss-custom-media": "^9.1.0",
++    "postcss-custom-properties": "^13.1.0",
++    "postcss-custom-selectors": "^7.1.0",
++    "postcss-dir-pseudo-class": "^7.0.0",
++    "postcss-double-position-gradients": "^4.0.0",
++    "postcss-focus-visible": "^8.0.0",
++    "postcss-focus-within": "^7.0.0",
++    "postcss-font-variant": "^5.0.0",
++    "postcss-gap-properties": "^4.0.0",
++    "postcss-image-set-function": "^5.0.0",
++    "postcss-initial": "^4.0.1",
++    "postcss-lab-function": "^5.0.0",
++    "postcss-logical": "^6.0.0",
++    "postcss-media-minmax": "^5.0.0",
++    "postcss-nesting": "^11.0.0",
++    "postcss-opacity-percentage": "^1.1.3",
++    "postcss-overflow-shorthand": "^4.0.0",
++    "postcss-page-break": "^3.0.4",
++    "postcss-place": "^8.0.0",
++    "postcss-pseudo-class-any-link": "^8.0.0",
++    "postcss-replace-overflow-wrap": "^4.0.0",
++    "postcss-selector-not": "^7.0.0",
++    "postcss-value-parser": "^4.2.0"
++  },
++  "peerDependencies": {
++    "postcss": "^8.4"
++  },
++  "devDependencies": {
++    "postcss-simple-vars": "^7.0.1"
++  },
++  "scripts": {
++    "prebuild": "node ./scripts/generate-plugins-data.mjs && eslint --fix ./src/plugins/*.mjs && npm run clean",
++    "build": "rollup -c ../../rollup/default.mjs",
++    "clean": "node -e \"fs.rmSync('./dist', { recursive: true, force: true }); fs.mkdirSync('./dist');\"",
++    "docs": "node ./docs/generate.mjs",
++    "lint": "npm run lint:eslint && npm run lint:package-json",
++    "lint:eslint": "eslint ./src --ext .js --ext .ts --ext .mjs --no-error-on-unmatched-pattern",
++    "lint:package-json": "node ../../.github/bin/format-package-json.mjs",
++    "prepublishOnly": "npm run clean && npm run build && npm run test",
++    "stryker": "stryker run --logLevel error",
++    "test": "node .tape.mjs && node ./src/test/test.mjs && npm run test:exports",
++    "test:exports": "node ./test/_import.mjs && node ./test/_require.cjs",
++    "test:rewrite-expects": "REWRITE_EXPECTS=true node .tape.mjs"
++  },
++  "homepage": "https://github.com/csstools/postcss-plugins/tree/main/plugin-packs/postcss-preset-env#readme",
++  "repository": {
++    "type": "git",
++    "url": "https://github.com/csstools/postcss-plugins.git",
++    "directory": "plugin-packs/postcss-preset-env"
++  },
++  "bugs": "https://github.com/csstools/postcss-plugins/issues",
++  "keywords": [
++    "css",
++    "csswg",
++    "features",
++    "future",
++    "lists",
++    "next",
++    "postcss",
++    "postcss-plugin",
++    "specifications",
++    "specs",
++    "stages",
++    "w3c"
++  ],
++  "volta": {
++    "extends": "../../package.json"
++  }
+ }
