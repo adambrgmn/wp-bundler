@@ -44,7 +44,7 @@
     "test": "vitest",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit",
-    "release": "npm run build && changeset publish",
+    "release": "npm run build && npx publint run && changeset publish",
     "examples:start": "cd examples && npx -p @wordpress/env wp-env start",
     "examples:destroy": "cd examples && npx -p @wordpress/env wp-env destroy",
     "examples:stop": "cd examples && npx -p @wordpress/env wp-env stop",

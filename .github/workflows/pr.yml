@@ -28,5 +28,8 @@ jobs:
       - name: Test
         run: npm run test:coverage
 
+      - name: Publint
+        run: npx publint run
+
       - name: Examples
         run: npm run examples:build
