@@ -1,9 +1,3 @@
-declare module 'postcss-preset-env' {
-  import { AcceptedPlugin } from 'postcss';
-  function postcssPresetEnv(options?: Record<string, any>): AcceptedPlugin;
-  export = postcssPresetEnv;
-}
-
 declare module 'po2json' {
   export interface ParseOptions<Domain extends string = 'messages'> {
     // Whether to include fuzzy translation in JSON or not. Should be either true or false. Defaults to false.

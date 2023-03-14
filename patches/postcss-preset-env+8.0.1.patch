@@ -1,0 +1,45 @@
+diff --git a/node_modules/postcss-preset-env/dist/index.d.cts b/node_modules/postcss-preset-env/dist/index.d.cts
+new file mode 100644
+index 0000000..718f942
+--- /dev/null
++++ b/node_modules/postcss-preset-env/dist/index.d.cts
+@@ -0,0 +1,5 @@
++import type { pluginOptions } from './options.js';
++import type { PluginCreator } from 'postcss';
++export type { pluginOptions } from './options.js';
++declare const creator: PluginCreator<pluginOptions>;
++export {creator as default};
+diff --git a/node_modules/postcss-preset-env/dist/index.d.mts b/node_modules/postcss-preset-env/dist/index.d.mts
+new file mode 100644
+index 0000000..718f942
+--- /dev/null
++++ b/node_modules/postcss-preset-env/dist/index.d.mts
+@@ -0,0 +1,5 @@
++import type { pluginOptions } from './options.js';
++import type { PluginCreator } from 'postcss';
++export type { pluginOptions } from './options.js';
++declare const creator: PluginCreator<pluginOptions>;
++export {creator as default};
+diff --git a/node_modules/postcss-preset-env/dist/index.d.ts b/node_modules/postcss-preset-env/dist/index.d.ts
+deleted file mode 100644
+index 8ffa75d..0000000
+--- a/node_modules/postcss-preset-env/dist/index.d.ts
++++ /dev/null
+@@ -1,5 +0,0 @@
+-import type { pluginOptions } from './options';
+-import type { PluginCreator } from 'postcss';
+-export type { pluginOptions } from './options';
+-declare const creator: PluginCreator<pluginOptions>;
+-export default creator;
+diff --git a/node_modules/postcss-preset-env/package.json b/node_modules/postcss-preset-env/package.json
+index 707adf2..8f1f88c 100644
+--- a/node_modules/postcss-preset-env/package.json
++++ b/node_modules/postcss-preset-env/package.json
+@@ -30,7 +30,6 @@
+ 	"types": "dist/index.d.ts",
+ 	"exports": {
+ 		".": {
+-			"types": "./dist/index.d.ts",
+ 			"import": "./dist/index.mjs",
+ 			"require": "./dist/index.cjs",
+ 			"default": "./dist/index.mjs"
