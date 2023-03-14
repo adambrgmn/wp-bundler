@@ -1,5 +1,25 @@
 # @fransvilhelm/wp-bundler
 
+## 4.0.0
+
+### Major Changes
+
+- Make project esm only (by [@adambrgmn](https://github.com/adambrgmn) in [#66](https://github.com/adambrgmn/wp-bundler/pull/66))
+
+  This project is now esm only. Generally it shouldn't affect you that much. But if you plan on building something on top of wp-bundler, using the exposed interfaces you need to be aware of this fact.
+
+- Remove ability to call wp-bundler without sub commands (by [@adambrgmn](https://github.com/adambrgmn) in [#69](https://github.com/adambrgmn/wp-bundler/pull/69))
+
+  Previously we allowed calling `wp-bundler` without `dev` or `build` sub commands, like it was from v1. This release removes that ability. From now on you must call `wp-bundler dev` or `wp-bundler build`.
+
+### Minor Changes
+
+- Move away from multibundler setup (by [@adambrgmn](https://github.com/adambrgmn) in [#69](https://github.com/adambrgmn/wp-bundler/pull/69))
+
+  Previously we initiated two separate esbuild process to build the modern and legacy outputs. This meant we had no way to output a good asset loader witouth waiting for both of the outputs to be done and merge them.
+
+  With this approach the legacy output is moving into the main process again. Something that will speed up and make out lives much easier in the future.
+
 ## 3.0.1
 
 ### Patch Changes
