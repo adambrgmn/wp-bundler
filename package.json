@@ -48,8 +48,7 @@
     "examples:start": "cd examples && npx -p @wordpress/env wp-env start",
     "examples:destroy": "cd examples && npx -p @wordpress/env wp-env destroy",
     "examples:stop": "cd examples && npx -p @wordpress/env wp-env stop",
-    "examples:build": "npm run --prefix ./examples/wp-bundler-theme build && npm run --prefix ./examples/wp-bundler-plugin build",
-    "postinstall": "patch-package"
+    "examples:build": "npm run --prefix ./examples/wp-bundler-theme build && npm run --prefix ./examples/wp-bundler-plugin build"
   },
   "dependencies": {
     "@swc/core": "^1.3.40",
@@ -87,7 +86,6 @@
     "eslint": "^8.36.0",
     "eslint-config-react-app": "^7.0.1",
     "lodash.merge": "^4.6.2",
-    "patch-package": "^6.5.1",
     "prettier": "^2.8.4",
     "typescript": "^4.9.5",
     "vitest": "^0.29.2"
