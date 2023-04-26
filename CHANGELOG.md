@@ -1,5 +1,11 @@
 # @fransvilhelm/wp-bundler
 
+## 4.0.2
+
+### Patch Changes
+
+- Use correct ReactDOM global (by [@adambrgmn](https://github.com/adambrgmn) in [#75](https://github.com/adambrgmn/wp-bundler/pull/75))
+
 ## 4.0.1
 
 ### Patch Changes
