@@ -1,5 +1,11 @@
 # @fransvilhelm/wp-bundler
 
+## 4.0.3
+
+### Patch Changes
+
+- Skip using wp.element globals (by [@adambrgmn](https://github.com/adambrgmn) in [#78](https://github.com/adambrgmn/wp-bundler/pull/78))
+
 ## 4.0.2
 
 ### Patch Changes
