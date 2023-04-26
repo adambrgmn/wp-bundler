@@ -5,7 +5,7 @@ interface Dependencies {
 }
 
 export const DEPENDENCIES: Dependencies = {
-  react: { wpId: 'wp-element', global: 'wp.element' },
+  react: { wpId: 'wp-element', global: 'React' },
   'react-dom': { wpId: 'wp-element', global: 'ReactDOM' },
   jquery: { wpId: 'jquery', global: '$' },
   lodash: { wpId: 'lodash', global: '_' },
