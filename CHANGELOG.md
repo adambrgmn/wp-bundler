@@ -1,5 +1,15 @@
 # @fransvilhelm/wp-bundler
 
+## 4.0.1
+
+### Patch Changes
+
+- Remove postinstall script (by [@adambrgmn](https://github.com/adambrgmn) in [#73](https://github.com/adambrgmn/wp-bundler/pull/73))
+
+  The postinstall script was a stupid idea from the beginning, causing issues for `yarn` projects.
+
+  We're better off without it.
+
 ## 4.0.0
 
 ### Major Changes
