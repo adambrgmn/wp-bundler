@@ -25,7 +25,7 @@ const postcssPlugin: BundlerPlugin = () => ({
 
       return {
         contents: result.content,
-        loader: 'css',
+        loader: args.path.endsWith('.module.css') ? 'local-css' : 'css',
         pluginName: PLUGIN_NAME,
         warnings,
         resolveDir: path.dirname(args.path),
