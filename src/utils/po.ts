@@ -90,13 +90,14 @@ export class Po {
     await fs.writeFile(filename, this.toString(foldLength));
   }
 
-  toOutputFile(filename = this.filename, foldLength?: number): OutputFile {
+  toOutputFile(filename = this.filename, foldLength?: number) {
     let text = this.toString(foldLength);
     return {
       path: filename,
       contents: Buffer.from(text, 'utf-8'),
       text: text,
-    };
+      hash: '',
+    } satisfies OutputFile;
   }
 
   has(id: string, context: string = '') {
