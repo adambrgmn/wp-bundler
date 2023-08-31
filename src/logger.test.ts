@@ -97,7 +97,7 @@ describe('Logger', () => {
 
     function output(path: string, text: string) {
       const encoder = new TextEncoder();
-      return { path, contents: encoder.encode(text), text };
+      return { path, contents: encoder.encode(text), text, hash: '' };
     }
 
     logger.buildOutput({
