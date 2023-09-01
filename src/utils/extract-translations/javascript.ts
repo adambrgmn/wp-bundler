@@ -17,8 +17,8 @@ export function extractTranslations(source: string, filename: string): Translati
 }
 
 const translatableMethods = ['_n', '_nx', '_x', '__'] as const;
-type TranslatableMethod = typeof translatableMethods[number];
-const isTranslatableMethod = (name: any): name is TranslatableMethod => {
+type TranslatableMethod = (typeof translatableMethods)[number];
+const isTranslatableMethod = (name: string): name is TranslatableMethod => {
   return translatableMethods.includes(name);
 };
 
@@ -49,10 +49,11 @@ function findRelevantImports(sourceFile: ts.SourceFile): ts.Identifier[] {
               break;
 
             // Named import ({ __, _x })
-            case ts.SyntaxKind.NamedImports:
+            case ts.SyntaxKind.NamedImports: {
               let relevant = getRelevantNamedImports(clause);
               identifiers.push(...relevant);
               break;
+            }
           }
         }
       }
@@ -102,7 +103,7 @@ function findTranslatableMessages(
       message = extractMessage(node.expression.name, node.arguments, null, locationMeta);
     }
 
-    // wp.i18n.__(...) || window.wp.i18n.__(...)
+    // wp.i18n.__(...) || window.wp.i18n.__(...)
     if (
       ts.isPropertyAccessExpression(node.expression) &&
       (node.expression.expression.getText() === 'window.wp.i18n' || node.expression.expression.getText() === 'wp.i18n')

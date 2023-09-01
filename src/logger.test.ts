@@ -4,6 +4,7 @@ import { Chalk } from 'chalk';
 import { describe, expect, it } from 'vitest';
 
 import { Logger } from './logger.js';
+import { Note } from 'esbuild';
 
 const chalk = new Chalk({ level: 0 });
 
@@ -37,7 +38,7 @@ describe('Logger', () => {
         {
           id: '1',
           pluginName: 'test',
-          detail: {} as any,
+          detail: {},
           text: 'something went wrong',
           location: {
             file: 'test.ts',
@@ -49,8 +50,11 @@ describe('Logger', () => {
             suggestion: 'Write a better message',
           },
           notes: [
-            { text: 'A note', location: {} as any },
-            { text: 'The plugin "something" failed to load (this note should be ignored)', location: {} as any },
+            { text: 'A note', location: {} as Note['location'] },
+            {
+              text: 'The plugin "something" failed to load (this note should be ignored)',
+              location: {} as Note['location'],
+            },
           ],
         },
       ],
@@ -58,7 +62,7 @@ describe('Logger', () => {
         {
           id: '2',
           pluginName: 'test',
-          detail: {} as any,
+          detail: {},
           text: 'you have been warned',
           location: {
             file: 'warn.ts',
@@ -137,13 +141,13 @@ describe('Logger', () => {
 class TestWriter extends Writable {
   #lines: string[] = [];
 
-  write(chunk: any, callback?: ((error: Error | null | undefined) => void) | undefined): boolean;
+  write(chunk: string | Buffer, callback?: ((error: Error | null | undefined) => void) | undefined): boolean;
   write(
-    chunk: any,
+    chunk: string | Buffer,
     encoding: BufferEncoding,
     callback?: ((error: Error | null | undefined) => void) | undefined,
   ): boolean;
-  write(chunk: unknown, encoding?: unknown, callback?: unknown): boolean {
+  write(chunk: unknown): boolean {
     if (typeof chunk === 'string') {
       this.#lines.push(chunk);
       return true;

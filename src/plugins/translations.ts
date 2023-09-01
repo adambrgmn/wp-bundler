@@ -187,9 +187,9 @@ function generateTranslationFilename(domain: string, language: string, file: str
   return `${domain}-${language}-${md5Path}.json`;
 }
 
-function getFoldLength(pkgJson: any): number | undefined {
+function getFoldLength(pkgJson: Record<string, unknown>) {
   let prettier = pkgJson.prettier;
   if (typeof prettier === 'object' && prettier != null && 'printWidth' in prettier) {
-    return prettier.printWidth;
+    return typeof prettier.printWidth === 'number' ? prettier.printWidth : undefined;
   }
 }

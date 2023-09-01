@@ -8,7 +8,7 @@ eventSource.addEventListener('open', () => {
   retry.count = 0;
 });
 
-eventSource.addEventListener('error', (event) => {
+eventSource.addEventListener('error', () => {
   retry.count += 1;
 
   if (retry.count > 5) {
