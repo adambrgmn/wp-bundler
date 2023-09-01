@@ -90,13 +90,14 @@ export class Po {
     await fs.writeFile(filename, this.toString(foldLength));
   }
 
-  toOutputFile(filename = this.filename, foldLength?: number): OutputFile {
+  toOutputFile(filename = this.filename, foldLength?: number) {
     let text = this.toString(foldLength);
     return {
       path: filename,
       contents: Buffer.from(text, 'utf-8'),
       text: text,
-    };
+      hash: '',
+    } satisfies OutputFile;
   }
 
   has(id: string, context: string = '') {
@@ -148,7 +149,7 @@ export class Po {
           return out;
         }
 
-        if (key === 'msgstr' && Array.isArray(value) && Array.isArray(srcValue)) {
+        if (key === 'msgstr' && isStringArray(value) && isStringArray(srcValue)) {
           return minLengthMsgstr(
             value.map((prev, i) => srcValue[i] || prev || ''),
             obj.msgid_plural != null || source.msgid_plural != null,
@@ -328,4 +329,8 @@ function compareTranslations(a: GetTextTranslation, b: GetTextTranslation) {
 
 function minLengthMsgstr(msgstr: string[], plural: boolean) {
   return Array.from({ length: plural ? 2 : 1 }, (_, i) => msgstr[i] ?? '');
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((v) => typeof v === 'string');
 }

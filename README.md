@@ -17,6 +17,7 @@ It will output modern Javascript for modern browsers as well as a "legacy" versi
 - [Asset types](#asset-types)
   - [Javascript and Typescript](#javascript-and-typescript)
   - [CSS](#css)
+    - [CSS modules](#css-modules)
 - [Asset loader](#asset-loader)
   - [Usage](#usage)
 - [External dependencies](#external-dependencies)
@@ -26,7 +27,6 @@ It will output modern Javascript for modern browsers as well as a "legacy" versi
   - [Other injected variables](#other-injected-variables)
   - [Other `.env` files](#other-env-files)
 - [Other WordPress focused bundlers](#other-wordpress-focused-bundlers)
-- [Roadmap](#roadmap)
 - [LICENSE](#license)
 
 ## Installation
@@ -193,6 +193,23 @@ The "modern" bundle is loaded in a script tag with `type="module"` specified, an
 ### CSS
 
 Your css is "post processed" by [`postcss`](https://postcss.org/). `wp-bundler` uses [`postcss-preset-env`](https://preset-env.cssdb.org/) to compile the css to a version that is more friendly to older browsers. See `postcss-preset-env`'s documentation for details around which features are available for compilation.
+
+#### CSS modules
+
+CSS modules are supported out of the box. Name your css files with the `.module.css` extension and they will be treated as css modules. The class names will be globally unique and each class will be available as a named export.
+
+```css
+.button {
+  background: rebeccapurple;
+}
+```
+
+```js
+import * as style from './button.module.css';
+<button className={style.button}>Hello</button>;
+```
+
+You can read more about what is possible with CSS modules within the context of wp-bundler and esbuild by referencing the [esbuild documentation](https://esbuild.github.io/content-types/#local-css).
 
 ## Asset loader
 

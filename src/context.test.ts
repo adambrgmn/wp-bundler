@@ -118,6 +118,8 @@ describe('plugin', () => {
       [
         "dist/main.js.map",
         "dist/main.js",
+        "dist/main.css.map",
+        "dist/main.css",
         "dist/admin.js.map",
         "dist/admin.js",
         "dist/AssetLoader.php",

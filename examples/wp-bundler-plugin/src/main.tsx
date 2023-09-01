@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+
+import * as style from './main.module.css';
 
 const App = () => {
   const [count, setCount] = useState(0);
   return (
     <>
-      <button onClick={() => setCount(count + 1)}>Increment</button>
-      <button onClick={() => setCount(count - 1)}>Decrement</button>
+      <button className={style.button} onClick={() => setCount(count + 1)}>
+        Increment
+      </button>
+      <button className={style.button} onClick={() => setCount(count - 1)}>
+        Decrement
+      </button>
       <p>Count: {count}</p>
     </>
   );
@@ -19,5 +25,5 @@ if (wrapper != null && sibling != null) {
   let root = document.createElement('div');
   wrapper.insertBefore(root, sibling);
 
-  render(<App />, root);
+  createRoot(root).render(<App />);
 }

@@ -50,7 +50,7 @@ export function readPkgUp(cwd: string = process.cwd()): ReadResult | null {
   for (let item of items) {
     if (item === 'package.json') {
       let pkgPath = path.join(cwd, item);
-      let packageJson = readJson<ProjectInfo['packageJson']>(pkgPath);
+      let packageJson = readJson(pkgPath) as ProjectInfo['packageJson'];
 
       return { path: pkgPath, packageJson };
     }

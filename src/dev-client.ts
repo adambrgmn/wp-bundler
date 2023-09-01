@@ -1,14 +1,22 @@
 const url = new URL('/esbuild', `http://${window.WP_BUNDLER_HOST}:${window.WP_BUNDLER_PORT}`);
 
 let eventSource = new EventSource(url);
+let retry = { count: 0 };
 
 eventSource.addEventListener('open', () => {
   log.info('Dev server connection established');
+  retry.count = 0;
 });
 
-eventSource.addEventListener('error', (event) => {
-  log.error(new Error(`Dev server errored`));
-  console.log(event);
+eventSource.addEventListener('error', () => {
+  retry.count += 1;
+
+  if (retry.count > 5) {
+    log.error(new Error(`Dev server connection failed. Closing connection.`));
+    eventSource.close();
+  } else {
+    log.error(new Error(`Dev server errored`));
+  }
 });
 
 eventSource.addEventListener('change', (e) => {
@@ -49,7 +57,6 @@ const log = {
     console.log(`[wp-bundler]: ${message}`);
   },
   error(error: unknown) {
-    console.error(`[wp-bundler]: An error occured`);
     console.error(error);
   },
 };

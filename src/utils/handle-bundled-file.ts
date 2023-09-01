@@ -14,7 +14,7 @@ export function createFileHandler<Opts extends BuildOptions>(result: BuildResult
     let text = typeof output.contents === 'string' ? output.contents : output.contents.toString('utf-8');
 
     if (result.outputFiles != null) {
-      result.outputFiles.push({ path: absolute, contents, text });
+      result.outputFiles.push({ path: absolute, contents, text, hash: '' });
     } else {
       ensureDir(absolute);
       fs.writeFileSync(absolute, contents, 'utf-8');

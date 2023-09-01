@@ -86,7 +86,6 @@ const swc = (): esbuild.Plugin => ({
         },
         jsc: {
           parser: { syntax: 'typescript', tsx: true },
-          target: 'es5',
         },
       });
 

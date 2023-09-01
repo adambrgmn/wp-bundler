@@ -53,12 +53,19 @@ function visitAll(nodes: Node[] | Node, callback: (node: Node, parent?: Node) =>
     if (shouldContinue === false) return;
 
     for (let key of childrenKeys) {
-      let children = (node as any)[key];
-      if (children != null) {
+      if (hasChildArray(node, key)) {
+        let children = node[key];
         visitAll(children, callback);
       }
     }
   }
+}
+
+function hasChildArray<Key extends (typeof childrenKeys)[number]>(
+  node: unknown,
+  key: Key,
+): node is { [K in typeof key]: Node[] } {
+  return typeof node === 'object' && node != null && (node as Record<string, unknown>)[key] != null;
 }
 
 const childrenKeys = [
@@ -84,6 +91,8 @@ function isCallNode(node?: Node | null): node is Call {
   return node != null && node.kind === 'call';
 }
 
+// This is not the built-in type String, but a node with kind 'string'
+// eslint-disable-next-line @typescript-eslint/ban-types
 function isStringNode(node?: Node | null): node is String {
   return node != null && node.kind === 'string';
 }
