@@ -13,9 +13,9 @@ export const PLUGIN_NAME = 'wp-bundler-postcss';
 
 const postcssPlugin: BundlerPlugin = () => ({
   name: PLUGIN_NAME,
-  async setup(build) {
+  setup(build) {
     // @ts-expect-error The env plugin lacks good types or something clashes with postcss types.
-    let plugins: AcceptedPlugin[] = [postcssPresetEnv()];
+    let plugins = [postcssPresetEnv()] as AcceptedPlugin[];
     let processor = postcss(plugins);
 
     build.onLoad({ filter: /\.css$/, namespace: 'file' }, async (args) => {

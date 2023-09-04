@@ -19,7 +19,7 @@ eventSource.addEventListener('error', () => {
   }
 });
 
-eventSource.addEventListener('change', (e) => {
+eventSource.addEventListener('change', (e: MessageEvent<string>) => {
   const { added, removed, updated } = parseEventPayload(e.data);
 
   if (!added.length && !removed.length && updated.length === 1) {

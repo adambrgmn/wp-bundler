@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 
 import { extractTranslations } from './javascript.js';
+import { Location } from 'esbuild';
 
 it('extract translations from regular ts files', () => {
   let source = `
@@ -9,7 +10,7 @@ it('extract translations from regular ts files', () => {
   `;
 
   let result = extractTranslations(source, 'test.ts');
-  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', location: expect.anything() }]);
+  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', location: expect.anything() as Location }]);
 });
 
 it('extract translations from tsx files', () => {
@@ -24,7 +25,7 @@ it('extract translations from tsx files', () => {
       text: 'Translate this',
       context: 'context',
       domain: 'wp-bundler',
-      location: expect.anything(),
+      location: expect.anything() as Location,
     },
   ]);
 });
@@ -40,7 +41,7 @@ it('extract translations from js files', () => {
     {
       text: 'Translate this',
       domain: 'wp-bundler',
-      location: expect.anything(),
+      location: expect.anything() as Location,
     },
   ]);
 });
@@ -57,7 +58,7 @@ it('extract translations from jsx files', () => {
       text: 'Translate this',
       context: 'context',
       domain: 'wp-bundler',
-      location: expect.anything(),
+      location: expect.anything() as Location,
     },
   ]);
 });
@@ -69,7 +70,7 @@ it('extract translations from named imports', () => {
   `;
 
   let result = extractTranslations(source, 'test.ts');
-  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', location: expect.anything() }]);
+  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', location: expect.anything() as Location }]);
 });
 
 it('extract translations from default imports', () => {
@@ -79,7 +80,7 @@ it('extract translations from default imports', () => {
   `;
 
   let result = extractTranslations(source, 'test.ts');
-  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', location: expect.anything() }]);
+  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', location: expect.anything() as Location }]);
 });
 
 it('extract translations from namespace imports', () => {
@@ -89,7 +90,7 @@ it('extract translations from namespace imports', () => {
   `;
 
   let result = extractTranslations(source, 'test.ts');
-  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', location: expect.anything() }]);
+  expect(result).toEqual([{ text: 'Translate this', domain: 'wp-bundler', location: expect.anything() as Location }]);
 });
 
 it('extract translations from calls to window.wp.i18n', () => {
@@ -102,7 +103,7 @@ it('extract translations from calls to window.wp.i18n', () => {
     {
       text: 'Translate this',
       domain: 'wp-bundler',
-      location: expect.anything(),
+      location: expect.anything() as Location,
     },
   ]);
 });
@@ -117,7 +118,7 @@ it('extract translations from calls to wp.i18n', () => {
     {
       text: 'Translate this',
       domain: 'wp-bundler',
-      location: expect.anything(),
+      location: expect.anything() as Location,
     },
   ]);
 });
@@ -134,13 +135,13 @@ it('can extract translations if the named import is renamed on import', () => {
     {
       text: 'Translate this',
       domain: 'wp-bundler',
-      location: expect.anything(),
+      location: expect.anything() as Location,
     },
     {
       text: 'Translate this',
       context: 'context',
       domain: 'wp-bundler',
-      location: expect.anything(),
+      location: expect.anything() as Location,
     },
   ]);
 });

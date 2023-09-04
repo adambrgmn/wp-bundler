@@ -102,9 +102,16 @@
   "eslintConfig": {
     "extends": [
       "eslint:recommended",
-      "plugin:@typescript-eslint/recommended"
+      "plugin:@typescript-eslint/recommended-type-checked"
     ],
+    "env": {
+      "node": true
+    },
     "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "project": true,
+      "tsconfigRootDir": "."
+    },
     "plugins": [
       "@typescript-eslint"
     ],

@@ -14,7 +14,7 @@ export const watch: BundlerPlugin = (options) => ({
     let entry = Object.values(options.config.entryPoints)[0];
     let filter = new RegExp(entry.replaceAll('.', '\\.').replaceAll('/', '\\/'));
 
-    build.onResolve({ filter }, async (args) => {
+    build.onResolve({ filter }, (args) => {
       return {
         path: options.project.paths.absolute(args.path),
         watchFiles,
