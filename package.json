@@ -1,6 +1,6 @@
 {
   "name": "@fransvilhelm/wp-bundler",
-  "version": "4.0.3",
+  "version": "5.0.0",
   "description": "A fast bundler tailored for WordPress based on esbuild",
   "type": "module",
   "exports": {
