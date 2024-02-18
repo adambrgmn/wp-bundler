@@ -31,7 +31,7 @@
     "bundler"
   ],
   "engines": {
-    "node": ">=14.18.0"
+    "node": ">=18"
   },
   "scripts": {
     "prebuild": "rm -rf dist",
