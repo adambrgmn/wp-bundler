@@ -248,14 +248,6 @@ describe('output', () => {
         mod
       ));
 
-      // _wp-bundler-wp-externals:@wordpress/element
-      var require_element = __commonJS({
-        \\"_wp-bundler-wp-externals:@wordpress/element\\"(exports, module) {
-          init_wp_element();
-          module.exports = window.wp.element;
-        }
-      });
-
       // ../../assets/wp-element/wp-element.ts
       var init_wp_element = __esm({
         \\"../../assets/wp-element/wp-element.ts\\"() {
@@ -268,6 +260,14 @@ describe('output', () => {
         \\"_wp-bundler-wp-externals:@wordpress/i18n\\"(exports, module) {
           init_wp_element();
           module.exports = window.wp.i18n;
+        }
+      });
+
+      // _wp-bundler-externals:react
+      var require_react = __commonJS({
+        \\"_wp-bundler-externals:react\\"(exports, module) {
+          init_wp_element();
+          module.exports = window.React;
         }
       });
 
@@ -288,12 +288,12 @@ describe('output', () => {
 
       // ../../node_modules/@wordpress/icons/build-module/library/bug.js
       init_wp_element();
-      var import_element = __toESM(require_element());
+      var import_react = __toESM(require_react());
       var import_primitives = __toESM(require_primitives());
-      var bug = (0, import_element.createElement)(import_primitives.SVG, {
+      var bug = (0, import_react.createElement)(import_primitives.SVG, {
         xmlns: \\"http://www.w3.org/2000/svg\\",
         viewBox: \\"0 0 24 24\\"
-      }, (0, import_element.createElement)(import_primitives.Path, {
+      }, (0, import_react.createElement)(import_primitives.Path, {
         d: \\"M6.13 5.5l1.926 1.927A4.975 4.975 0 007.025 10H5v1.5h2V13H5v1.5h2.1a5.002 5.002 0 009.8 0H19V13h-2v-1.5h2V10h-2.025a4.979 4.979 0 00-1.167-2.74l1.76-1.76-1.061-1.06-1.834 1.834A4.977 4.977 0 0012 5.5c-1.062 0-2.046.33-2.855.895L7.19 4.44 6.13 5.5zm2.37 5v3a3.5 3.5 0 107 0v-3a3.5 3.5 0 10-7 0z\\",
         fillRule: \\"evenodd\\",
         clipRule: \\"evenodd\\"
