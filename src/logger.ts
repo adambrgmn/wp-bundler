@@ -128,7 +128,7 @@ export class Logger {
 }
 
 function isStringifiable(value: unknown): value is { toString(): string } {
-  return typeof value === 'object' && value != null && 'toString' in value;
+  return value != null && typeof value.toString === 'function';
 }
 
 const PREFIX_ICONS: Record<string, string> = {
