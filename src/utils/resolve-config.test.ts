@@ -64,14 +64,14 @@ describe('resolveConfig()', () => {
 
     expect(spy).toHaveBeenCalled();
     expect(spy.mock.calls[0][0]).toMatchInlineSnapshot(
-      `"Found more than one wp-bundler configuration (package.json, .wp-bundlerrc). It is recommended to only stick with one of the options: package.json[\\"wp-bundler\\"], .wp-bundlerrc or wp-bundler.config.json."`,
+      `"Found more than one wp-bundler configuration (package.json, .wp-bundlerrc). It is recommended to only stick with one of the options: package.json["wp-bundler"], .wp-bundlerrc or wp-bundler.config.json."`,
     );
   });
 
   it('will throw an error if no proper configuration was found', () => {
     let project = createPackageInfo({ packageJson: {} });
     expect(() => resolveConfig(project)).toThrowErrorMatchingInlineSnapshot(
-      `"Could not resolve a configuration file. Either configure wp-bundler in your package.json, in .wp-bundlerrc or in wp-bundler.config.json."`,
+      `[Error: Could not resolve a configuration file. Either configure wp-bundler in your package.json, in .wp-bundlerrc or in wp-bundler.config.json.]`,
     );
   });
 
@@ -80,21 +80,21 @@ describe('resolveConfig()', () => {
 
     let project = createPackageInfo({ packageJson: { 'wp-bundler': { entryPoints: { entry: 1 } } } });
     expect(() => resolveConfig(project)).toThrowErrorMatchingInlineSnapshot(
-      `"Something is wrong in your configuration file."`,
+      `[Error: Something is wrong in your configuration file.]`,
     );
 
     expect(spy).toHaveBeenCalled();
     expect(spy.mock.calls[0][0]).toMatchInlineSnapshot(`
       "[
         {
-          \\"code\\": \\"invalid_type\\",
-          \\"expected\\": \\"string\\",
-          \\"received\\": \\"number\\",
-          \\"path\\": [
-            \\"entryPoints\\",
-            \\"entry\\"
+          "code": "invalid_type",
+          "expected": "string",
+          "received": "number",
+          "path": [
+            "entryPoints",
+            "entry"
           ],
-          \\"message\\": \\"Expected string, received number\\"
+          "message": "Expected string, received number"
         }
       ]"
     `);

@@ -13,22 +13,22 @@ describe('toPhpArray', () => {
 
   it('formats an object with primitive values', () => {
     expect(toPhpArray({ a: 'a', b: 1, c: true })).toMatchInlineSnapshot(
-      '"[\\"a\\"=>\\"a\\",\\"b\\"=>1,\\"c\\"=>true,]"',
+      `"["a"=>"a","b"=>1,"c"=>true,]"`,
     );
   });
 
   it('formats an array of primitive values', () => {
-    expect(toPhpArray([1, '2', true])).toMatchInlineSnapshot('"[1,\\"2\\",true,]"');
+    expect(toPhpArray([1, '2', true])).toMatchInlineSnapshot(`"[1,"2",true,]"`);
   });
 
   it('formats an object with more complex values within', () => {
     expect(toPhpArray({ a: ['a'], b: { foo: true } })).toMatchInlineSnapshot(
-      '"[\\"a\\"=>[\\"a\\",],\\"b\\"=>[\\"foo\\"=>true,],]"',
+      `"["a"=>["a",],"b"=>["foo"=>true,],]"`,
     );
   });
 
   it('formats an array with more complex values within', () => {
-    expect(toPhpArray([{ a: 'a' }, [1, 2]])).toMatchInlineSnapshot('"[[\\"a\\"=>\\"a\\",],[1,2,],]"');
+    expect(toPhpArray([{ a: 'a' }, [1, 2]])).toMatchInlineSnapshot(`"[["a"=>"a",],[1,2,],]"`);
   });
 
   it('ignores undefined values in objects', () => {

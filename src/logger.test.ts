@@ -87,7 +87,7 @@ describe('Logger', () => {
       ✖  ERROR  something went wrong
 
           test.ts:1:3:
-            1 │ console.log(\\"hello world\\");
+            1 │ console.log("hello world");
 
           A note
 
