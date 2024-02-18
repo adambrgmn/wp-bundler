@@ -46,18 +46,18 @@ it('can update a po file with data from a pot', async () => {
 
   po.updateFromTemplate(pot);
   expect(po.toString()).toMatchInlineSnapshot(`
-    "msgid \\"\\"
-    msgstr \\"\\"
-    \\"Plural-Forms: nplurals=2; plural=(n != 1);\\\\n\\"
-    \\"Content-Type: text/plain; charset=utf-8\\\\n\\"
-    \\"Content-Transfer-Encoding: 8bit\\\\n\\"
-    \\"MIME-Version: 1.0\\\\n\\"
+    "msgid ""
+    msgstr ""
+    "Plural-Forms: nplurals=2; plural=(n != 1);\\n"
+    "Content-Type: text/plain; charset=utf-8\\n"
+    "Content-Transfer-Encoding: 8bit\\n"
+    "MIME-Version: 1.0\\n"
 
     # A comment to keep
     #: test.ts:1
     #. translators: New translator
-    msgid \\"A\\"
-    msgstr \\"A\\"
+    msgid "A"
+    msgstr "A"
     "
   `);
 });
@@ -75,28 +75,28 @@ it('keeps unreferenced translations in the bottom', async () => {
 
   po.updateFromTemplate(pot);
   expect(po.toString()).toMatchInlineSnapshot(`
-    "msgid \\"\\"
-    msgstr \\"\\"
-    \\"Plural-Forms: nplurals=2; plural=(n != 1);\\\\n\\"
-    \\"Content-Type: text/plain; charset=utf-8\\\\n\\"
-    \\"Content-Transfer-Encoding: 8bit\\\\n\\"
-    \\"MIME-Version: 1.0\\\\n\\"
+    "msgid ""
+    msgstr ""
+    "Plural-Forms: nplurals=2; plural=(n != 1);\\n"
+    "Content-Type: text/plain; charset=utf-8\\n"
+    "Content-Transfer-Encoding: 8bit\\n"
+    "MIME-Version: 1.0\\n"
 
     #: test1.ts:1
-    msgid \\"A\\"
-    msgstr \\"A\\"
+    msgid "A"
+    msgstr "A"
 
     #: test2.ts:1
-    msgid \\"B\\"
-    msgstr \\"\\"
+    msgid "B"
+    msgstr ""
 
     # THIS TRANSLATION IS NO LONGER REFERENCED INSIDE YOUR PROJECT
-    msgid \\"A unused 1\\"
-    msgstr \\"Unused\\"
+    msgid "A unused 1"
+    msgstr "Unused"
 
     # THIS TRANSLATION IS NO LONGER REFERENCED INSIDE YOUR PROJECT
-    msgid \\"A unused 2\\"
-    msgstr \\"Unused\\"
+    msgid "A unused 2"
+    msgstr "Unused"
     "
   `);
 });
@@ -172,25 +172,25 @@ it('will output translations sorted by their msgid then their msgctxt', async ()
 
   expect(po1.toString()).toEqual(po2.toString());
   expect(po1.toString()).toMatchInlineSnapshot(`
-    "msgid \\"\\"
-    msgstr \\"\\"
-    \\"Plural-Forms: nplurals=2; plural=(n != 1);\\\\n\\"
-    \\"Content-Type: text/plain; charset=utf-8\\\\n\\"
-    \\"Content-Transfer-Encoding: 8bit\\\\n\\"
-    \\"MIME-Version: 1.0\\\\n\\"
+    "msgid ""
+    msgstr ""
+    "Plural-Forms: nplurals=2; plural=(n != 1);\\n"
+    "Content-Type: text/plain; charset=utf-8\\n"
+    "Content-Transfer-Encoding: 8bit\\n"
+    "MIME-Version: 1.0\\n"
 
     #: test.ts:1
-    msgid \\"A\\"
-    msgstr \\"\\"
+    msgid "A"
+    msgstr ""
 
     #: test.ts:1
-    msgctxt \\"context\\"
-    msgid \\"A\\"
-    msgstr \\"\\"
+    msgctxt "context"
+    msgid "A"
+    msgstr ""
 
     #: test.ts:1
-    msgid \\"B\\"
-    msgstr \\"\\"
+    msgid "B"
+    msgstr ""
     "
   `);
 });
@@ -215,17 +215,17 @@ it('should not overwrite headers in po file when updating from pot', async () =>
   po.updateFromTemplate(pot);
 
   expect(po.toString()).toMatchInlineSnapshot(`
-    "msgid \\"\\"
-    msgstr \\"\\"
-    \\"Plural-Forms: nplurals=2; plural=(n != 1);\\\\n\\"
-    \\"Content-Type: text/plain; charset=utf-8\\\\n\\"
-    \\"Content-Transfer-Encoding: 8bit\\\\n\\"
-    \\"MIME-Version: 1.0\\\\n\\"
-    \\"Language: en_US\\\\n\\"
+    "msgid ""
+    msgstr ""
+    "Plural-Forms: nplurals=2; plural=(n != 1);\\n"
+    "Content-Type: text/plain; charset=utf-8\\n"
+    "Content-Transfer-Encoding: 8bit\\n"
+    "MIME-Version: 1.0\\n"
+    "Language: en_US\\n"
 
     #: test.ts:1
-    msgid \\"a\\"
-    msgstr \\"\\"
+    msgid "a"
+    msgstr ""
     "
   `);
 });
@@ -235,18 +235,18 @@ it('creates correct plural templates translations', async () => {
 
   po.set({ single: 'test', plural: 'tester', domain: 'wp', location: createLocation() });
   expect(po.toString()).toMatchInlineSnapshot(`
-    "msgid \\"\\"
-    msgstr \\"\\"
-    \\"Plural-Forms: nplurals=2; plural=(n != 1);\\\\n\\"
-    \\"Content-Type: text/plain; charset=utf-8\\\\n\\"
-    \\"Content-Transfer-Encoding: 8bit\\\\n\\"
-    \\"MIME-Version: 1.0\\\\n\\"
+    "msgid ""
+    msgstr ""
+    "Plural-Forms: nplurals=2; plural=(n != 1);\\n"
+    "Content-Type: text/plain; charset=utf-8\\n"
+    "Content-Transfer-Encoding: 8bit\\n"
+    "MIME-Version: 1.0\\n"
 
     #: test.ts:1
-    msgid \\"test\\"
-    msgid_plural \\"tester\\"
-    msgstr[0] \\"\\"
-    msgstr[1] \\"\\"
+    msgid "test"
+    msgid_plural "tester"
+    msgstr[0] ""
+    msgstr[1] ""
     "
   `);
 });
@@ -270,19 +270,19 @@ it('handles translations that exists as single but get appended as plural', () =
 
   po.set({ single: 'test', plural: 'tester', location: createLocation() });
   expect(po.toString()).toMatchInlineSnapshot(`
-    "msgid \\"\\"
-    msgstr \\"\\"
-    \\"Plural-Forms: nplurals=2; plural=(n != 1);\\\\n\\"
-    \\"Content-Type: text/plain; charset=utf-8\\\\n\\"
-    \\"Content-Transfer-Encoding: 8bit\\\\n\\"
-    \\"MIME-Version: 1.0\\\\n\\"
-    \\"Language: en_US\\\\n\\"
+    "msgid ""
+    msgstr ""
+    "Plural-Forms: nplurals=2; plural=(n != 1);\\n"
+    "Content-Type: text/plain; charset=utf-8\\n"
+    "Content-Transfer-Encoding: 8bit\\n"
+    "MIME-Version: 1.0\\n"
+    "Language: en_US\\n"
 
     #: test.ts:1
-    msgid \\"test\\"
-    msgid_plural \\"tester\\"
-    msgstr[0] \\"test\\"
-    msgstr[1] \\"\\"
+    msgid "test"
+    msgid_plural "tester"
+    msgstr[0] "test"
+    msgstr[1] ""
     "
   `);
 });
@@ -311,17 +311,17 @@ it('removes removed comment if translation is brought back', async () => {
   po.updateFromTemplate(pot);
 
   expect(po.toString()).toMatchInlineSnapshot(`
-    "msgid \\"\\"
-    msgstr \\"\\"
-    \\"Plural-Forms: nplurals=2; plural=(n != 1);\\\\n\\"
-    \\"Content-Type: text/plain; charset=utf-8\\\\n\\"
-    \\"Content-Transfer-Encoding: 8bit\\\\n\\"
-    \\"MIME-Version: 1.0\\\\n\\"
-    \\"Language: en_US\\\\n\\"
+    "msgid ""
+    msgstr ""
+    "Plural-Forms: nplurals=2; plural=(n != 1);\\n"
+    "Content-Type: text/plain; charset=utf-8\\n"
+    "Content-Transfer-Encoding: 8bit\\n"
+    "MIME-Version: 1.0\\n"
+    "Language: en_US\\n"
 
     #: test.ts:1
-    msgid \\"test\\"
-    msgstr \\"test\\"
+    msgid "test"
+    msgstr "test"
     "
   `);
 });

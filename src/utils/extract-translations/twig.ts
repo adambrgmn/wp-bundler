@@ -1,17 +1,18 @@
 import { Location } from 'esbuild';
 import {
-  TwingEnvironment,
-  TwingLoaderNull,
+  createArrayLoader,
+  createEnvironment,
+  createSource,
+  TwingArrayNode,
+  TwingBaseNode,
+  TwingCommentNode,
+  TwingFunctionNode,
   TwingNode,
-  TwingNodeComment,
-  TwingNodeExpressionConstant,
-  TwingNodeExpressionFunction,
-  TwingNodeModule,
-  TwingSource,
 } from 'twing';
 
 import { TranslationMessage } from './types.js';
 import { isTranslatorsComment } from './utils.js';
+import { ensure } from '../assert.js';
 
 export { mightHaveTranslations } from './php.js';
 
@@ -21,8 +22,8 @@ export function extractTranslations(source: string, filename: string): Translati
   let lastTranslators: string | undefined = undefined;
 
   visitAll(getAst(source, filename), (node) => {
-    if (node instanceof TwingNodeExpressionFunction) {
-      let translation = extractTranslationFromCall(node);
+    if (node.type === 'function') {
+      let translation = extractTranslationFromCall(node, filename);
       if (translation) {
         translation.translators = lastTranslators;
         lastTranslators = undefined;
@@ -30,7 +31,7 @@ export function extractTranslations(source: string, filename: string): Translati
       }
     }
 
-    if (node instanceof TwingNodeComment) {
+    if (node.type === 'comment') {
       let translators = getTranslatorComment(node);
       if (translators) lastTranslators = translators;
     }
@@ -39,34 +40,39 @@ export function extractTranslations(source: string, filename: string): Translati
   return messages;
 }
 
-const env = new TwingEnvironment(new TwingLoaderNull());
+const env = createEnvironment(createArrayLoader({}), {});
 
-function getAst(code: string, filename: string): TwingNodeModule {
-  let source = new TwingSource(code, filename);
+function getAst(code: string, filename: string) {
+  let source = createSource(filename, code);
   return env.parse(env.tokenize(source), { strict: false });
 }
 
 function visitAll(node: TwingNode, callback: (node: TwingNode) => void) {
-  for (let [, child] of node.getNodes()) {
+  node.children;
+  for (let child of getChildren(node)) {
     callback(child);
     visitAll(child, callback);
   }
 }
 
-function extractTranslationFromCall(call: TwingNodeExpressionFunction): TranslationMessage | null {
+function getChildren(node: TwingBaseNode): TwingNode[] {
+  return Object.values(node.children);
+}
+
+function extractTranslationFromCall(call: TwingFunctionNode, file: string): TranslationMessage | null {
   let location: Location = {
-    file: call.getTemplateName(),
+    file,
     namespace: '',
-    line: call.getTemplateLine(),
-    column: call.getTemplateColumn() - 1,
+    line: call.line,
+    column: call.column - 1,
     length: 0,
     lineText: '',
     suggestion: '',
   };
 
-  let args = call.getNode('arguments');
+  let args = call.children.arguments;
 
-  switch (call.getAttribute('name')) {
+  switch (call.attributes.operatorName) {
     case '__':
     case '_e':
     case 'esc_attr__':
@@ -74,8 +80,8 @@ function extractTranslationFromCall(call: TwingNodeExpressionFunction): Translat
     case 'esc_html__':
     case 'esc_html_e':
       return {
-        text: getArgumentStringValue(args, 0) ?? '',
-        domain: getArgumentStringValue(args, 1) ?? undefined,
+        text: ensure(getArgumentStringValue(args, 0)),
+        domain: getArgumentStringValue(args, 1),
         location,
       };
 
@@ -84,43 +90,43 @@ function extractTranslationFromCall(call: TwingNodeExpressionFunction): Translat
     case 'esc_attr_x':
     case 'esc_html_x':
       return {
-        text: getArgumentStringValue(args, 0) ?? '',
-        context: getArgumentStringValue(args, 1) ?? '',
-        domain: getArgumentStringValue(args, 2) ?? undefined,
+        text: ensure(getArgumentStringValue(args, 0)),
+        context: ensure(getArgumentStringValue(args, 1)),
+        domain: getArgumentStringValue(args, 2),
         location,
       };
 
     case '_n':
       return {
-        single: getArgumentStringValue(args, 0) ?? '',
-        plural: getArgumentStringValue(args, 1) ?? '',
-        domain: getArgumentStringValue(args, 3) ?? undefined,
+        single: ensure(getArgumentStringValue(args, 0)),
+        plural: ensure(getArgumentStringValue(args, 1)),
+        domain: getArgumentStringValue(args, 3),
         location,
       };
 
     case '_n_noop':
       return {
-        single: getArgumentStringValue(args, 0) ?? '',
-        plural: getArgumentStringValue(args, 1) ?? '',
-        domain: getArgumentStringValue(args, 2) ?? undefined,
+        single: ensure(getArgumentStringValue(args, 0)),
+        plural: ensure(getArgumentStringValue(args, 1)),
+        domain: getArgumentStringValue(args, 2),
         location,
       };
 
     case '_nx':
       return {
-        single: getArgumentStringValue(args, 0) ?? '',
-        plural: getArgumentStringValue(args, 1) ?? '',
-        context: getArgumentStringValue(args, 3) ?? '',
-        domain: getArgumentStringValue(args, 4) ?? undefined,
+        single: ensure(getArgumentStringValue(args, 0)),
+        plural: ensure(getArgumentStringValue(args, 1)),
+        context: ensure(getArgumentStringValue(args, 3)),
+        domain: getArgumentStringValue(args, 4),
         location,
       };
 
     case '_nx_noop':
       return {
-        single: getArgumentStringValue(args, 0) ?? '',
-        plural: getArgumentStringValue(args, 1) ?? '',
-        context: getArgumentStringValue(args, 2) ?? '',
-        domain: getArgumentStringValue(args, 3) ?? undefined,
+        single: ensure(getArgumentStringValue(args, 0)),
+        plural: ensure(getArgumentStringValue(args, 1)),
+        context: ensure(getArgumentStringValue(args, 2)),
+        domain: getArgumentStringValue(args, 3),
         location,
       };
 
@@ -129,25 +135,22 @@ function extractTranslationFromCall(call: TwingNodeExpressionFunction): Translat
   }
 }
 
-function getArgumentStringValue(args: TwingNode, index: number): string | null {
-  try {
-    let argument = args.getNode(index);
-    if (argument instanceof TwingNodeExpressionConstant) {
-      let attr: unknown = argument.getAttribute('value');
-      return typeof attr === 'string' ? attr : null;
-    }
+function getArgumentStringValue(args: TwingArrayNode, index: number) {
+  /**
+   * When parsing the ast twing inserts indices as part of the arguments for some unknown reason.
+   * That's why we have to cater for the fact that the "array" looks like this:
+   * `[{value:0}, {value: 'Translation'}, {value: 1}, {value: 'domain'}]`
+   */
+  let clean_index = index * 2 + 1;
+  let argument = args.children[`${clean_index}`];
+  if (argument == null) return undefined;
 
-    return null;
-  } catch (error) {
-    return null;
-  }
+  let attr = 'value' in argument.attributes ? argument.attributes.value : undefined;
+  return typeof attr === 'string' ? attr : undefined;
 }
 
-function getTranslatorComment(node: TwingNodeComment) {
-  let comment: unknown = node.getAttribute('data');
-  if (typeof comment === 'string' && isTranslatorsComment(comment)) {
-    return comment;
-  }
-
+function getTranslatorComment(node: TwingCommentNode) {
+  let comment = node.attributes.data;
+  if (isTranslatorsComment(comment)) return comment;
   return null;
 }
