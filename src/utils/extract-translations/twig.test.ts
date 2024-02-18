@@ -162,13 +162,25 @@ it('extracts the correct location for translations', () => {
 it('can extract translator comments from twig', () => {
   let source = `
     {# translators: a translation #}
-    <p>{{ __('Translation', 'wp-bundler') }}</p>
+    <p>{{ __('Translation 0', 'wp-bundler') }}</p>
+    {# not a translators string #}
+    <p>{{ __('Translation 1', 'wp-bundler') }}</p>
   `;
 
   let result = extractTranslations(source, 'test.twig');
   expect(removeLocation(result)).toEqual([
-    { text: 'Translation', domain: 'wp-bundler', translators: 'translators: a translation' },
+    { text: 'Translation 0', domain: 'wp-bundler', translators: 'translators: a translation' },
+    { text: 'Translation 1', domain: 'wp-bundler', translators: undefined },
   ]);
+});
+
+it('will not break if domain is not defined', () => {
+  let source = `
+    <p>{{ __('Translation without domain') }}</p>
+  `;
+
+  let result = extractTranslations(source, 'test.twig');
+  expect(removeLocation(result)).toEqual([{ text: 'Translation without domain', domain: undefined }]);
 });
 
 function removeLocation(messages: TranslationMessage[]): Omit<TranslationMessage, 'location'>[] {

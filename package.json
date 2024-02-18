@@ -65,7 +65,7 @@
     "postcss": "^8.4.35",
     "postcss-preset-env": "^9.3.0",
     "strman": "^2.0.1",
-    "twing": "^5.1.4",
+    "twing": "^6.0.2",
     "type-fest": "^4.10.2",
     "yargs": "^17.7.2",
     "zod": "^3.22.4"
