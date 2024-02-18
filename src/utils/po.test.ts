@@ -251,7 +251,7 @@ it('creates correct plural templates translations', async () => {
   `);
 });
 
-it('handles translations that exists as single but get appended as plural', async () => {
+it('handles translations that exists as single but get appended as plural', () => {
   let po = new Po(
     `
   msgid ""

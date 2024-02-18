@@ -24,7 +24,7 @@ export const nomodule: BundlerPlugin = ({ project }) => ({
     }
 
     let entryPoints: Record<string, string> = {};
-    for (let [key, entry] of Object.entries(build.initialOptions.entryPoints)) {
+    for (let [key, entry] of Object.entries(build.initialOptions.entryPoints as Record<string, string>)) {
       entryPoints[key] = entry;
       let ext = path.extname(entry);
       if (ext !== '.css') {

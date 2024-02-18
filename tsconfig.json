@@ -15,5 +15,5 @@
     "jsx": "react",
     "types": ["@total-typescript/ts-reset"]
   },
-  "include": ["src"]
+  "include": ["."]
 }

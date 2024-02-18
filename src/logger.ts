@@ -115,7 +115,8 @@ export class Logger {
   }
 
   #write(message: unknown, { withPrefix = true, ...prefix }: WriteOptions = {}) {
-    this.#target.write(`${withPrefix ? this.#prefix(prefix) : ''}${message}\n`);
+    let parsedMessage = isStringifiable(message) ? message.toString() : JSON.stringify(message);
+    this.#target.write(`${withPrefix ? this.#prefix(prefix) : ''}${parsedMessage}\n`);
   }
 
   #prefix({ prefix = this.#prefixValue, state = prefix }: PrefixOptions = {}) {
@@ -124,6 +125,10 @@ export class Logger {
 
     return `${iconColor(icon)} ${prefixColor(` ${prefix} `)} `;
   }
+}
+
+function isStringifiable(value: unknown): value is { toString(): string } {
+  return value != null && typeof value.toString === 'function';
 }
 
 const PREFIX_ICONS: Record<string, string> = {

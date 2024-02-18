@@ -16,7 +16,7 @@ export const PLUGIN_NAME = 'wp-bundler-translations';
 
 export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
   name: PLUGIN_NAME,
-  async setup(build) {
+  setup(build) {
     if (config.translations == null) return;
 
     let translationsConfig = config.translations;

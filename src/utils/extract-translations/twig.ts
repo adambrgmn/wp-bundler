@@ -133,7 +133,7 @@ function getArgumentStringValue(args: TwingNode, index: number): string | null {
   try {
     let argument = args.getNode(index);
     if (argument instanceof TwingNodeExpressionConstant) {
-      let attr = argument.getAttribute('value');
+      let attr: unknown = argument.getAttribute('value');
       return typeof attr === 'string' ? attr : null;
     }
 
@@ -144,7 +144,7 @@ function getArgumentStringValue(args: TwingNode, index: number): string | null {
 }
 
 function getTranslatorComment(node: TwingNodeComment) {
-  let comment = node.getAttribute('data');
+  let comment: unknown = node.getAttribute('data');
   if (typeof comment === 'string' && isTranslatorsComment(comment)) {
     return comment;
   }

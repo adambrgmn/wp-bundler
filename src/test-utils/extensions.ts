@@ -10,7 +10,7 @@ export class TestLogger extends Logger {
   constructor(prefix: string) {
     process.env.FORCE_COLOR = '0';
     let stream = new Writable({
-      write: (chunk, _, callback) => {
+      write: (chunk: string | Buffer, _, callback) => {
         this.#logs.add(chunk.toString());
         callback();
       },
