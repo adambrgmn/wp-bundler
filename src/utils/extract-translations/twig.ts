@@ -40,7 +40,7 @@ export function extractTranslations(source: string, filename: string): Translati
   return messages;
 }
 
-const env = createEnvironment(createArrayLoader({}), {}); // new TwingEnvironment(new TwingLoaderNull());
+const env = createEnvironment(createArrayLoader({}), {});
 
 function getAst(code: string, filename: string) {
   let source = createSource(filename, code);
