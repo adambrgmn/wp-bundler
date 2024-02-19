@@ -2,10 +2,10 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as process from 'node:process';
 
-import { PackageJson } from 'type-fest';
+import type { PackageJson } from 'type-fest';
 
-import { BundlerConfig } from '../schema.js';
-import { ProjectInfo, ProjectPaths } from '../types.js';
+import type { BundlerConfig } from '../schema.js';
+import type { ProjectInfo, ProjectPaths } from '../types.js';
 import { readJson } from './read-json.js';
 import { resolveConfig } from './resolve-config.js';
 

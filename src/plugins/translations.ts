@@ -3,12 +3,12 @@ import * as crypto from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
-import { Message, Plugin } from 'esbuild';
+import type { Message, Plugin } from 'esbuild';
 import { globby } from 'globby';
 import md5 from 'md5';
 
-import { BundlerPlugin } from '../types.js';
-import { TranslationMessage, js, php, theme, twig } from '../utils/extract-translations/index.js';
+import type { BundlerPlugin } from '../types.js';
+import { type TranslationMessage, js, php, theme, twig } from '../utils/extract-translations/index.js';
 import { createFileHandler } from '../utils/handle-bundled-file.js';
 import { Po } from '../utils/po.js';
 
@@ -86,7 +86,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
 
         for (let distFile of Object.keys(result.metafile.outputs)) {
           let meta = result.metafile.outputs[distFile];
-          let srcFiles = Object.keys(meta.inputs);
+          let srcFiles = Object.keys(meta?.inputs ?? {});
 
           let jed = po.toJed(translationsConfig.domain, ({ comments }) => {
             return comments != null && srcFiles.some((file) => comments.reference.includes(file));
@@ -192,4 +192,6 @@ function getFoldLength(pkgJson: Record<string, unknown>) {
   if (typeof prettier === 'object' && prettier != null && 'printWidth' in prettier) {
     return typeof prettier.printWidth === 'number' ? prettier.printWidth : undefined;
   }
+
+  return undefined;
 }

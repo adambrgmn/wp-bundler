@@ -12,9 +12,7 @@ describe('toPhpArray', () => {
   });
 
   it('formats an object with primitive values', () => {
-    expect(toPhpArray({ a: 'a', b: 1, c: true })).toMatchInlineSnapshot(
-      `"["a"=>"a","b"=>1,"c"=>true,]"`,
-    );
+    expect(toPhpArray({ a: 'a', b: 1, c: true })).toMatchInlineSnapshot(`"["a"=>"a","b"=>1,"c"=>true,]"`);
   });
 
   it('formats an array of primitive values', () => {
@@ -22,9 +20,7 @@ describe('toPhpArray', () => {
   });
 
   it('formats an object with more complex values within', () => {
-    expect(toPhpArray({ a: ['a'], b: { foo: true } })).toMatchInlineSnapshot(
-      `"["a"=>["a",],"b"=>["foo"=>true,],]"`,
-    );
+    expect(toPhpArray({ a: ['a'], b: { foo: true } })).toMatchInlineSnapshot(`"["a"=>["a",],"b"=>["foo"=>true,],]"`);
   });
 
   it('formats an array with more complex values within', () => {

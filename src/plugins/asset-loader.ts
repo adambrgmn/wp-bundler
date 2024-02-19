@@ -1,4 +1,4 @@
-import { BundlerPlugin } from '../types.js';
+import type { BundlerPlugin } from '../types.js';
 import { assert } from '../utils/assert.js';
 import { createAssetLoaderTemplate } from '../utils/asset-loader.js';
 import { createFileHandler } from '../utils/handle-bundled-file.js';

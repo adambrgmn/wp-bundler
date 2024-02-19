@@ -1,6 +1,6 @@
-import { Location } from 'esbuild';
+import type { Location } from 'esbuild';
 
-import { TranslationMessage } from './index.js';
+import type { TranslationMessage } from './index.js';
 
 let find = [
   { comment: 'translators: Theme Name of the theme', re: /theme name:\s*(?<value>.+)/i },
@@ -31,7 +31,7 @@ function posToLocation(pos: number, source: string, file: string): Location {
   let substring = source.substr(0, pos);
   let lines = substring.split('\n');
   let line = lines.length;
-  let column = lines[line - 1].length;
+  let column = lines.at(line - 1)?.length ?? 0;
 
   return {
     file,

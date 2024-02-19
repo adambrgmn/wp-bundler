@@ -1,8 +1,8 @@
 import merge from 'lodash.merge';
-import { JsonValue } from 'type-fest';
+import type { JsonValue } from 'type-fest';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ProjectInfo } from '../types.js';
+import type { ProjectInfo } from '../types.js';
 import { createPaths } from './read-pkg.js';
 import { _resolveConfig } from './resolve-config.js';
 
@@ -63,7 +63,7 @@ describe('resolveConfig()', () => {
     resolveConfig(project);
 
     expect(spy).toHaveBeenCalled();
-    expect(spy.mock.calls[0][0]).toMatchInlineSnapshot(
+    expect(spy.mock.calls.at(0)?.at(0)).toMatchInlineSnapshot(
       `"Found more than one wp-bundler configuration (package.json, .wp-bundlerrc). It is recommended to only stick with one of the options: package.json["wp-bundler"], .wp-bundlerrc or wp-bundler.config.json."`,
     );
   });
@@ -84,7 +84,7 @@ describe('resolveConfig()', () => {
     );
 
     expect(spy).toHaveBeenCalled();
-    expect(spy.mock.calls[0][0]).toMatchInlineSnapshot(`
+    expect(spy.mock.calls.at(0)?.at(0)).toMatchInlineSnapshot(`
       "[
         {
           "code": "invalid_type",

@@ -1,6 +1,7 @@
 import ts from 'typescript';
 
-import { TranslationMessage } from './types.js';
+import { ensure } from '../assert.js';
+import type { TranslationMessage } from './types.js';
 import { isTranslatorsComment, trimComment, tsNodeToLocation } from './utils.js';
 
 export function mightHaveTranslations(source: string): boolean {
@@ -19,7 +20,7 @@ export function extractTranslations(source: string, filename: string): Translati
 const translatableMethods = ['_n', '_nx', '_x', '__'] as const;
 type TranslatableMethod = (typeof translatableMethods)[number];
 const isTranslatableMethod = (name: string): name is TranslatableMethod => {
-  return translatableMethods.includes(name);
+  return translatableMethods.includes(name as TranslatableMethod);
 };
 
 /**
@@ -60,6 +61,8 @@ function findRelevantImports(sourceFile: ts.SourceFile): ts.Identifier[] {
 
       return false;
     }
+
+    return true;
   });
 
   return identifiers;
@@ -117,6 +120,8 @@ function findTranslatableMessages(
       messages.push(message);
       return false;
     }
+
+    return true;
   });
 
   return messages;
@@ -159,32 +164,32 @@ function extractMessage(
     case '_n':
       return {
         location,
-        single: getStringValue(args[0]),
-        plural: getStringValue(args[1]),
+        single: getStringValue(ensure(args[0])),
+        plural: getStringValue(ensure(args[1])),
         domain: args[3] ? getStringValue(args[3]) : undefined,
       };
 
     case '_nx':
       return {
         location,
-        single: getStringValue(args[0]),
-        plural: getStringValue(args[1]),
-        context: getStringValue(args[3]),
+        single: getStringValue(ensure(args[0])),
+        plural: getStringValue(ensure(args[1])),
+        context: getStringValue(ensure(args[3])),
         domain: args[4] ? getStringValue(args[4]) : undefined,
       };
 
     case '__':
       return {
         location,
-        text: getStringValue(args[0]),
+        text: getStringValue(ensure(args[0])),
         domain: args[1] ? getStringValue(args[1]) : undefined,
       };
 
     case '_x':
       return {
         location,
-        text: getStringValue(args[0]),
-        context: getStringValue(args[1]),
+        text: getStringValue(ensure(args[0])),
+        context: getStringValue(ensure(args[1])),
         domain: args[2] ? getStringValue(args[2]) : undefined,
       };
   }

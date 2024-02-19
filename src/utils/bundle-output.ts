@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 
-import { Metafile, OutputFile } from 'esbuild';
+import type { Metafile, OutputFile } from 'esbuild';
 
 type BundlerOutput = Record<string, { file: string; size: number | null }[]>;
 
@@ -17,18 +17,18 @@ export function constructBundleOutput({ metafile, outputFiles, root, entryPoints
   for (let [key, output] of Object.entries(metafile.outputs)) {
     let entrypoint = getEntrypoint(output, root, entryPoints);
     if (entrypoint != null) {
-      bundles[entrypoint] = bundles[entrypoint] ?? [];
-      bundles[entrypoint].push({ file: key, size: getSize(key, outputFiles) });
+      bundles[entrypoint] ??= [];
+      bundles[entrypoint]?.push({ file: key, size: getSize(key, outputFiles) });
 
       if (output.cssBundle != null) {
-        bundles[entrypoint].push({ file: output.cssBundle, size: getSize(output.cssBundle, outputFiles) });
+        bundles[entrypoint]?.push({ file: output.cssBundle, size: getSize(output.cssBundle, outputFiles) });
       }
       continue;
     }
 
     let extension = path.extname(key);
     if (['.mo', '.po', '.pot'].includes(extension) || (extension === '.json' && key.includes('/languages/'))) {
-      bundles.translations = bundles.translations ?? [];
+      bundles.translations ??= [];
       bundles.translations.push({ file: key, size: getSize(key, outputFiles) });
       continue;
     }
@@ -48,7 +48,7 @@ function getEntrypoint(output: Metafile['outputs'][string], root: string, entryP
     let url = new URL(output.entryPoint, base);
     let relative = path.relative(root, url.pathname);
 
-    let name = Object.keys(entryPoints).find((entry) => entryPoints[entry].endsWith(relative));
+    let name = Object.keys(entryPoints).find((entry) => entryPoints[entry]?.endsWith(relative));
     return name ?? null;
   }
 

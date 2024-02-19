@@ -2,6 +2,7 @@
   "name": "@fransvilhelm/wp-bundler-plugin",
   "version": "0.0.0",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "build": "../../cli.js build",
     "dev": "../../cli.js dev"

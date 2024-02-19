@@ -1,7 +1,7 @@
+import type { Location } from 'esbuild';
 import { expect, it } from 'vitest';
 
 import { extractTranslations } from './javascript.js';
-import { Location } from 'esbuild';
 
 it('extract translations from regular ts files', () => {
   let source = `
@@ -153,7 +153,7 @@ it('outputs correct location for translations', () => {
   `.trim();
 
   let result = extractTranslations(source, 'test.ts');
-  expect(result[0].location).toEqual({
+  expect(result.at(0)?.location).toEqual({
     file: 'test.ts',
     namespace: '',
     line: 2, // 1-based
@@ -183,7 +183,7 @@ it('extracts translator comments', () => {
   `;
 
   let result = extractTranslations(source, 'test.php');
-  expect(result[0].translators).toEqual('translators: a comment 1');
-  expect(result[1].translators).toEqual('translators: a comment 2');
-  expect(result[2].translators).toEqual('translators: a comment 3');
+  expect(result.at(0)?.translators).toEqual('translators: a comment 1');
+  expect(result.at(1)?.translators).toEqual('translators: a comment 2');
+  expect(result.at(2)?.translators).toEqual('translators: a comment 3');
 });

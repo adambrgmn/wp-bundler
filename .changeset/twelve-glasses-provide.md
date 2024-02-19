@@ -1,5 +1,5 @@
 ---
-"@fransvilhelm/wp-bundler": patch
+'@fransvilhelm/wp-bundler': patch
 ---
 
 Update dependencies
