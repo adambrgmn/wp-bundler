@@ -31,7 +31,7 @@ function posToLocation(pos: number, source: string, file: string): Location {
   let substring = source.substr(0, pos);
   let lines = substring.split('\n');
   let line = lines.length;
-  let column = lines[line - 1].length;
+  let column = lines.at(line - 1)?.length ?? 0;
 
   return {
     file,

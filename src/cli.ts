@@ -30,10 +30,11 @@ export function cli() {
         } as const,
       },
       async function build(argv) {
-        let metadata = getMetadata(argv.cwd ?? process.cwd(), __dirname);
+        let cwd = argv.cwd ?? process.cwd();
+        let metadata = getMetadata(cwd, __dirname);
         prerun(argv.mode, metadata);
 
-        let context = await createContext({ ...argv, ...metadata, logger: new Logger('wp-bundler') });
+        let context = await createContext({ ...argv, cwd, ...metadata, logger: new Logger('wp-bundler') });
 
         try {
           await context.rebuild();
@@ -71,10 +72,11 @@ export function cli() {
         } as const,
       },
       async function dev(argv) {
-        let metadata = getMetadata(argv.cwd ?? process.cwd(), __dirname);
+        let cwd = argv.cwd ?? process.cwd();
+        let metadata = getMetadata(cwd, __dirname);
         prerun(argv.mode, metadata);
 
-        let context = await createContext({ ...argv, ...metadata, watch: true, logger: new Logger('wp-bundler') });
+        let context = await createContext({ ...argv, cwd, ...metadata, watch: true, logger: new Logger('wp-bundler') });
 
         try {
           await context.watch();
@@ -93,6 +95,6 @@ export function cli() {
 }
 
 function prerun(mode: Mode, metadata: Metadata) {
-  process.env.NODE_ENV = process.env.NODE_ENV || mode === 'dev' ? 'development' : 'production';
+  process.env['NODE_ENV'] = process.env['NODE_ENV'] || mode === 'dev' ? 'development' : 'production';
   rimraf(metadata.project.paths.absolute(metadata.config.outdir));
 }

@@ -12,6 +12,7 @@ import {
   isPluralMessage,
   isTranslationMessage,
 } from './extract-translations/index.js';
+import { ensure } from './assert.js';
 
 const GetTextTranslationSchema = z.object({
   msgctxt: z.string().optional(),
@@ -32,7 +33,7 @@ const GetTextTranslationSchema = z.object({
 function parse(source: string | Buffer) {
   let result = po.parse(source);
   for (let key of Object.keys(result.translations)) {
-    let context = result.translations[key];
+    let context = ensure(result.translations[key]);
     result.translations[key] = Object.entries(context).reduce<GetTextTranslations['translations'][string]>(
       (acc, [key, translation]) => {
         if (key === '') {
@@ -155,18 +156,20 @@ export class Po {
             obj.msgid_plural != null || source.msgid_plural != null,
           );
         }
+
+        return undefined;
       },
     );
 
     context[next.msgid] = final;
   }
 
-  createContext(context: string): GetTextTranslations['translations'][string] {
+  createContext(context: string) {
     let existing = this.getContext(context);
     if (existing != null) return existing;
 
     this.parsedTranslations.translations[context] = {};
-    return this.parsedTranslations.translations[context];
+    return ensure(this.parsedTranslations.translations[context]);
   }
 
   remove(id: string, context: string = '') {

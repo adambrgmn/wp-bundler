@@ -86,7 +86,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
 
         for (let distFile of Object.keys(result.metafile.outputs)) {
           let meta = result.metafile.outputs[distFile];
-          let srcFiles = Object.keys(meta.inputs);
+          let srcFiles = Object.keys(meta?.inputs ?? {});
 
           let jed = po.toJed(translationsConfig.domain, ({ comments }) => {
             return comments != null && srcFiles.some((file) => comments.reference.includes(file));
@@ -192,4 +192,6 @@ function getFoldLength(pkgJson: Record<string, unknown>) {
   if (typeof prettier === 'object' && prettier != null && 'printWidth' in prettier) {
     return typeof prettier.printWidth === 'number' ? prettier.printWidth : undefined;
   }
+
+  return undefined;
 }

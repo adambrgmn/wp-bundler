@@ -141,13 +141,13 @@ describe('Logger', () => {
 class TestWriter extends Writable {
   #lines: string[] = [];
 
-  write(chunk: string | Buffer, callback?: ((error: Error | null | undefined) => void) | undefined): boolean;
-  write(
+  override write(chunk: string | Buffer, callback?: ((error: Error | null | undefined) => void) | undefined): boolean;
+  override write(
     chunk: string | Buffer,
     encoding: BufferEncoding,
     callback?: ((error: Error | null | undefined) => void) | undefined,
   ): boolean;
-  write(chunk: unknown): boolean {
+  override write(chunk: unknown): boolean {
     if (typeof chunk === 'string') {
       this.#lines.push(chunk);
       return true;

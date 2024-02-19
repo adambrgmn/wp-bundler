@@ -16,10 +16,10 @@ export function phpNodeToLocation(node: PhpNode, file: string): Location {
 
 export function tsNodeToLocation(node: TsNode, fnName: string, source: string, file: string): Location {
   let pos = source.indexOf(fnName, node.pos);
-  let substring = source.substr(0, pos);
+  let substring = source.substring(0, pos);
   let lines = substring.split('\n');
   let line = lines.length;
-  let column = lines[line - 1].length;
+  let column = lines.at(line - 1)?.length ?? 0;
 
   return {
     file,
