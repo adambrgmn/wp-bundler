@@ -17,33 +17,25 @@ const MessageBaseSchema = z.object({
   translators: z.string().optional(),
 });
 
-export const PluralMessageWithoutContextSchema = MessageBaseSchema.extend({ single: z.string(), plural: z.string() });
-export const PluralMessageWithContextSchema = PluralMessageWithoutContextSchema.extend({ context: z.string() });
-export const PluralMessageSchema = z.union([PluralMessageWithoutContextSchema, PluralMessageWithContextSchema]);
+const PluralMessageWithoutContextSchema = MessageBaseSchema.extend({ single: z.string(), plural: z.string() });
+const PluralMessageWithContextSchema = PluralMessageWithoutContextSchema.extend({ context: z.string() });
+const PluralMessageSchema = z.union([PluralMessageWithoutContextSchema, PluralMessageWithContextSchema]);
 
-export type PluralMessageWithoutContext = z.infer<typeof PluralMessageWithoutContextSchema>;
-export type PluralMessageWithContext = z.infer<typeof PluralMessageWithContextSchema>;
-export type PluralMessage = z.infer<typeof PluralMessageSchema>;
+type PluralMessageWithContext = z.infer<typeof PluralMessageWithContextSchema>;
+type PluralMessage = z.infer<typeof PluralMessageSchema>;
 
 export const isPluralMessage = (v: unknown): v is PluralMessage => {
   let res = PluralMessageSchema.safeParse(v);
   return res.success;
 };
 
-export const SingleMessageWithoutContextSchema = MessageBaseSchema.extend({ text: z.string() });
-export const SingleMessageWithContextSchema = SingleMessageWithoutContextSchema.extend({ context: z.string() });
-export const SingleMessageSchema = z.union([SingleMessageWithoutContextSchema, SingleMessageWithContextSchema]);
+const SingleMessageWithoutContextSchema = MessageBaseSchema.extend({ text: z.string() });
+const SingleMessageWithContextSchema = SingleMessageWithoutContextSchema.extend({ context: z.string() });
+const SingleMessageSchema = z.union([SingleMessageWithoutContextSchema, SingleMessageWithContextSchema]);
 
-export type SingleMessageWithoutContext = z.infer<typeof SingleMessageWithoutContextSchema>;
-export type SingleMessageWithContext = z.infer<typeof SingleMessageWithContextSchema>;
-export type SingleMessage = z.infer<typeof SingleMessageSchema>;
+type SingleMessageWithContext = z.infer<typeof SingleMessageWithContextSchema>;
 
-export const isSingleMessage = (v: unknown): v is SingleMessage => {
-  let res = SingleMessageSchema.safeParse(v);
-  return res.success;
-};
-
-export const TranslationMessageSchema = z.union([PluralMessageSchema, SingleMessageSchema]);
+const TranslationMessageSchema = z.union([PluralMessageSchema, SingleMessageSchema]);
 export type TranslationMessage = z.infer<typeof TranslationMessageSchema>;
 export const isTranslationMessage = (v: unknown): v is TranslationMessage => {
   let res = TranslationMessageSchema.safeParse(v);

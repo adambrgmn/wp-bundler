@@ -41,6 +41,7 @@
     "dev": "tsc -p ./tsconfig.build.json --watch",
     "dev:dev-client": "npm run build:dev-client -- --watch",
     "lint": "eslint . --ext .ts --ext .tsx --ext .js --ignore-path .gitignore",
+    "format": "prettier --write .",
     "test": "vitest --ui --coverage",
     "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit",
