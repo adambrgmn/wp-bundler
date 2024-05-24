@@ -5,6 +5,9 @@ on: pull_request
 jobs:
   validate:
     name: Validate
+    strategy:
+      matrix:
+        version: [18, 20, 22]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -13,7 +16,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: ${{ matrix.version }}
           cache: npm
 
       - name: Install
