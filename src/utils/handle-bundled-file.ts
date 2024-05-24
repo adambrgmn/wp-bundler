@@ -1,9 +1,9 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { BuildOptions, BuildResult } from 'esbuild';
+import type { BuildOptions, BuildResult } from 'esbuild';
 
-import { ProjectInfo } from '../types.js';
+import type { ProjectInfo } from '../types.js';
 
 export function createFileHandler<Opts extends BuildOptions>(result: BuildResult<Opts>, project: ProjectInfo) {
   function append(output: { path: string; contents: Uint8Array | Buffer | string }) {

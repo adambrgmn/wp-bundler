@@ -1,6 +1,6 @@
 import { globbySync } from 'globby';
 
-import { BundlerPlugin } from '../types.js';
+import type { BundlerPlugin } from '../types.js';
 
 export const PLUGIN_NAME = 'wp-bundler-watch';
 
@@ -12,7 +12,7 @@ export const watch: BundlerPlugin = (options) => ({
     }).map((p) => options.project.paths.absolute(p));
 
     let entry = Object.values(options.config.entryPoints)[0];
-    let filter = new RegExp(entry.replaceAll('.', '\\.').replaceAll('/', '\\/'));
+    let filter = new RegExp(entry?.replaceAll('.', '\\.').replaceAll('/', '\\/') ?? '');
 
     build.onResolve({ filter }, (args) => {
       return {

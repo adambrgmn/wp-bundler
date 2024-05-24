@@ -1,4 +1,4 @@
-import { Location } from 'esbuild';
+import type { Location } from 'esbuild';
 import { expect, it } from 'vitest';
 
 import { Po } from './po.js';

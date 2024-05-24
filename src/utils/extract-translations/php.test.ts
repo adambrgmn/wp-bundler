@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 
-import { TranslationMessage } from './index.js';
+import type { TranslationMessage } from './index.js';
 import { extractTranslations } from './php.js';
 
 it('extracts translations from php files', () => {
@@ -113,7 +113,7 @@ it('extracts the correct location for translations', () => {
   `.trim();
 
   let result = extractTranslations(source, 'test.php');
-  expect(result[0].location).toEqual({
+  expect(result.at(0)?.location).toEqual({
     file: 'test.php',
     namespace: '',
     line: 4, // 1-based
@@ -145,10 +145,10 @@ it('extracts translator comments', () => {
   `;
 
   let result = extractTranslations(source, 'test.php');
-  expect(result[0].translators).toEqual('translators: a comment 1');
-  expect(result[1].translators).toEqual('translators: a comment 2');
-  expect(result[2].translators).toEqual('translators: a comment 3');
-  expect(result[3]?.translators).toEqual('translators: a comment 4');
+  expect(result.at(0)?.translators).toEqual('translators: a comment 1');
+  expect(result.at(1)?.translators).toEqual('translators: a comment 2');
+  expect(result.at(2)?.translators).toEqual('translators: a comment 3');
+  expect(result.at(3)?.translators).toEqual('translators: a comment 4');
 });
 
 function removeLocation(messages: TranslationMessage[]) {

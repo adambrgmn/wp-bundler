@@ -43,8 +43,8 @@ type Payload = { added: string[]; removed: string[]; updated: string[] };
 
 function parseEventPayload(payload: string) {
   try {
-    let value = JSON.parse(payload);
-    if (typeof value === 'object' && value != null) return value as Payload;
+    let value = JSON.parse(payload) as Payload;
+    if (typeof value === 'object' && value != null) return value;
 
     throw new Error('Bad data format');
   } catch (error) {

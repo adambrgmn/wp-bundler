@@ -206,6 +206,7 @@ CSS modules are supported out of the box. Name your css files with the `.module.
 
 ```js
 import * as style from './button.module.css';
+
 <button className={style.button}>Hello</button>;
 ```
 

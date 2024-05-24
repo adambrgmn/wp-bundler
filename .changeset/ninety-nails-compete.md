@@ -2,4 +2,4 @@
 '@fransvilhelm/wp-bundler': patch
 ---
 
-Update dependencies
+Upgrade dependencies

@@ -1,19 +1,13 @@
 {
+  "extends": ["@tsconfig/node18/tsconfig.json", "@tsconfig/strictest/tsconfig.json"],
   "compilerOptions": {
-    "target": "esnext",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
+    "lib": ["es2023", "dom", "dom.iterable"],
+    "noPropertyAccessFromIndexSignature": false,
+    "verbatimModuleSyntax": true,
+    "checkJs": false,
     "noEmit": true,
-    "jsx": "react",
-    "types": ["@total-typescript/ts-reset"]
+    "jsx": "react"
   },
-  "include": ["."]
+  "include": ["."],
+  "exclude": ["**/dist", "coverage"]
 }

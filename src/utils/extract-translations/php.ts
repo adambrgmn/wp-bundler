@@ -1,6 +1,6 @@
-import { Call, Comment, CommentBlock, Engine, Node, String } from 'php-parser';
+import { type Call, type Comment, type CommentBlock, Engine, type Node, type String } from 'php-parser';
 
-import { TranslationMessage } from './types.js';
+import type { TranslationMessage } from './types.js';
 import { isTranslatorsComment, phpNodeToLocation, trimComment } from './utils.js';
 
 export const WP_TRANSLATION_FUNCTIONS = [
@@ -113,7 +113,9 @@ function getCalledFunction(call: Call): string | null {
 
 function extractTranslationFromCall(call: Call, filename: string): TranslationMessage | null {
   let name = getCalledFunction(call);
-  const getStringVal = (val: Node) => (isStringNode(val) && typeof val.value === 'string' ? val.value : null);
+  const getStringVal = (val: Node | undefined) => {
+    return isStringNode(val) && typeof val.value === 'string' ? val.value : null;
+  };
 
   let location = phpNodeToLocation(call, filename);
 
@@ -125,8 +127,8 @@ function extractTranslationFromCall(call: Call, filename: string): TranslationMe
     case 'esc_html__':
     case 'esc_html_e':
       return {
-        text: getStringVal(call.arguments[0]) ?? '',
-        domain: getStringVal(call.arguments[1]) ?? undefined,
+        text: getStringVal(call.arguments.at(0)) ?? '',
+        domain: getStringVal(call.arguments.at(1)) ?? undefined,
         location,
       };
 
@@ -135,43 +137,43 @@ function extractTranslationFromCall(call: Call, filename: string): TranslationMe
     case 'esc_attr_x':
     case 'esc_html_x':
       return {
-        text: getStringVal(call.arguments[0]) ?? '',
-        context: getStringVal(call.arguments[1]) ?? '',
-        domain: getStringVal(call.arguments[2]) ?? undefined,
+        text: getStringVal(call.arguments.at(0)) ?? '',
+        context: getStringVal(call.arguments.at(1)) ?? '',
+        domain: getStringVal(call.arguments.at(2)) ?? undefined,
         location,
       };
 
     case '_n':
       return {
-        single: getStringVal(call.arguments[0]) ?? '',
-        plural: getStringVal(call.arguments[1]) ?? '',
-        domain: getStringVal(call.arguments[3]) ?? undefined,
+        single: getStringVal(call.arguments.at(0)) ?? '',
+        plural: getStringVal(call.arguments.at(1)) ?? '',
+        domain: getStringVal(call.arguments.at(3)) ?? undefined,
         location,
       };
 
     case '_n_noop':
       return {
-        single: getStringVal(call.arguments[0]) ?? '',
-        plural: getStringVal(call.arguments[1]) ?? '',
-        domain: getStringVal(call.arguments[2]) ?? undefined,
+        single: getStringVal(call.arguments.at(0)) ?? '',
+        plural: getStringVal(call.arguments.at(1)) ?? '',
+        domain: getStringVal(call.arguments.at(2)) ?? undefined,
         location,
       };
 
     case '_nx':
       return {
-        single: getStringVal(call.arguments[0]) ?? '',
-        plural: getStringVal(call.arguments[1]) ?? '',
-        context: getStringVal(call.arguments[3]) ?? '',
-        domain: getStringVal(call.arguments[4]) ?? undefined,
+        single: getStringVal(call.arguments.at(0)) ?? '',
+        plural: getStringVal(call.arguments.at(1)) ?? '',
+        context: getStringVal(call.arguments.at(3)) ?? '',
+        domain: getStringVal(call.arguments.at(4)) ?? undefined,
         location,
       };
 
     case '_nx_noop':
       return {
-        single: getStringVal(call.arguments[0]) ?? '',
-        plural: getStringVal(call.arguments[1]) ?? '',
-        context: getStringVal(call.arguments[2]) ?? '',
-        domain: getStringVal(call.arguments[3]) ?? undefined,
+        single: getStringVal(call.arguments.at(0)) ?? '',
+        plural: getStringVal(call.arguments.at(1)) ?? '',
+        context: getStringVal(call.arguments.at(2)) ?? '',
+        domain: getStringVal(call.arguments.at(3)) ?? undefined,
         location,
       };
 

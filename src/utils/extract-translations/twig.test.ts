@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 
-import { TranslationMessage } from './index.js';
+import type { TranslationMessage } from './index.js';
 import { extractTranslations } from './twig.js';
 
 it('extracts translations from php files', () => {
@@ -148,7 +148,7 @@ it('extracts the correct location for translations', () => {
   `;
 
   let result = extractTranslations(source, 'test.twig');
-  expect(result[0].location).toEqual({
+  expect(result.at(0)?.location).toEqual({
     file: 'test.twig',
     namespace: '',
     line: 2, // 1-based

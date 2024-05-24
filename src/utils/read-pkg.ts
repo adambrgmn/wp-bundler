@@ -2,10 +2,10 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as process from 'node:process';
 
-import { PackageJson } from 'type-fest';
+import type { PackageJson } from 'type-fest';
 
-import { BundlerConfig } from '../schema.js';
-import { ProjectInfo, ProjectPaths } from '../types.js';
+import type { BundlerConfig } from '../schema.js';
+import type { ProjectInfo, ProjectPaths } from '../types.js';
 import { readJson } from './read-json.js';
 import { resolveConfig } from './resolve-config.js';
 
@@ -29,7 +29,7 @@ export function getMetadata(projectPath: string, bundlerPath: string): Metadata 
   return metadata;
 }
 
-export function readPkg(cwd: string): ProjectInfo {
+function readPkg(cwd: string): ProjectInfo {
   let pkg = readPkgUp(cwd);
   if (pkg == null) {
     throw new Error(`Could not read package.json related to ${cwd}.`);
@@ -43,7 +43,7 @@ interface ReadResult {
   packageJson: PackageJson & Record<string, unknown>;
 }
 
-export function readPkgUp(cwd: string = process.cwd()): ReadResult | null {
+function readPkgUp(cwd: string = process.cwd()): ReadResult | null {
   if (cwd === '/') return null;
   let items = fs.readdirSync(cwd);
 

@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import { transform } from '@swc/core';
 import esbuild from 'esbuild';
 
-import { BundlerPlugin } from '../types.js';
+import type { BundlerPlugin } from '../types.js';
 import { PLUGIN_NAME as ASSET_LOADER } from './asset-loader.js';
 import { PLUGIN_NAME as LOG } from './log.js';
 import { PLUGIN_NAME as POSTCSS } from './postcss.js';

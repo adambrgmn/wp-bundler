@@ -4,10 +4,10 @@ import esbuild from 'esbuild';
 
 import { Logger } from './logger.js';
 import * as plugin from './plugins/index.js';
-import { Mode } from './types.js';
-import { Metadata } from './utils/read-pkg.js';
+import type { Mode } from './types.js';
+import type { Metadata } from './utils/read-pkg.js';
 
-export type ContextOptions = Metadata & {
+type ContextOptions = Metadata & {
   watch?: boolean;
   write?: boolean;
   mode?: Mode;

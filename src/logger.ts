@@ -2,11 +2,11 @@ import * as process from 'node:process';
 import { Writable } from 'node:stream';
 import * as util from 'node:util';
 
-import { ChalkInstance, default as chalkDefault } from 'chalk';
-import { BuildResult, PartialMessage } from 'esbuild';
+import { type ChalkInstance, default as chalkDefault } from 'chalk';
+import type { BuildResult, PartialMessage } from 'esbuild';
 import { filesize } from 'filesize';
 
-import { BundleOutputOptions, constructBundleOutput } from './utils/bundle-output.js';
+import { type BundleOutputOptions, constructBundleOutput } from './utils/bundle-output.js';
 import { figures } from './utils/figures.js';
 
 export class Logger {
@@ -15,7 +15,12 @@ export class Logger {
 
   chalk: ChalkInstance;
 
-  #prefixColors: Record<string, [icon: typeof chalkDefault, prefix: typeof chalkDefault]>;
+  #prefixColors: {
+    warning: [icon: typeof chalkDefault, prefix: typeof chalkDefault];
+    error: [icon: typeof chalkDefault, prefix: typeof chalkDefault];
+    success: [icon: typeof chalkDefault, prefix: typeof chalkDefault];
+    default: [icon: typeof chalkDefault, prefix: typeof chalkDefault];
+  };
 
   constructor(prefix: string, target: Writable = process.stdout, chalk: ChalkInstance = chalkDefault) {
     this.#prefixValue = prefix;
@@ -120,8 +125,9 @@ export class Logger {
   }
 
   #prefix({ prefix = this.#prefixValue, state = prefix }: PrefixOptions = {}) {
-    let [iconColor, prefixColor] = this.#prefixColors[state?.toLowerCase() ?? 'default'] ?? this.#prefixColors.default;
-    let icon = PREFIX_ICONS[state?.toLowerCase() ?? 'default'] ?? PREFIX_ICONS.default;
+    let key = (state?.toLowerCase() ?? 'default') as keyof typeof PREFIX_ICONS;
+    let [iconColor, prefixColor] = this.#prefixColors[key] ?? this.#prefixColors.default;
+    let icon = PREFIX_ICONS[key] ?? PREFIX_ICONS.default;
 
     return `${iconColor(icon)} ${prefixColor(` ${prefix} `)} `;
   }
@@ -131,12 +137,12 @@ function isStringifiable(value: unknown): value is { toString(): string } {
   return value != null && typeof value.toString === 'function';
 }
 
-const PREFIX_ICONS: Record<string, string> = {
+const PREFIX_ICONS = {
   warning: figures.triangleUp,
   error: figures.cross,
   success: figures.tick,
   default: figures.triangleRight,
-};
+} as const;
 
 interface PrefixOptions {
   prefix?: string | null;

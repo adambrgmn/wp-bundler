@@ -1,10 +1,10 @@
 import { Writable } from 'node:stream';
 
 import { Chalk } from 'chalk';
+import type { Note } from 'esbuild';
 import { describe, expect, it } from 'vitest';
 
 import { Logger } from './logger.js';
-import { Note } from 'esbuild';
 
 const chalk = new Chalk({ level: 0 });
 
@@ -141,13 +141,13 @@ describe('Logger', () => {
 class TestWriter extends Writable {
   #lines: string[] = [];
 
-  write(chunk: string | Buffer, callback?: ((error: Error | null | undefined) => void) | undefined): boolean;
-  write(
+  override write(chunk: string | Buffer, callback?: ((error: Error | null | undefined) => void) | undefined): boolean;
+  override write(
     chunk: string | Buffer,
     encoding: BufferEncoding,
     callback?: ((error: Error | null | undefined) => void) | undefined,
   ): boolean;
-  write(chunk: unknown): boolean {
+  override write(chunk: unknown): boolean {
     if (typeof chunk === 'string') {
       this.#lines.push(chunk);
       return true;

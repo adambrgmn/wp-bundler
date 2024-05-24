@@ -1,11 +1,11 @@
 import * as path from 'node:path';
 
-import { BuildContext } from 'esbuild';
+import type { BuildContext } from 'esbuild';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { createContext } from './context.js';
 import { TestLogger } from './test-utils/extensions.js';
-import { Mode } from './types.js';
+import type { Mode } from './types.js';
 import { dirname } from './utils/dirname.js';
 import { getMetadata } from './utils/read-pkg.js';
 

@@ -1,7 +1,7 @@
-import { Plugin } from 'esbuild';
-import { PackageJson } from 'type-fest';
+import type { Plugin } from 'esbuild';
+import type { PackageJson } from 'type-fest';
 
-import { BundlerConfig } from './schema.js';
+import type { BundlerConfig } from './schema.js';
 
 export type BundlerOptions = {
   config: BundlerConfig;
