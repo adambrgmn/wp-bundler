@@ -19,6 +19,9 @@
     "email": "adam@fransvilhelm.com"
   },
   "homepage": "https://github.com/adambrgmn/wp-bundler#readme",
+  "bugs": {
+    "url": "https://github.com/adambrgmn/wp-bundler/issues"
+  },
   "license": "MIT",
   "files": [
     "dist",
@@ -98,42 +101,6 @@
   },
   "peerDependencies": {
     "typescript": ">4.7.0"
-  },
-  "bugs": {
-    "url": "https://github.com/adambrgmn/wp-bundler/issues"
-  },
-  "_eslintConfig": {
-    "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/recommended-type-checked"
-    ],
-    "env": {
-      "node": true
-    },
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "project": true,
-      "tsconfigRootDir": "."
-    },
-    "plugins": [
-      "@typescript-eslint"
-    ],
-    "root": true,
-    "rules": {
-      "prefer-const": "off",
-      "no-empty": [
-        "error",
-        {
-          "allowEmptyCatch": true
-        }
-      ],
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          "ignoreRestSiblings": true
-        }
-      ]
-    }
   },
   "prettier": {
     "singleQuote": true,
