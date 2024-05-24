@@ -40,7 +40,7 @@
     "predev": "rm -rf dist",
     "dev": "tsc -p ./tsconfig.build.json --watch",
     "dev:dev-client": "npm run build:dev-client -- --watch",
-    "lint": "eslint . --ext .ts --ext .tsx --ext .js --ignore-path .gitignore",
+    "lint": "eslint",
     "format": "prettier --write .",
     "test": "vitest --ui --coverage",
     "test:coverage": "vitest run --coverage",
@@ -73,6 +73,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.3",
+    "@eslint/js": "^9.3.0",
     "@fransvilhelm/changeset-changelog": "^1.1.1",
     "@prettier/plugin-php": "^0.22.2",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
@@ -85,14 +86,14 @@
     "@types/node": "^20.12.12",
     "@types/strman": "^2.0.3",
     "@types/yargs": "^17.0.32",
-    "@typescript-eslint/eslint-plugin": "^7.0.1",
-    "@typescript-eslint/parser": "^7.0.1",
     "@vitest/coverage-v8": "^1.6.0",
     "@vitest/ui": "^1.6.0",
-    "eslint": "^8.56.0",
+    "eslint": "^9.3.0",
+    "globals": "^15.3.0",
     "lodash.merge": "^4.6.2",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5",
+    "typescript-eslint": "^7.10.0",
     "vitest": "^1.6.0"
   },
   "peerDependencies": {
@@ -101,7 +102,7 @@
   "bugs": {
     "url": "https://github.com/adambrgmn/wp-bundler/issues"
   },
-  "eslintConfig": {
+  "_eslintConfig": {
     "extends": [
       "eslint:recommended",
       "plugin:@typescript-eslint/recommended-type-checked"
@@ -149,9 +150,6 @@
     "plugins": [
       "@trivago/prettier-plugin-sort-imports"
     ]
-  },
-  "volta": {
-    "node": "18.16.0"
   },
   "packageManager": "npm@9.5.1"
 }
