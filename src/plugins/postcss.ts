@@ -2,20 +2,17 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 import type { PartialMessage } from 'esbuild';
-import { type AcceptedPlugin, type Postcss, Warning, default as _postcss } from 'postcss';
+import postcss, { type Warning } from 'postcss';
 import postcssPresetEnv from 'postcss-preset-env';
 
 import type { BundlerPlugin } from '../types.js';
 
-// Something, not sure what, is broken with the postcss types default export. Never use default exports...
-const postcss = _postcss as unknown as Postcss;
 export const PLUGIN_NAME = 'wp-bundler-postcss';
 
 const postcssPlugin: BundlerPlugin = () => ({
   name: PLUGIN_NAME,
   setup(build) {
-    // @ts-expect-error The env plugin lacks good types or something clashes with postcss types.
-    let plugins = [postcssPresetEnv()] as AcceptedPlugin[];
+    let plugins = [postcssPresetEnv()];
     let processor = postcss(plugins);
 
     build.onLoad({ filter: /\.css$/, namespace: 'file' }, async (args) => {
