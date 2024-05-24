@@ -9,7 +9,7 @@ const config = [
    * other configuration together with `ignores` it stops working and eslint start lint files that
    * it shouldn't check.
    */
-  { ignores: ['**/dist', '**/coverage'] },
+  { ignores: ['**/dist', '**/coverage', 'cli.js'] },
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
