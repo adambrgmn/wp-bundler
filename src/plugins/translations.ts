@@ -89,7 +89,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
           let srcFiles = Object.keys(meta?.inputs ?? {});
 
           let jed = po.toJed(translationsConfig.domain, ({ comments }) => {
-            return comments != null && srcFiles.some((file) => comments.reference.includes(file));
+            return comments != null && srcFiles.some((file) => comments.reference?.includes(file));
           });
 
           if (jed == null) continue;
@@ -177,7 +177,7 @@ async function findThemeTranslations(cwd: string, domain: string) {
   try {
     let source = await fs.readFile(path.join(cwd, 'style.css'), 'utf-8');
     return theme.extractTranslations(source, 'style.css', domain);
-  } catch (error) {
+  } catch {
     return [];
   }
 }

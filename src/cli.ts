@@ -39,7 +39,7 @@ export function cli() {
         try {
           await context.rebuild();
           process.exit(0);
-        } catch (error) {
+        } catch {
           process.exit(1);
         } finally {
           await context.dispose();

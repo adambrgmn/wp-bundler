@@ -47,7 +47,7 @@ function readConfigFile(path: string, read: (path: string) => unknown): unknown 
   try {
     let json = read(path);
     return json;
-  } catch (error) {
+  } catch {
     return undefined;
   }
 }

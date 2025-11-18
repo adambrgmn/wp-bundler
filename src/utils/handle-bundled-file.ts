@@ -37,5 +37,5 @@ function ensureDir(file: string) {
   try {
     let dirname = path.dirname(file);
     fs.mkdirSync(dirname, { recursive: true });
-  } catch (error) {}
+  } catch {}
 }

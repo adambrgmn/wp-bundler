@@ -2,7 +2,7 @@ import pluginJs from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-/** @type {import('eslint').Linter.FlatConfig[]} */
+/** @type {import('eslint').Linter.Config[]} */
 const config = [
   /**
    * For some unknown reason `ignores` needs to be in its own config object. As soon as I put any
@@ -10,15 +10,13 @@ const config = [
    * it shouldn't check.
    */
   { ignores: ['**/dist', '**/coverage', 'cli.js'] },
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   {
     languageOptions: {
       globals: globals.node,
       parserOptions: {
-        project: true,
+        projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
     },

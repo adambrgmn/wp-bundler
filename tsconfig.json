@@ -6,7 +6,8 @@
     "verbatimModuleSyntax": true,
     "checkJs": false,
     "noEmit": true,
-    "jsx": "react"
+    "jsx": "react",
+    "allowJs": true
   },
   "include": ["."],
   "exclude": ["**/dist", "coverage"]

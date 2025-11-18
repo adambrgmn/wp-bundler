@@ -72,7 +72,7 @@ export class Po {
     try {
       let source = await fs.readFile(filename);
       return new Po(source, filename);
-    } catch (error) {
+    } catch {
       return new Po(
         `
       msgid ""

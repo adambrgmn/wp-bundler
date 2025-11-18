@@ -91,8 +91,6 @@ function isCallNode(node?: Node | null): node is Call {
   return node != null && node.kind === 'call';
 }
 
-// This is not the built-in type String, but a node with kind 'string'
-// eslint-disable-next-line @typescript-eslint/ban-types
 function isStringNode(node?: Node | null): node is String {
   return node != null && node.kind === 'string';
 }
