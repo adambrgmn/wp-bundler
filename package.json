@@ -34,7 +34,7 @@
     "bundler"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "prebuild": "rm -rf dist",
@@ -81,7 +81,7 @@
     "@fransvilhelm/changeset-changelog": "^1.1.1",
     "@prettier/plugin-php": "^0.24.0",
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
-    "@tsconfig/node18": "^18.2.6",
+    "@tsconfig/node20": "^20.1.8",
     "@tsconfig/strictest": "^2.0.8",
     "@types/gettext-parser": "^8.0.0",
     "@types/lodash.merge": "^4.6.9",
