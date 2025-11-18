@@ -1,5 +1,3 @@
-import * as process from 'node:process';
-
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
 
@@ -38,9 +36,9 @@ export function cli() {
 
         try {
           await context.rebuild();
-          process.exit(0);
+          process.exitCode = 0;
         } catch {
-          process.exit(1);
+          process.exitCode = 1;
         } finally {
           await context.dispose();
         }
@@ -87,7 +85,7 @@ export function cli() {
           });
         } catch (error) {
           console.error(error);
-          process.exit(1);
+          process.exitCode = 1;
         }
       },
     )

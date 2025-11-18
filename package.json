@@ -52,7 +52,8 @@
     "examples:start": "cd examples && npx -p @wordpress/env wp-env start",
     "examples:destroy": "cd examples && npx -p @wordpress/env wp-env destroy",
     "examples:stop": "cd examples && npx -p @wordpress/env wp-env stop",
-    "examples:build": "npm run --prefix ./examples/wp-bundler-theme build && npm run --prefix ./examples/wp-bundler-plugin build"
+    "examples:build": "npm run --prefix ./examples/wp-bundler-theme build && npm run --prefix ./examples/wp-bundler-plugin build",
+    "examples:build-dev": "npm run --prefix ./examples/wp-bundler-theme build -- --mode dev && npm run --prefix ./examples/wp-bundler-plugin build -- --mode dev"
   },
   "dependencies": {
     "@swc/core": "^1.15.2",

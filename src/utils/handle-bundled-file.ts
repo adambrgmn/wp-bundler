@@ -23,7 +23,7 @@ export function createFileHandler<Opts extends BuildOptions>(result: BuildResult
 
     if (result.metafile != null) {
       result.metafile.outputs[relative] = {
-        bytes: Buffer.from(text, 'utf-8').byteLength,
+        bytes: contents.byteLength,
         exports: [],
         imports: [],
         inputs: {},
