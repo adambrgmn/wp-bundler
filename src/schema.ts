@@ -2,17 +2,17 @@ import * as z from 'zod';
 
 export const BundlerConfigSchema = z
   .object({
-    entryPoints: z.record(z.string()),
+    entryPoints: z.record(z.string(), z.string()),
     outdir: z.string().default('./dist'),
     sourcemap: z.boolean().optional(),
-    externals: z.record(z.string()).optional(),
+    externals: z.record(z.string(), z.string()).optional(),
     assetLoader: z
       .object({
         path: z.string().default('./AssetLoader.php'),
         namespace: z.string().default('WPBundler'),
       })
       .strict()
-      .default({}),
+      .default({ path: './AssetLoader.php', namespace: 'WPBundler' }),
     translations: z
       .object({
         domain: z.string(),

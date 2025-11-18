@@ -87,14 +87,13 @@ describe('resolveConfig()', () => {
     expect(spy.mock.calls.at(0)?.at(0)).toMatchInlineSnapshot(`
       "[
         {
-          "code": "invalid_type",
           "expected": "string",
-          "received": "number",
+          "code": "invalid_type",
           "path": [
             "entryPoints",
             "entry"
           ],
-          "message": "Expected string, received number"
+          "message": "Invalid input: expected string, received number"
         }
       ]"
     `);

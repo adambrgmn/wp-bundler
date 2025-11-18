@@ -21,13 +21,14 @@ const GetTextTranslationSchema = z.object({
   msgstr: z.array(z.string()).default([]),
   comments: z
     .object({
-      translator: z.string().default(''),
-      reference: z.string().default(''),
-      extracted: z.string().default(''),
-      flag: z.string().default(''),
-      previous: z.string().default(''),
+      translator: z.string().optional().default(''),
+      reference: z.string().optional().default(''),
+      extracted: z.string().optional().default(''),
+      flag: z.string().optional().default(''),
+      previous: z.string().optional().default(''),
     })
-    .default({}),
+    .optional()
+    .default({ translator: '', reference: '', extracted: '', flag: '', previous: '' }),
 });
 
 function parse(source: string | Uint8Array) {
