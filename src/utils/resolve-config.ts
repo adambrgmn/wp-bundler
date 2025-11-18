@@ -39,6 +39,7 @@ export function _resolveConfig(project: ProjectInfo, read: (path: string) => unk
     return parsedConfig.data;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-base-to-string
   console.error(parsedConfig.error.toString());
   throw new Error('Something is wrong in your configuration file.');
 }
