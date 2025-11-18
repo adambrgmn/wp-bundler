@@ -3,6 +3,7 @@
   "compilerOptions": {
     "lib": ["es2023", "dom", "dom.iterable"],
     "noPropertyAccessFromIndexSignature": false,
+    "exactOptionalPropertyTypes": false,
     "verbatimModuleSyntax": true,
     "checkJs": false,
     "noEmit": true,

@@ -1,9 +1,9 @@
-import { Buffer } from 'node:buffer';
 import * as fs from 'node:fs/promises';
 
 import type { OutputFile } from 'esbuild';
 import { type GetTextTranslation, type GetTextTranslations, mo, po } from 'gettext-parser';
 import mergeWith from 'lodash.mergewith';
+import { stringToUint8Array } from 'uint8array-extras';
 import * as z from 'zod';
 
 import { ensure } from './assert.js';
@@ -30,8 +30,8 @@ const GetTextTranslationSchema = z.object({
     .default({}),
 });
 
-function parse(source: string | Buffer) {
-  let result = po.parse(source);
+function parse(source: string | Uint8Array) {
+  let result = po.parse(Buffer.from(source));
   for (let key of Object.keys(result.translations)) {
     let context = ensure(result.translations[key]);
     result.translations[key] = Object.entries(context).reduce<GetTextTranslations['translations'][string]>(
@@ -56,7 +56,7 @@ export class Po {
   private parsedTranslations: GetTextTranslations;
   public filename: string;
 
-  constructor(source: string | Buffer, filename: string) {
+  constructor(source: string | Uint8Array, filename: string) {
     this.parsedTranslations = parse(source);
     this.filename = filename;
     this.parsedTranslations.headers['Plural-Forms'] = 'nplurals=2; plural=(n != 1);';
@@ -71,7 +71,7 @@ export class Po {
   static async load(filename: string): Promise<Po> {
     try {
       let source = await fs.readFile(filename);
-      return new Po(source, filename);
+      return new Po(source as Uint8Array, filename);
     } catch {
       return new Po(
         `
@@ -95,7 +95,7 @@ export class Po {
     let text = this.toString(foldLength);
     return {
       path: filename,
-      contents: Buffer.from(text, 'utf-8'),
+      contents: stringToUint8Array(text),
       text: text,
       hash: '',
     } satisfies OutputFile;
@@ -119,12 +119,12 @@ export class Po {
   }
 
   set(message: TranslationMessage | GetTextTranslation, mergeComments: boolean = true) {
-    let next: GetTextTranslation = isTranslationMessage(message)
+    let next = isTranslationMessage(message)
       ? messageToTranslationItem(message)
       : GetTextTranslationSchema.parse(message);
 
     let context = this.createContext(next.msgctxt ?? '');
-    let current: GetTextTranslation = this.get(next.msgid, next.msgctxt) ?? next;
+    let current = this.get(next.msgid, next.msgctxt) ?? next;
 
     let final = mergeWith(
       current,
@@ -224,7 +224,7 @@ export class Po {
     return buffer.toString('utf-8');
   }
 
-  toMo(filterTranslation?: (t: GetTextTranslation) => boolean): Buffer {
+  toMo(filterTranslation?: (t: GetTextTranslation) => boolean) {
     let translations: GetTextTranslations['translations'] = {};
     for (let [contextKey, context] of Object.entries(this.parsedTranslations.translations)) {
       let nextContext: Record<string, GetTextTranslation> = {};
@@ -242,7 +242,7 @@ export class Po {
       translations,
     };
 
-    return mo.compile(data);
+    return mo.compile(data) as Uint8Array;
   }
 
   toJed<Domain extends string>(

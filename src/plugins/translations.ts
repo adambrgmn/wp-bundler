@@ -1,4 +1,3 @@
-import { Buffer } from 'node:buffer';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
@@ -6,6 +5,7 @@ import * as path from 'node:path';
 import type { Message, Plugin } from 'esbuild';
 import { globby } from 'globby';
 import md5 from 'md5';
+import { stringToUint8Array } from 'uint8array-extras';
 
 import type { BundlerPlugin } from '../types.js';
 import { type TranslationMessage, js, php, theme, twig } from '../utils/extract-translations/index.js';
@@ -81,8 +81,8 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
           continue;
         }
 
-        let buffer = po.toMo();
-        files.append({ path: po.filename.replace(/\.po$/, '.mo'), contents: buffer });
+        let contents = po.toMo();
+        files.append({ path: po.filename.replace(/\.po$/, '.mo'), contents });
 
         for (let distFile of Object.keys(result.metafile.outputs)) {
           let meta = result.metafile.outputs[distFile];
@@ -95,7 +95,7 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
           if (jed == null) continue;
           let filename = generateTranslationFilename(translationsConfig.domain, language, distFile);
           let text = JSON.stringify(jed);
-          files.append({ path: path.join(langDir, filename), contents: Buffer.from(text, 'utf-8') });
+          files.append({ path: path.join(langDir, filename), contents: stringToUint8Array(text) });
         }
       }
 
