@@ -59,13 +59,11 @@
     "@swc/core": "^1.15.2",
     "@wordpress/icons": "^11.2.0",
     "chalk": "^5.6.2",
-    "dotenv": "^17.2.3",
     "esbuild": "^0.27.0",
     "filesize": "^11.0.13",
     "gettext-parser": "^8.0.0",
     "globby": "^16.0.0",
     "lodash.mergewith": "^4.6.2",
-    "md5": "^2.3.0",
     "php-parser": "^3.2.5",
     "postcss": "^8.5.6",
     "postcss-preset-env": "^10.4.0",
@@ -87,7 +85,6 @@
     "@types/gettext-parser": "^8.0.0",
     "@types/lodash.merge": "^4.6.9",
     "@types/lodash.mergewith": "^4.6.9",
-    "@types/md5": "^2.3.6",
     "@types/node": "^24.10.1",
     "@types/strman": "^2.0.3",
     "@types/yargs": "^17.0.35",
@@ -100,9 +97,6 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.47.0",
     "vitest": "^4.0.10"
-  },
-  "peerDependencies": {
-    "typescript": ">4.7.0"
   },
   "prettier": {
     "singleQuote": true,

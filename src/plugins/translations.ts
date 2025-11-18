@@ -4,7 +4,6 @@ import * as path from 'node:path';
 
 import type { Message, Plugin } from 'esbuild';
 import { globby } from 'globby';
-import md5 from 'md5';
 import { stringToUint8Array } from 'uint8array-extras';
 
 import type { BundlerPlugin } from '../types.js';
@@ -183,8 +182,8 @@ async function findThemeTranslations(cwd: string, domain: string) {
 }
 
 function generateTranslationFilename(domain: string, language: string, file: string): string {
-  let md5Path = md5(file);
-  return `${domain}-${language}-${md5Path}.json`;
+  let hash = crypto.createHash('md5').update(file).digest('hex');
+  return `${domain}-${language}-${hash}.json`;
 }
 
 function getFoldLength(pkgJson: Record<string, unknown>) {
