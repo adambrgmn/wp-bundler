@@ -1,11 +1,10 @@
-import { Buffer } from 'node:buffer';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 import type { Message, Plugin } from 'esbuild';
 import { globby } from 'globby';
-import md5 from 'md5';
+import { stringToUint8Array } from 'uint8array-extras';
 
 import type { BundlerPlugin } from '../types.js';
 import { type TranslationMessage, js, php, theme, twig } from '../utils/extract-translations/index.js';
@@ -81,21 +80,21 @@ export const translations: BundlerPlugin = ({ project, config }): Plugin => ({
           continue;
         }
 
-        let buffer = po.toMo();
-        files.append({ path: po.filename.replace(/\.po$/, '.mo'), contents: buffer });
+        let contents = po.toMo();
+        files.append({ path: po.filename.replace(/\.po$/, '.mo'), contents });
 
         for (let distFile of Object.keys(result.metafile.outputs)) {
           let meta = result.metafile.outputs[distFile];
           let srcFiles = Object.keys(meta?.inputs ?? {});
 
           let jed = po.toJed(translationsConfig.domain, ({ comments }) => {
-            return comments != null && srcFiles.some((file) => comments.reference.includes(file));
+            return comments != null && srcFiles.some((file) => comments.reference?.includes(file));
           });
 
           if (jed == null) continue;
           let filename = generateTranslationFilename(translationsConfig.domain, language, distFile);
           let text = JSON.stringify(jed);
-          files.append({ path: path.join(langDir, filename), contents: Buffer.from(text, 'utf-8') });
+          files.append({ path: path.join(langDir, filename), contents: stringToUint8Array(text) });
         }
       }
 
@@ -177,14 +176,14 @@ async function findThemeTranslations(cwd: string, domain: string) {
   try {
     let source = await fs.readFile(path.join(cwd, 'style.css'), 'utf-8');
     return theme.extractTranslations(source, 'style.css', domain);
-  } catch (error) {
+  } catch {
     return [];
   }
 }
 
 function generateTranslationFilename(domain: string, language: string, file: string): string {
-  let md5Path = md5(file);
-  return `${domain}-${language}-${md5Path}.json`;
+  let hash = crypto.createHash('md5').update(file).digest('hex');
+  return `${domain}-${language}-${hash}.json`;
 }
 
 function getFoldLength(pkgJson: Record<string, unknown>) {

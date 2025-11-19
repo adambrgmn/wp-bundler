@@ -4,7 +4,7 @@ export function existsSync(p: string): boolean {
   try {
     accessSync(p);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

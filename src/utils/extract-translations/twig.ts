@@ -48,7 +48,6 @@ function getAst(code: string, filename: string) {
 }
 
 function visitAll(node: TwingNode, callback: (node: TwingNode) => void) {
-  node.children;
   for (let child of getChildren(node)) {
     callback(child);
     visitAll(child, callback);

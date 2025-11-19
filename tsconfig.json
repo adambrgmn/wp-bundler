@@ -1,12 +1,14 @@
 {
-  "extends": ["@tsconfig/node18/tsconfig.json", "@tsconfig/strictest/tsconfig.json"],
+  "extends": ["@tsconfig/node20/tsconfig.json", "@tsconfig/strictest/tsconfig.json"],
   "compilerOptions": {
     "lib": ["es2023", "dom", "dom.iterable"],
     "noPropertyAccessFromIndexSignature": false,
+    "exactOptionalPropertyTypes": false,
     "verbatimModuleSyntax": true,
     "checkJs": false,
     "noEmit": true,
-    "jsx": "react"
+    "jsx": "react",
+    "allowJs": true
   },
   "include": ["."],
   "exclude": ["**/dist", "coverage"]

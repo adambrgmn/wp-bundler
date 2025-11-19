@@ -6,7 +6,7 @@ import type { ProjectInfo } from '../types.js';
 import { createPaths } from './read-pkg.js';
 import { _resolveConfig } from './resolve-config.js';
 
-const readJson = vi.fn<[path: string], JsonValue | undefined>();
+const readJson = vi.fn<(path: string) => JsonValue | undefined>();
 const resolveConfig = (project: ProjectInfo) => _resolveConfig(project, readJson);
 
 beforeEach(() => {
@@ -87,14 +87,13 @@ describe('resolveConfig()', () => {
     expect(spy.mock.calls.at(0)?.at(0)).toMatchInlineSnapshot(`
       "[
         {
-          "code": "invalid_type",
           "expected": "string",
-          "received": "number",
+          "code": "invalid_type",
           "path": [
             "entryPoints",
             "entry"
           ],
-          "message": "Expected string, received number"
+          "message": "Invalid input: expected string, received number"
         }
       ]"
     `);
