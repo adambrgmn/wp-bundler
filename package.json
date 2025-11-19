@@ -93,6 +93,7 @@
     "eslint": "^9.39.1",
     "globals": "^16.5.0",
     "lodash.merge": "^4.6.2",
+    "memfs": "^4.51.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.47.0",
