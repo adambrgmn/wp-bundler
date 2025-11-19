@@ -1,5 +1,24 @@
 # @fransvilhelm/wp-bundler
 
+## 5.0.0
+
+### Major Changes
+
+- Drop support for node 18 (by [@adambrgmn](https://github.com/adambrgmn) in [#88](https://github.com/adambrgmn/wp-bundler/pull/88))
+
+### Minor Changes
+
+- Upgrade package dependencies (by [@adambrgmn](https://github.com/adambrgmn) in [#88](https://github.com/adambrgmn/wp-bundler/pull/88))
+- Add support for css modules (by [@adambrgmn](https://github.com/adambrgmn) in [#81](https://github.com/adambrgmn/wp-bundler/pull/81))
+
+  Esbuild has had support for css modules for a while. But it has not been possible to use them with wp-bundler due to an implementation detail of the wp-bundler setup.
+
+  But from now on css modules are supported. Read more about how they [work in the esbuild context](https://esbuild.github.io/content-types/#local-css).
+
+### Patch Changes
+
+- Stop retrying event source connection after 5 tries (by [@adambrgmn](https://github.com/adambrgmn) in [#81](https://github.com/adambrgmn/wp-bundler/pull/81))
+
 ## 4.0.3
 
 ### Patch Changes
